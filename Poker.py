@@ -10,6 +10,10 @@ speed = [2, 2]
 black = 0, 0, 0
 background = 49, 117, 61
 
+CardPath = "./Images/Cards/"
+ButtonPath = "./Images/Buttons/"
+CharacterPath = "./Images/Characters/"
+
 cNumber = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13]
 cSuit = ['H', 'D', 'C', 'S']
 
@@ -71,8 +75,7 @@ def main():
 
 	screen = pygame.display.set_mode(size)
 
-	ball = pygame.image.load("ball.png")
-	ballrect = ball.get_rect()
+	
 
 	r1 = random.randint(1, 13)
 	r2 = random.randint(1, 13)
@@ -80,24 +83,24 @@ def main():
 	s2 = random.randint(0, 3)
 
 
-	card1 = pygame.image.load(f"Card_{r1}{cSuit[s1]}.png")
-	card2 = pygame.image.load(f"Card_{r2}{cSuit[s2]}.png")
+	card1 = pygame.image.load(f"{CardPath}Card_{r1}{cSuit[s1]}.png")
+	card2 = pygame.image.load(f"{CardPath}Card_{r2}{cSuit[s2]}.png")
 	card1rect = card1.get_rect(center=((width/2) - 20, height - 80)) #center=((width/2) - 40, height - 150)
 	card2rect = card2.get_rect(center=((width/2) + 20, height - 80)) #topleft=((width/2) + 40, height - 150)
 
 	
-	player1 = Opponent(40, 20, "Player2.png")
+	player1 = Opponent(40, 20, f"{CharacterPath}Player2.png")
 	player1text = myfont.render(str(player1.getChips()), False, (0, 0, 0))
-	player2 = Opponent(388, 20, "Player3.png")
+	player2 = Opponent(388, 20, f"{CharacterPath}Player3.png")
 	player2text = myfont.render(str(player2.getChips()), False, (0, 0, 0))
-	player3 = Opponent(736, 20, "Player4.png")
+	player3 = Opponent(736, 20, f"{CharacterPath}Player4.png")
 	player3text = myfont.render(str(player3.getChips()), False, (0, 0, 0))
 
-	btnFold = pygame.image.load("Btn_Fold.png")
+	btnFold = pygame.image.load(f"{ButtonPath}Btn_Fold.png")
 	btnFoldRect = btnFold.get_rect(center=(340, 460))
-	btnCheck = pygame.image.load("Btn_Check.png")
+	btnCheck = pygame.image.load(f"{ButtonPath}Btn_Check.png")
 	btnCheckRect = btnCheck.get_rect(center=(460, 460))
-	btnRaise = pygame.image.load("Btn_Raise.png")
+	btnRaise = pygame.image.load(f"{ButtonPath}Btn_Raise.png")
 	btnRaiseRect = btnRaise.get_rect(center=(580, 460))
 
 	#fold check raise
@@ -128,18 +131,15 @@ def main():
 		if card2rect.collidepoint(mousepos):
 			card2rect.y -= 10
 
-		ballrect = ballrect.move(speed)
+		
 		
 
-		if ballrect.left < 0 or ballrect.right > width:
-			speed[0] = -speed[0]
-		if ballrect.top < 0 or ballrect.bottom > height:
-			speed[1] = -speed[1]
+	
 
 
 
 		screen.fill(background)
-		screen.blit(ball, ballrect)
+		
 		screen.blit(card1, card1rect)
 		screen.blit(card2, card2rect)
 		screen.blit(player1.getImage(), player1.getRect())
