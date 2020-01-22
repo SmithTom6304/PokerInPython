@@ -11,6 +11,9 @@ CardPath = "./Images/Cards/"
 ButtonPath = "./Images/Buttons/"
 CharacterPath = "./Images/Characters/"
 
+cNumber = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13]
+cSuit = ['H', 'D', 'C', 'S']
+
 #myfont = pygame.font.SysFont('Elephant', 16)
 
 class Card:
@@ -30,9 +33,16 @@ class Card:
 	def getRect(self):
 		return self.rect
 
+	def getNumber(self):
+		return self.number
+
+	def getSuit(self):
+		return self.suit
+
+
 
 
 
 def initDisplay():
-	return
 	#screen = pygame.display.set_mode(size)
+	return
