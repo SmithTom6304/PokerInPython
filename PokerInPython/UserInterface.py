@@ -3,6 +3,7 @@ import sys
 import pygame
 
 size = width, height = 920, 640
+screen = None
 
 black = 0, 0, 0
 background = 49, 117, 61
@@ -33,16 +34,53 @@ class Card:
 	def getRect(self):
 		return self.rect
 
+
 	def getNumber(self):
 		return self.number
 
 	def getSuit(self):
 		return self.suit
 
+	#Move a cards rect coords relative to the current coords
+	def moveRelative(self, x=0, y=0):
+		if ((self.rect.x + x) >= 0):
+			self.rect.x += x
+		else:
+			self.rect.x = 0
+
+		if ((self.rect.y + y) >= 0):
+			self.rect.y += y
+		else:
+			self.rect.y = 0
+
+	#Move a cards rect coords to an absolute position
+	def moveAbsolute(self, x=0, y=0):
+		if (x >= 0):
+			self.rect.x = x
+		else:
+			self.rect.x = 0
+
+		if (y >= 0):
+			self.rect.y = y
+		else:
+			self.rect.y = 0
+
 
 
 
 
 def initDisplay():
-	#screen = pygame.display.set_mode(size)
+	global screen 
+	screen = pygame.display.set_mode(size)
+	return
+
+def updateDisplay(sequence):
+
+	screen.fill(background)
+
+	screen.blits(sequence)
+	
+
+	pygame.display.flip()
+
 	return
