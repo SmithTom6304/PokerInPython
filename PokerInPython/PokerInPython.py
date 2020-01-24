@@ -67,6 +67,9 @@ class Player:
 def shuffleDeck():
 	return
 
+def loadObjectIntoUpdateQueue(objectToLoad):
+	return
+
 
 def main():
 
@@ -121,17 +124,21 @@ def main():
 
 	mousepos = [0, 0]
 
-	sequence = [None, None]
+	#Queue of objects to be added to the sequence to update
+	objectImagesToUpdateQueue = []
+	#List of (image, rect) tuples to provide to UserInterface layer to update screen
+	objectImagesToUpdateSequence = [None, None]
 
 	while True:
 		mousepos = pygame.mouse.get_pos()
 
-		sequence.clear()
+		objectImagesToUpdateSequence.clear()
 
 		Card1.moveAbsolute(card1pos[0], card1pos[1])
-		
+		objectImagesToUpdateQueue.append(Card1)
 
 		Card2.moveAbsolute(card2pos[0], card2pos[1])
+		objectImagesToUpdateQueue.append(Card2)
 		
 
 
@@ -150,11 +157,10 @@ def main():
 			Card2.moveRelative(0, -10)
 
 		
-		
-		sequence.append((Card1.image, Card1.rect))
-		sequence.append((Card2.image, Card2.rect))
+		for each in objectImagesToUpdateQueue:
+			objectImagesToUpdateSequence.append((each.image, each.rect))
 	
-		UserInterface.updateDisplay(sequence)
+		UserInterface.updateDisplay(objectImagesToUpdateSequence)
 
 
 		#screen.fill(background)
