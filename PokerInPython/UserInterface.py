@@ -69,6 +69,7 @@ class Card:
 
 
 
+
 def initDisplay():
 	global screen 
 	screen = pygame.display.set_mode(size)

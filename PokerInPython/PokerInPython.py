@@ -21,7 +21,7 @@ CharacterPath = "./Images/Characters/"
 cNumber = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13]
 cSuit = ['H', 'D', 'C', 'S']
 
-playerCards = {"Card1": None,"Card2": None}
+
 
 #Queue of objects to be added to the sequence to update
 objectImagesToUpdateQueue = []
@@ -58,7 +58,7 @@ class Opponent:
 
 
 class Player:
-	card = [None, None]
+	card = {"Card1": None, "Card2": None}
 	def __init__(self):
 		chips = 100
 	def getChips(self):
@@ -71,6 +71,10 @@ class Player:
 		card = [None, None]
 
 
+player = Player()
+
+
+
 def shuffleDeck():
 	return
 
@@ -79,11 +83,11 @@ def loadObjectIntoUpdateQueue(objectToLoad):
 
 #Sets the players cards back to their original position
 def resetPlayerCards():
-	playerCards["Card1"].moveAbsolute(440, 480)
-	objectImagesToUpdateQueue.append(playerCards["Card1"])
+	player.card["Card1"].moveAbsolute(440, 480)
+	objectImagesToUpdateQueue.append(player.card["Card1"])
 
-	playerCards["Card2"].moveAbsolute(480, 480)
-	objectImagesToUpdateQueue.append(playerCards["Card2"])
+	player.card["Card2"].moveAbsolute(480, 480)
+	objectImagesToUpdateQueue.append(player.card["Card2"])
 	return
 
 
@@ -100,7 +104,7 @@ def handleEvents():
 	for event in pygame.event.get():
 		if event.type == pygame.QUIT: sys.exit()
 
-	UserInterface.playerMouseOverCard(playerCards["Card1"], playerCards["Card2"])		
+	UserInterface.playerMouseOverCard(player.card["Card1"], player.card["Card2"])		
 
 	for each in objectImagesToUpdateQueue:
 		objectImagesToUpdateSequence.append((each.image, each.rect))
@@ -114,6 +118,9 @@ def main():
 
 	pygame.init()
 	clock = pygame.time.Clock()
+
+
+	
 
 	#myfont = pygame.font.SysFont('Elephant', 16)
 	
@@ -136,8 +143,8 @@ def main():
 	Card1 = UserInterface.Card(3, 'S', (width/2) - 20, height - 160)
 	Card2 = UserInterface.Card(5, 'H', (width/2) + 20, height - 160)
 
-	playerCards["Card1"] = Card1
-	playerCards["Card2"] = Card2
+	player.card["Card1"] = Card1
+	player.card["Card2"] = Card2
 	
 	#player1 = Opponent(40, 20, f"{CharacterPath}Player2.png")
 	#player1text = myfont.render(str(player1.getChips()), False, (0, 0, 0))
