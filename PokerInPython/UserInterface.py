@@ -67,8 +67,32 @@ class Card:
 		else:
 			self.rect.y = 0
 
+class Opponent:
 
+	rect = None
+	image = None
+	card = {"Card1": None, "Card2": None}
+	chips = 100
 
+	def __init__(self, x, y, number):
+		self.image = pygame.image.load(f"{CharacterPath}Player{number}.png")
+		chips = 100
+		self.rect = self.image.get_rect(topleft=(x, y))
+
+	def getChips(self):
+		return self.chips
+
+	def getRect(self):
+		return self.rect
+
+	def getImage(self):
+		return self.image
+
+	def getCards(self):
+		return self.card
+
+	def clearCards(self):
+		card = [None, None]
 
 def initDisplay():
 	global screen 
