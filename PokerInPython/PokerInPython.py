@@ -21,6 +21,13 @@ CharacterPath = "./Images/Characters/"
 cNumber = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13]
 cSuit = ['H', 'D', 'C', 'S']
 
+playerCards = {"Card1": None,"Card2": None}
+
+#Queue of objects to be added to the sequence to update
+objectImagesToUpdateQueue = []
+#List of (image, rect) tuples to provide to UserInterface layer to update screen
+objectImagesToUpdateSequence = [None, None]
+
 class Opponent:
 	rect = None
 	image = None
@@ -70,6 +77,37 @@ def shuffleDeck():
 def loadObjectIntoUpdateQueue(objectToLoad):
 	return
 
+#Sets the players cards back to their original position
+def resetPlayerCards():
+	playerCards["Card1"].moveAbsolute(440, 480)
+	objectImagesToUpdateQueue.append(playerCards["Card1"])
+
+	playerCards["Card2"].moveAbsolute(480, 480)
+	objectImagesToUpdateQueue.append(playerCards["Card2"])
+	return
+
+
+def handleEvents():
+
+	mousepos = pygame.mouse.get_pos()
+	UserInterface.mouse_pos = mousepos
+
+	#Clear the sequence of images that will be updated
+	objectImagesToUpdateSequence.clear()
+
+	resetPlayerCards()
+
+	for event in pygame.event.get():
+		if event.type == pygame.QUIT: sys.exit()
+
+	UserInterface.playerMouseOverCard(playerCards["Card1"], playerCards["Card2"])		
+
+	for each in objectImagesToUpdateQueue:
+		objectImagesToUpdateSequence.append((each.image, each.rect))
+	
+	UserInterface.updateDisplay(objectImagesToUpdateSequence)
+
+	return
 
 def main():
 
@@ -98,6 +136,8 @@ def main():
 	Card1 = UserInterface.Card(3, 'S', (width/2) - 20, height - 160)
 	Card2 = UserInterface.Card(5, 'H', (width/2) + 20, height - 160)
 
+	playerCards["Card1"] = Card1
+	playerCards["Card2"] = Card2
 	
 	#player1 = Opponent(40, 20, f"{CharacterPath}Player2.png")
 	#player1text = myfont.render(str(player1.getChips()), False, (0, 0, 0))
@@ -116,51 +156,27 @@ def main():
 	#fold check raise
 	#	  call
 
-	c1rect = Card1.getRect()
-	card1pos = [c1rect.x, c1rect.y]
-	c2rect = Card2.getRect()
-	card2pos = [c2rect.x, c2rect.y]
+	
+	
 
 
 	mousepos = [0, 0]
 
-	#Queue of objects to be added to the sequence to update
-	objectImagesToUpdateQueue = []
-	#List of (image, rect) tuples to provide to UserInterface layer to update screen
-	objectImagesToUpdateSequence = [None, None]
+	
 
 	while True:
-		mousepos = pygame.mouse.get_pos()
 
-		objectImagesToUpdateSequence.clear()
-
-		Card1.moveAbsolute(card1pos[0], card1pos[1])
-		objectImagesToUpdateQueue.append(Card1)
-
-		Card2.moveAbsolute(card2pos[0], card2pos[1])
-		objectImagesToUpdateQueue.append(Card2)
+		handleEvents()
 		
+
 
 
 		
 
 		
 
-
-		for event in pygame.event.get():
-			if event.type == pygame.QUIT: sys.exit()
-
-		if (Card1.rect.collidepoint(mousepos) and not Card2.rect.collidepoint(mousepos)):
-			Card1.moveRelative(0, -10)
-
-		if Card2.rect.collidepoint(mousepos):
-			Card2.moveRelative(0, -10)
-
 		
-		for each in objectImagesToUpdateQueue:
-			objectImagesToUpdateSequence.append((each.image, each.rect))
-	
-		UserInterface.updateDisplay(objectImagesToUpdateSequence)
+		
 
 
 		#screen.fill(background)

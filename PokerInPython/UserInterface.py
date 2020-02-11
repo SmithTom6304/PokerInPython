@@ -8,6 +8,8 @@ screen = None
 black = 0, 0, 0
 background = 49, 117, 61
 
+mouse_pos = 0, 0
+
 CardPath = "./Images/Cards/"
 ButtonPath = "./Images/Buttons/"
 CharacterPath = "./Images/Characters/"
@@ -67,8 +69,6 @@ class Card:
 
 
 
-
-
 def initDisplay():
 	global screen 
 	screen = pygame.display.set_mode(size)
@@ -82,5 +82,15 @@ def updateDisplay(sequence):
 	
 
 	pygame.display.flip()
+
+	return
+
+def playerMouseOverCard(Card1, Card2):
+
+	if (Card1.rect.collidepoint(mouse_pos) and not Card2.rect.collidepoint(mouse_pos)):
+		Card1.moveRelative(0, -10)
+
+	if Card2.rect.collidepoint(mouse_pos):
+		Card2.moveRelative(0, -10)
 
 	return
