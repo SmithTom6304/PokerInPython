@@ -35,6 +35,14 @@ class TestCardMethods(unittest.TestCase):
 		card1.setFaceUp(True)
 		self.assertEqual(card1.isFaceUp(), True)
 
+		card1.flip()
+		self.assertEqual(card1.isFaceUp(), False)
+		card1.flip()
+		self.assertEqual(card1.isFaceUp(), True)
+
+
+
+
 
 if __name__ == '__main__':
 	unittest.main()
