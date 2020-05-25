@@ -4,6 +4,7 @@ import random
 import os
 
 import UserInterface
+import Card
 
 os.environ['SDL_VIDEO_WINDOW_POS'] = "%d,%d" % (5,35)
 
@@ -93,6 +94,7 @@ def handleEvents():
 
 	#Clear the sequence of images that will be updated
 	objectImagesToUpdateSequence.clear()
+	objectImagesToUpdateQueue.clear()
 
 	resetPlayerCards()
 	objectImagesToUpdateQueue.append(player2graphics)
@@ -107,6 +109,8 @@ def handleEvents():
 	objectImagesToUpdateQueue.append(player4graphics.card["Card1"])
 	objectImagesToUpdateQueue.append(player4graphics.card["Card2"])
 
+
+
 	for event in pygame.event.get():
 		if event.type == pygame.QUIT: sys.exit()
 
@@ -114,8 +118,12 @@ def handleEvents():
 
 	for each in objectImagesToUpdateQueue:
 		objectImagesToUpdateSequence.append((each.image, each.rect))
+
+	newCard.flip()
 	
+	objectImagesToUpdateSequence.append((newCard.getImage(), newCard.getRect()))
 	UserInterface.updateDisplay(objectImagesToUpdateSequence)
+
 
 	return
 
@@ -148,6 +156,9 @@ def main():
 
 	Card1 = UserInterface.Card(3, 'S', (width/2) - 20, height - 160)
 	Card2 = UserInterface.Card(5, 'H', (width/2) + 20, height - 160)
+
+	global newCard
+	newCard = Card.Card(7, 'D', 30, 30)
 
 	player.card["Card1"] = Card1
 	player.card["Card2"] = Card2

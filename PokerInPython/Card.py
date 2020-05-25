@@ -4,13 +4,13 @@ import pygame
 
 class Card:
 
-	def __init__(self, number, suit):
+	def __init__(self, number, suit, posX = 0, posY = 0):
 		self.model = self.Model(number, suit)
 		#Return if failed to assign, most likely because card was assigned with bad values
 		if(self.model.getValue()["number"] == None or self.model.getValue()["suit"] == None):
 			print("ERROR: Card was not initialized properly")
 			return
-		self.view = self.View(number, suit, 20, 20)
+		self.view = self.View(number, suit, posX, posY)
 
 	def getValue(self):
 		return self.model.getValue()
