@@ -34,6 +34,12 @@ class Card:
 	def getRect(self):
 		return self.view.getRect()
 
+	def moveTo(self, x, y):
+		self.view.moveAbsolute(x, y)
+
+	def moveBy(self, x, y):
+		self.view.moveRelative(x, y)
+
 
 	class Model:
 
@@ -87,6 +93,30 @@ class Card:
 
 		def getRect(self):
 			return self.rect
+
+		def moveRelative(self, x, y):
+
+			if ((self.rect.x + x) >= 0):
+				self.rect.x += x
+			else:
+				self.rect.x = 0
+
+			if ((self.rect.y + y) >= 0):
+				self.rect.y += y
+			else:
+				self.rect.y = 0
+
+		#Move a cards rect coords to an absolute position
+		def moveAbsolute(self, x, y):
+			if (x >= 0):
+				self.rect.x = x
+			else:
+				self.rect.x = 0
+
+			if (y >= 0):
+				self.rect.y = y
+			else:
+				self.rect.y = 0
 
 
 
