@@ -6,6 +6,7 @@ class Player:
 	def __init__(self, number, chips, confidence, posX, posY):
 		self.model = self.Model(number, chips, confidence)
 		self.view = self.View(number, posX, posY)
+		self.cards = [None, None]
 
 	def getNumber(self):
 		return self.model.getNumber()
@@ -28,6 +29,13 @@ class Player:
 	def moveBy(self, x, y):
 		self.view.moveRelative(x, y)
 
+	def setCards(self, cards):
+		self.cards[0] = cards[0]
+		self.cards[1] = cards[1]
+
+	def getCards(self):
+		return self.cards
+
 
 
 	class Model:
@@ -35,7 +43,7 @@ class Player:
 		def __init__(self, number, chips, confidence):
 			self.number = number
 			self.chips = chips
-			self. confidence = confidence
+			self.confidence = confidence
 
 		def getNumber(self):
 			return self.number

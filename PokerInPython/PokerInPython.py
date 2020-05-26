@@ -5,6 +5,7 @@ import os
 
 import UserInterface
 import Card
+import Player
 
 os.environ['SDL_VIDEO_WINDOW_POS'] = "%d,%d" % (5,35)
 
@@ -13,67 +14,15 @@ speed = [2, 2]
 black = 0, 0, 0
 background = 49, 117, 61
 
-test = "f"
-
 CardPath = "./Images/Cards/"
 ButtonPath = "./Images/Buttons/"
 CharacterPath = "./Images/Characters/"
-
-cNumber = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13]
-cSuit = ['H', 'D', 'C', 'S']
 
 
 #Queue of objects to be added to the sequence to update
 objectImagesToUpdateQueue = []
 #List of (image, rect) tuples to provide to UserInterface layer to update screen
 objectImagesToUpdateSequence = [None, None]
-
-class Opponent:
-	number = None
-	card = {"Card1": None, "Card2": None}
-	chips = 100
-	confidence = 0
-	cool = 0
-	def __init__(self, x, y, number):
-		self.number = number
-		chips = 100
-		confidence = 1
-		cool = 1
-		self.rect = self.image.get_rect(topleft=(x, y))
-	def getChips(self):
-		return self.chips
-
-	def getCards(self):
-		return self.card
-
-	def clearCards(self):
-		card = [None, None]
-
-
-class Player:
-	card = {"Card1": None, "Card2": None}
-	def __init__(self):
-		chips = 100
-	def getChips(self):
-		return self.chips
-
-	def getCards(self):
-		return self.card
-
-	def clearCards(self):
-		card = [None, None]
-
-
-player = Player()
-
-
-
-def shuffleDeck():
-	return
-
-def loadObjectIntoUpdateQueue(objectToLoad):
-	return
-
 
 
 
@@ -87,7 +36,6 @@ def handleEvents():
 	objectImagesToUpdateQueue.clear()
 
 	objectImagesToUpdateQueue.append(newCard)
-
 
 
 
