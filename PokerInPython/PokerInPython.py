@@ -22,9 +22,6 @@ CharacterPath = "./Images/Characters/"
 cNumber = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13]
 cSuit = ['H', 'D', 'C', 'S']
 
-player2graphics = None
-player3graphics = None
-player4graphics = None
 
 #Queue of objects to be added to the sequence to update
 objectImagesToUpdateQueue = []
@@ -77,14 +74,7 @@ def shuffleDeck():
 def loadObjectIntoUpdateQueue(objectToLoad):
 	return
 
-#Sets the players cards back to their original position
-def resetPlayerCards():
-	player.card["Card1"].moveAbsolute(440, 480)
-	objectImagesToUpdateQueue.append(player.card["Card1"])
 
-	player.card["Card2"].moveAbsolute(480, 480)
-	objectImagesToUpdateQueue.append(player.card["Card2"])
-	return
 
 
 def handleEvents():
@@ -96,32 +86,20 @@ def handleEvents():
 	objectImagesToUpdateSequence.clear()
 	objectImagesToUpdateQueue.clear()
 
-	resetPlayerCards()
-	objectImagesToUpdateQueue.append(player2graphics)
-	objectImagesToUpdateQueue.append(player2graphics.card["Card1"])
-	objectImagesToUpdateQueue.append(player2graphics.card["Card2"])
+	objectImagesToUpdateQueue.append(newCard)
 
-	objectImagesToUpdateQueue.append(player3graphics)
-	objectImagesToUpdateQueue.append(player3graphics.card["Card1"])
-	objectImagesToUpdateQueue.append(player3graphics.card["Card2"])
-
-	objectImagesToUpdateQueue.append(player4graphics)
-	objectImagesToUpdateQueue.append(player4graphics.card["Card1"])
-	objectImagesToUpdateQueue.append(player4graphics.card["Card2"])
 
 
 
 	for event in pygame.event.get():
 		if event.type == pygame.QUIT: sys.exit()
 
-	UserInterface.playerMouseOverCard(player.card["Card1"], player.card["Card2"])		
 
 	for each in objectImagesToUpdateQueue:
-		objectImagesToUpdateSequence.append((each.image, each.rect))
+		objectImagesToUpdateSequence.append((each.getImage(), each.getRect()))
 
 	newCard.flip()
 	
-	objectImagesToUpdateSequence.append((newCard.getImage(), newCard.getRect()))
 	UserInterface.updateDisplay(objectImagesToUpdateSequence)
 
 
@@ -154,15 +132,11 @@ def main():
 	#card1rect = card1.get_rect(center=((width/2) - 20, height - 80)) #center=((width/2) - 40, height - 150)
 	#card2rect = card2.get_rect(center=((width/2) + 20, height - 80)) #topleft=((width/2) + 40, height - 150)
 
-	Card1 = UserInterface.Card(3, 'S', (width/2) - 20, height - 160)
-	Card2 = UserInterface.Card(5, 'H', (width/2) + 20, height - 160)
+
 
 	global newCard
 	newCard = Card.Card(7, 'D', 30, 30)
 
-	player.card["Card1"] = Card1
-	player.card["Card2"] = Card2
-	
 	#player1 = Opponent(40, 20, f"{CharacterPath}Player2.png")
 	#player1text = myfont.render(str(player1.getChips()), False, (0, 0, 0))
 	#player2 = Opponent(388, 20, f"{CharacterPath}Player3.png")
@@ -179,16 +153,7 @@ def main():
 
 	#fold check raise
 	#	  call
-	global player2graphics, player3graphics, player4graphics
-	player2graphics = UserInterface.Opponent(40, 20, 2)
-	player2graphics.card = {"Card1": UserInterface.Card(12, 'S', 65, 150), "Card2": UserInterface.Card(10, 'H', 85, 150)}
-	player3graphics = UserInterface.Opponent(388, 20, 3)
-	player3graphics.card = {"Card1": UserInterface.Card(12, 'H', 378, 30), "Card2": UserInterface.Card(2, 'H', 398, 30)}
-	player4graphics = UserInterface.Opponent(736, 20, 4)
-	player4graphics.card = {"Card1": UserInterface.Card(1, 'C', 726, 30), "Card2": UserInterface.Card(4, 'D', 746, 30)}
 
-
-	
 
 
 	mousepos = [0, 0]
