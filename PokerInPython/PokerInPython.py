@@ -6,6 +6,7 @@ import os
 import UserInterface
 import Card
 import Player
+import Deck
 
 os.environ['SDL_VIDEO_WINDOW_POS'] = "%d,%d" % (5,35)
 
@@ -24,6 +25,11 @@ objectImagesToUpdateQueue = []
 #List of (image, rect) tuples to provide to UserInterface layer to update screen
 objectImagesToUpdateSequence = [None, None]
 
+deck = Deck.Deck()
+
+player2 = Player.Player(2, 300, 50, 230, 30)
+player3 = Player.Player(3, 300, 50, 690, 30)
+
 
 
 def handleEvents():
@@ -35,8 +41,10 @@ def handleEvents():
 	objectImagesToUpdateSequence.clear()
 	objectImagesToUpdateQueue.clear()
 
-	objectImagesToUpdateQueue.append(newCard)
-
+	objectImagesToUpdateQueue.append(player2)
+	objectImagesToUpdateQueue.append(player3)
+	objectImagesToUpdateQueue.extend(player2.getCards())
+	objectImagesToUpdateQueue.extend(player3.getCards())
 
 
 	for event in pygame.event.get():
@@ -46,7 +54,6 @@ def handleEvents():
 	for each in objectImagesToUpdateQueue:
 		objectImagesToUpdateSequence.append((each.getImage(), each.getRect()))
 
-	newCard.flip()
 	
 	UserInterface.updateDisplay(objectImagesToUpdateSequence)
 
@@ -80,10 +87,21 @@ def main():
 	#card1rect = card1.get_rect(center=((width/2) - 20, height - 80)) #center=((width/2) - 40, height - 150)
 	#card2rect = card2.get_rect(center=((width/2) + 20, height - 80)) #topleft=((width/2) + 40, height - 150)
 
+	c1 = deck.drawCard()
+	c2 = deck.drawCard()
+	c3 = deck.drawCard()
+	c4 = deck.drawCard()
+	c1.moveTo(player2.getRect().x-20, player2.getRect().y)
+	c2.moveTo(player2.getRect().x+20, player2.getRect().y)
+	c3.moveTo(player3.getRect().x-20, player2.getRect().y)
+	c4.moveTo(player3.getRect().x+20, player2.getRect().y)
+	c1.flip()
+	c2.flip()
+	c3.flip()
+	c4.flip()
 
-
-	global newCard
-	newCard = Card.Card(7, 'D', 30, 30)
+	player2.setCards([c1, c2])
+	player3.setCards([c3, c4])
 
 	#player1 = Opponent(40, 20, f"{CharacterPath}Player2.png")
 	#player1text = myfont.render(str(player1.getChips()), False, (0, 0, 0))
