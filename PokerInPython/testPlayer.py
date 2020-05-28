@@ -74,6 +74,27 @@ class TestPlayerMethods(unittest.TestCase):
 		self.assertEqual(playerCard2.getValue()["number"], 5)
 		self.assertEqual(playerCard2.getValue()["suit"], 'D')
 
+	def test_canSetFacedown(self):
+
+		player = Player.Player(3, 100, 50, 10, 20)
+		card1 = Card.Card(3, 'H')
+		card2 = Card.Card(5, 'D')
+
+		player.setCards([card1, card2])
+
+		playerCard1 = player.getCards()[0]
+		playerCard2 = player.getCards()[1]
+
+		self.assertEqual(playerCard1.isFaceUp(), False)
+
+		playerCard1.setFaceUp(True)
+		self.assertEqual(playerCard1.isFaceUp(), True)
+
+		playerCard1.flip()
+		self.assertEqual(playerCard1.isFaceUp(), False)
+		playerCard1.flip()
+		self.assertEqual(playerCard1.isFaceUp(), True)
+
 
 if __name__ == '__main__':
 	unittest.main()

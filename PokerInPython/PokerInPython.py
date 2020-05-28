@@ -7,6 +7,7 @@ import UserInterface
 import Card
 import Player
 import Deck
+import Button
 
 os.environ['SDL_VIDEO_WINDOW_POS'] = "%d,%d" % (5,35)
 
@@ -21,6 +22,7 @@ objectImagesToUpdateQueue = []
 objectImagesToUpdateSequence = [None, None]
 
 playerList = []
+buttonList = []
 
 deck = Deck.Deck()
 
@@ -47,6 +49,9 @@ def handleEvents():
 		objectImagesToUpdateQueue.append(player)
 		objectImagesToUpdateQueue.extend(player.getCards())
 
+	for button in buttonList:
+		objectImagesToUpdateQueue.append(button)
+
 
 	for event in pygame.event.get():
 		if event.type == pygame.QUIT: sys.exit()
@@ -65,7 +70,10 @@ def handleEvents():
 def initializePlayers(numberOfPlayers, chips):
 	playerList.clear()
 
-	#player1 = Player.Player(1)
+	player1 = Player.Player(1, chips, confidence=100, posX = 80, posY = 400)
+	player1.setCards([deck.drawCard(), deck.drawCard()])
+	player1.setCardsFaceUp(True)
+	playerList.append(player1)
 
 	for i in range(2, numberOfPlayers+1):
 		xValue = (width/numberOfPlayers) * (i-1)
@@ -73,6 +81,19 @@ def initializePlayers(numberOfPlayers, chips):
 		player.setCards([deck.drawCard(), deck.drawCard()])
 		playerList.append(player)
 	return
+
+def initializeButtons():
+	buttonList.clear()
+
+	btn1 = Button.Button(id=1, name="Fold", posX= 500, posY=540)
+	btn2 = Button.Button(id=2, name="Check", posX= 640, posY=540)
+	btn3 = Button.Button(id=3, name="Bet", posX= 780, posY=540)
+
+	buttonList.append(btn1)
+	buttonList.append(btn2)
+	buttonList.append(btn3)
+	#def __init__(self, id, name, posX = 0, posY = 0):
+
 
 
 def main():
@@ -82,61 +103,13 @@ def main():
 	clock = pygame.time.Clock()
 
 
-	
-
-	#myfont = pygame.font.SysFont('Elephant', 16)
-	
-
-	#screen = pygame.display.set_mode(size)
 
 	UserInterface.initDisplay()
 
-	#r1 = random.randint(1, 13)
-	#r2 = random.randint(1, 13)
-	#s1 = random.randint(0, 3)
-	#s2 = random.randint(0, 3)
-
-
-	#card1 = pygame.image.load(f"{CardPath}Card_{r1}{cSuit[s1]}.png")
-	#card2 = pygame.image.load(f"{CardPath}Card_{r2}{cSuit[s2]}.png")
-	#card1rect = card1.get_rect(center=((width/2) - 20, height - 80)) #center=((width/2) - 40, height - 150)
-	#card2rect = card2.get_rect(center=((width/2) + 20, height - 80)) #topleft=((width/2) + 40, height - 150)
-
-	# c1 = deck.drawCard()
-	# c2 = deck.drawCard()
-	# c3 = deck.drawCard()
-	# c4 = deck.drawCard()
-	# c1.moveTo(player2.getRect().x-20, player2.getRect().y)
-	# c2.moveTo(player2.getRect().x+20, player2.getRect().y)
-	# c3.moveTo(player3.getRect().x-20, player2.getRect().y)
-	# c4.moveTo(player3.getRect().x+20, player2.getRect().y)
-	# c1.flip()
-	# c2.flip()
-	# c3.flip()
-	# c4.flip()
-
-	# player2.setCards([c1, c2])
-	# player3.setCards([c3, c4])
+	
 
 	initializePlayers(3, 100)
-
-	#player1 = Opponent(40, 20, f"{CharacterPath}Player2.png")
-	#player1text = myfont.render(str(player1.getChips()), False, (0, 0, 0))
-	#player2 = Opponent(388, 20, f"{CharacterPath}Player3.png")
-	#player2text = myfont.render(str(player2.getChips()), False, (0, 0, 0))
-	#player3 = Opponent(736, 20, f"{CharacterPath}Player4.png")
-	#player3text = myfont.render(str(player3.getChips()), False, (0, 0, 0))
-
-	#btnFold = pygame.image.load(f"{ButtonPath}Btn_Fold.png")
-	#btnFoldRect = btnFold.get_rect(center=(340, 460))
-	#btnCheck = pygame.image.load(f"{ButtonPath}Btn_Check.png")
-	#btnCheckRect = btnCheck.get_rect(center=(460, 460))
-	#btnRaise = pygame.image.load(f"{ButtonPath}Btn_Raise.png")
-	#btnRaiseRect = btnRaise.get_rect(center=(580, 460))
-
-	#fold check raise
-	#	  call
-
+	initializeButtons()
 
 
 	mousepos = [0, 0]
@@ -148,31 +121,6 @@ def main():
 		handleEvents()
 		
 
-
-
-		
-
-		
-
-		
-		
-
-
-		#screen.fill(background)
-		
-			#screen.blit(Card1.image, Card1.rect)
-			#screen.blit(Card2.image, Card2.rect)
-		#screen.blit(player1.getImage(), player1.getRect())
-		#screen.blit(player1text, player1.getRect())
-		#screen.blit(player2.getImage(), player2.getRect())
-		#screen.blit(player2text, player2.getRect())
-		#screen.blit(player3.getImage(), player3.getRect())
-		#screen.blit(player3text, player3.getRect())
-
-		#screen.blit(btnFold, btnFoldRect)
-		#screen.blit(btnCheck, btnCheckRect)
-		#screen.blit(btnRaise, btnRaiseRect)
-			#pygame.display.flip()
 
 
 		clock.tick(30)

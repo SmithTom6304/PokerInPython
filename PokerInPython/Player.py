@@ -38,7 +38,17 @@ class Player:
 	def getCards(self):
 		return self.cards
 
+	#Returns true if the players cards are both face up, false if at least one is face down
+	def isCardsFaceUp(self):
+		return self.getCards()[0].isFaceUp() and self.getCards()[1].isFaceUp()
 
+	#Sets the players cards to be faceup/facedown based on value. Returns false if assertion fails
+	def setCardsFaceUp(self, value):
+		return self.getCards()[0].setFaceUp(value) and self.getCards()[1].setFaceUp(value)
+
+	def flipCards(self):
+		flip_faceup = self.isCardsFaceUp()
+		return self.setCardsFaceUp(not flip_faceup)
 
 	class Model:
 
@@ -62,7 +72,7 @@ class Player:
 		def __init__(self, number, posX, posY):
 			CharacterPath = "./Images/Characters/"
 			self.image = pygame.image.load(f"{CharacterPath}Player{number}.png")
-			self.rect = self.image.get_rect(center=(posX, posY))
+			self.rect = self.image.get_rect(topleft=(posX, posY))
 
 		def getImage(self):
 			return self.image

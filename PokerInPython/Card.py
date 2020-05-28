@@ -80,7 +80,7 @@ class Card:
 			self.imageFaceUp = pygame.image.load(f"{CardPath}Card_{number}{suit}.png")
 			self.imageFaceDown = pygame.image.load(f"{CardPath}Card_Back.png")
 			self.image = self.imageFaceDown
-			self.rect = self.image.get_rect(center=(posX, posY))
+			self.rect = self.image.get_rect(topleft=(posX, posY))
 
 		def setImage(self, faceupValue):
 			if(faceupValue == True):
