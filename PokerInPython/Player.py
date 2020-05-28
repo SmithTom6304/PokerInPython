@@ -30,6 +30,8 @@ class Player:
 		self.view.moveRelative(x, y)
 
 	def setCards(self, cards):
+		cards[0].moveTo(self.view.rect.x + 20, self.view.rect.y + 120)
+		cards[1].moveTo(self.view.rect.x + 60, self.view.rect.y + 120)
 		self.cards[0] = cards[0]
 		self.cards[1] = cards[1]
 
@@ -60,7 +62,7 @@ class Player:
 		def __init__(self, number, posX, posY):
 			CharacterPath = "./Images/Characters/"
 			self.image = pygame.image.load(f"{CharacterPath}Player{number}.png")
-			self.rect = self.image.get_rect(topleft=(posX, posY))
+			self.rect = self.image.get_rect(center=(posX, posY))
 
 		def getImage(self):
 			return self.image

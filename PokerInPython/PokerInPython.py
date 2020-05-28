@@ -15,20 +15,17 @@ speed = [2, 2]
 black = 0, 0, 0
 background = 49, 117, 61
 
-CardPath = "./Images/Cards/"
-ButtonPath = "./Images/Buttons/"
-CharacterPath = "./Images/Characters/"
-
-
 #Queue of objects to be added to the sequence to update
 objectImagesToUpdateQueue = []
 #List of (image, rect) tuples to provide to UserInterface layer to update screen
 objectImagesToUpdateSequence = [None, None]
 
+playerList = []
+
 deck = Deck.Deck()
 
-player2 = Player.Player(2, 300, 50, 230, 30)
-player3 = Player.Player(3, 300, 50, 690, 30)
+# player2 = Player.Player(2, 300, 50, 230, 30)
+# player3 = Player.Player(3, 300, 50, 690, 30)
 
 
 
@@ -41,10 +38,14 @@ def handleEvents():
 	objectImagesToUpdateSequence.clear()
 	objectImagesToUpdateQueue.clear()
 
-	objectImagesToUpdateQueue.append(player2)
-	objectImagesToUpdateQueue.append(player3)
-	objectImagesToUpdateQueue.extend(player2.getCards())
-	objectImagesToUpdateQueue.extend(player3.getCards())
+	# objectImagesToUpdateQueue.append(player2)
+	# objectImagesToUpdateQueue.append(player3)
+	# objectImagesToUpdateQueue.extend(player2.getCards())
+	# objectImagesToUpdateQueue.extend(player3.getCards())
+
+	for player in playerList:
+		objectImagesToUpdateQueue.append(player)
+		objectImagesToUpdateQueue.extend(player.getCards())
 
 
 	for event in pygame.event.get():
@@ -59,6 +60,20 @@ def handleEvents():
 
 
 	return
+
+
+def initializePlayers(numberOfPlayers, chips):
+	playerList.clear()
+
+	#player1 = Player.Player(1)
+
+	for i in range(2, numberOfPlayers+1):
+		xValue = (width/numberOfPlayers) * (i-1)
+		player = Player.Player(i, chips, confidence=100, posX=xValue, posY=(height/6))
+		player.setCards([deck.drawCard(), deck.drawCard()])
+		playerList.append(player)
+	return
+
 
 def main():
 
@@ -87,21 +102,23 @@ def main():
 	#card1rect = card1.get_rect(center=((width/2) - 20, height - 80)) #center=((width/2) - 40, height - 150)
 	#card2rect = card2.get_rect(center=((width/2) + 20, height - 80)) #topleft=((width/2) + 40, height - 150)
 
-	c1 = deck.drawCard()
-	c2 = deck.drawCard()
-	c3 = deck.drawCard()
-	c4 = deck.drawCard()
-	c1.moveTo(player2.getRect().x-20, player2.getRect().y)
-	c2.moveTo(player2.getRect().x+20, player2.getRect().y)
-	c3.moveTo(player3.getRect().x-20, player2.getRect().y)
-	c4.moveTo(player3.getRect().x+20, player2.getRect().y)
-	c1.flip()
-	c2.flip()
-	c3.flip()
-	c4.flip()
+	# c1 = deck.drawCard()
+	# c2 = deck.drawCard()
+	# c3 = deck.drawCard()
+	# c4 = deck.drawCard()
+	# c1.moveTo(player2.getRect().x-20, player2.getRect().y)
+	# c2.moveTo(player2.getRect().x+20, player2.getRect().y)
+	# c3.moveTo(player3.getRect().x-20, player2.getRect().y)
+	# c4.moveTo(player3.getRect().x+20, player2.getRect().y)
+	# c1.flip()
+	# c2.flip()
+	# c3.flip()
+	# c4.flip()
 
-	player2.setCards([c1, c2])
-	player3.setCards([c3, c4])
+	# player2.setCards([c1, c2])
+	# player3.setCards([c3, c4])
+
+	initializePlayers(3, 100)
 
 	#player1 = Opponent(40, 20, f"{CharacterPath}Player2.png")
 	#player1text = myfont.render(str(player1.getChips()), False, (0, 0, 0))
