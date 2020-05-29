@@ -51,37 +51,12 @@ class Card:
 		self.view.moveRelative(x, y)
 
 	def moveStep(self):
-		#Calculate difference between current pos and final pos
-		a_rect = self.getRect()
-		a_moveTo = self.view.movingTo
-		deltaX = a_moveTo[0] - a_rect.x
-		deltaY = a_moveTo[1] - a_rect.y
-		stepSize = 10
+		self.view.moveStep()
 
-		#If x or y is close to final x or y, move it there
-		if abs(deltaX) < stepSize:
-			self.moveTo(a_moveTo[0], a_rect.y)
-		if abs(deltaY) < stepSize:
-			self.moveTo(a_rect.x, a_moveTo[1])
+	def setWaitFrames(self, waitFrames):
+		self.view.waitFrames = waitFrames
 
-		#Re-calculate difference between current pos and final pos
-		a_rect = self.getRect()
-		a_moveTo = self.view.movingTo
-		deltaX = a_moveTo[0] - a_rect.x
-		deltaY = a_moveTo[1] - a_rect.y
-
-		#Move towards the final destination
-		if(deltaX > 0):
-			self.moveBy(stepSize, 0)
-		if(deltaX < 0):
-			self.moveBy(-stepSize, 0)
-		if(deltaY > 0):
-			self.moveBy(0, stepSize)
-		if(deltaY < 0):
-			self.moveBy(0, -stepSize)
-
-		if(deltaX == 0 and deltaY == 0):
-			self.moving = False
+	
 
 
 
@@ -134,12 +109,13 @@ class Card:
 
 	class View:
 		
-		def __init__(self, number, suit, posX=0, posY=0):
+		def __init__(self, number, suit, posX=0, posY=0, waitFrames=0):
 			CardPath = "./Images/Cards/"
 			self.imageFaceUp = pygame.image.load(f"{CardPath}Card_{number}{suit}.png")
 			self.imageFaceDown = pygame.image.load(f"{CardPath}Card_Back.png")
 			self.image = self.imageFaceDown
 			self.rect = self.image.get_rect(topleft=(posX, posY))
+			self.waitFrames = waitFrames
 
 			self.movingTo = [0.0, 0.0]
 
@@ -189,6 +165,44 @@ class Card:
 				self.movingTo[1] = y
 			else:
 				self.movingTo[1] = 0
+
+		def moveStep(self):
+
+			if(self.waitFrames > 0):
+				self.waitFrames-=1
+				return
+
+			#Calculate difference between current pos and final pos
+			a_rect = self.getRect()
+			a_moveTo = self.movingTo
+			deltaX = a_moveTo[0] - a_rect.x
+			deltaY = a_moveTo[1] - a_rect.y
+			stepSize = 10
+
+			#If x or y is close to final x or y, move it there
+			if abs(deltaX) < stepSize:
+				self.moveAbsolute(a_moveTo[0], a_rect.y)
+			if abs(deltaY) < stepSize:
+				self.moveAbsolute(a_rect.x, a_moveTo[1])
+
+			#Re-calculate difference between current pos and final pos
+			a_rect = self.getRect()
+			a_moveTo = self.movingTo
+			deltaX = a_moveTo[0] - a_rect.x
+			deltaY = a_moveTo[1] - a_rect.y
+
+			#Move towards the final destination
+			if(deltaX > 0):
+				self.moveRelative(stepSize, 0)
+			if(deltaX < 0):
+				self.moveRelative(-stepSize, 0)
+			if(deltaY > 0):
+				self.moveRelative(0, stepSize)
+			if(deltaY < 0):
+				self.moveRelative(0, -stepSize)
+
+			if(deltaX == 0 and deltaY == 0):
+				self.moving = False
 
 
 

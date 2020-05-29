@@ -79,7 +79,7 @@ def handleEvents():
 				initializeGameObjects()
 			if event.key == pygame.K_RIGHT:
 				for each in cardList:
-					each.flip()
+					each.setFaceUp(True)
 
 
 def initializeGameObjects():
@@ -88,9 +88,13 @@ def initializeGameObjects():
 	cardList.clear()
 	deck.resetDeck()
 
-	initializePlayers(3, 100)
+	initializePlayers(4, 100)
 	initializeButtons()
 	initializeCards()
+
+	#Add wait frames to each card to create ripple effect
+	for i in range(0, len(cardList)):
+		cardList[i].setWaitFrames((len(cardList)-i) * 3)
 
 
 def initializePlayers(numberOfPlayers, chips):
