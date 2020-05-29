@@ -84,6 +84,13 @@ class TestCardMethods(unittest.TestCase):
 		self.assertEqual(0, card.getRect().x, "Card did not move negatively in the x direction")
 		self.assertEqual(0, card.getRect().y, "Card did not move negatively in the y direction")
 
+	def test_canSetMoving(self):
+		card1 = Card.Card(1, 'S')
+		self.assertEqual(card1.isMoving(), False)
+
+		#card1.setMoving(True)
+		#self.assertEqual(card1.isMoving(), True)
+
 
 
 if __name__ == '__main__':

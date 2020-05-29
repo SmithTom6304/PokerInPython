@@ -1,24 +1,30 @@
 import Card
 import random
+import pygame
 
 class Deck:
 
 	def __init__(self):
+		CardPath = "./Images/Cards/"
 		self.deck = []
+		self.image = pygame.image.load(f"{CardPath}Card_Deck.png")
+		self.rect = self.image.get_rect(topleft=(100, 400))
 		self.resetDeck()
+		
+		
 
 	def resetDeck(self):
 
 		self.deck.clear()
 
 		for i in range(1, 14):
-			self.deck.append(Card.Card(i, 'C'))
+			self.deck.append(Card.Card(i, 'C', self.rect.x, self.rect.y))
 		for i in range(1, 14):
-			self.deck.append(Card.Card(i, 'D'))
+			self.deck.append(Card.Card(i, 'D', self.rect.x, self.rect.y))
 		for i in range(1, 14):
-			self.deck.append(Card.Card(i, 'H'))
+			self.deck.append(Card.Card(i, 'H', self.rect.x, self.rect.y))
 		for i in range(1, 14):
-			self.deck.append(Card.Card(i, 'S'))
+			self.deck.append(Card.Card(i, 'S', self.rect.x, self.rect.y))
 
 		self.shuffleDeck()
 
@@ -47,3 +53,9 @@ class Deck:
 
 	def drawCard(self):
 		return self.deck.pop()
+
+	def getImage(self):
+		return self.image
+
+	def getRect(self):
+		return self.rect

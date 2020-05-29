@@ -12,6 +12,9 @@ class Card:
 			return
 		self.view = self.View(number, suit, posX, posY)
 
+	def updatePosition(self):
+		self.moveStep()
+
 	def getValue(self):
 		return self.model.getValue()
 
@@ -34,11 +37,54 @@ class Card:
 	def getRect(self):
 		return self.view.getRect()
 
+	def isMoving(self):
+		return self.model.isMoving()
+
+	def move(self, x, y):
+		self.view.new_moveAbsolute(x, y)
+		self.model.moving = True
+
 	def moveTo(self, x, y):
 		self.view.moveAbsolute(x, y)
 
 	def moveBy(self, x, y):
 		self.view.moveRelative(x, y)
+
+	def moveStep(self):
+		#Calculate difference between current pos and final pos
+		a_rect = self.getRect()
+		a_moveTo = self.view.movingTo
+		deltaX = a_moveTo[0] - a_rect.x
+		deltaY = a_moveTo[1] - a_rect.y
+		stepSize = 10
+
+		#If x or y is close to final x or y, move it there
+		if abs(deltaX) < stepSize:
+			self.moveTo(a_moveTo[0], a_rect.y)
+		if abs(deltaY) < stepSize:
+			self.moveTo(a_rect.x, a_moveTo[1])
+
+		#Re-calculate difference between current pos and final pos
+		a_rect = self.getRect()
+		a_moveTo = self.view.movingTo
+		deltaX = a_moveTo[0] - a_rect.x
+		deltaY = a_moveTo[1] - a_rect.y
+
+		#Move towards the final destination
+		if(deltaX > 0):
+			self.moveBy(stepSize, 0)
+		if(deltaX < 0):
+			self.moveBy(-stepSize, 0)
+		if(deltaY > 0):
+			self.moveBy(0, stepSize)
+		if(deltaY < 0):
+			self.moveBy(0, -stepSize)
+
+		if(deltaX == 0 and deltaY == 0):
+			self.moving = False
+
+
+
 
 
 	class Model:
@@ -46,6 +92,7 @@ class Card:
 		def __init__(self, number, suit):
 			self.value = {"number": None, "suit": None}
 			self.faceUp = False
+			self.moving = False
 
 			#Ensure given card values are valid. Set to None and return if not. 
 			if(number < 1 or number > 13):
@@ -64,12 +111,24 @@ class Card:
 		def isFaceUp(self):
 			return self.faceUp
 
+		def isMoving(self):
+			return self.moving
+
 		def setFaceUp(self, value):
 			if(value == True):
 				self.faceUp = True
 				return True
 			if(value == False):
 				self.faceUp = False
+				return True
+			return False	#If assignment fails, return false
+
+		def setMoving(self, value):
+			if(value == True):
+				self.moving = True
+				return True
+			if(value == False):
+				self.moving = False
 				return True
 			return False	#If assignment fails, return false
 
@@ -81,6 +140,8 @@ class Card:
 			self.imageFaceDown = pygame.image.load(f"{CardPath}Card_Back.png")
 			self.image = self.imageFaceDown
 			self.rect = self.image.get_rect(topleft=(posX, posY))
+
+			self.movingTo = [0.0, 0.0]
 
 		def setImage(self, faceupValue):
 			if(faceupValue == True):
@@ -117,6 +178,19 @@ class Card:
 				self.rect.y = y
 			else:
 				self.rect.y = 0
+
+		def new_moveAbsolute(self, x, y):
+			if (x >= 0):
+				self.movingTo[0] = x
+			else:
+				self.movingTo[0] = 0
+
+			if (y >= 0):
+				self.movingTo[1] = y
+			else:
+				self.movingTo[1] = 0
+
+
 
 
 

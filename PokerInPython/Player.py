@@ -30,8 +30,8 @@ class Player:
 		self.view.moveRelative(x, y)
 
 	def setCards(self, cards):
-		cards[0].moveTo(self.view.rect.x + 20, self.view.rect.y + 120)
-		cards[1].moveTo(self.view.rect.x + 60, self.view.rect.y + 120)
+		cards[0].move(self.view.rect.x + 20, self.view.rect.y + 120)
+		cards[1].move(self.view.rect.x + 60, self.view.rect.y + 120)
 		self.cards[0] = cards[0]
 		self.cards[1] = cards[1]
 

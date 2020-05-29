@@ -23,6 +23,7 @@ objectImagesToUpdateSequence = [None, None]
 
 playerList = []
 buttonList = []
+cardList = []
 
 deck = Deck.Deck()
 
@@ -47,14 +48,21 @@ def handleEvents():
 
 	for player in playerList:
 		objectImagesToUpdateQueue.append(player)
-		objectImagesToUpdateQueue.extend(player.getCards())
+		#objectImagesToUpdateQueue.extend(player.getCards())
 
 	for button in buttonList:
 		objectImagesToUpdateQueue.append(button)
 
+	for card in cardList:
+		if card.isMoving():
+			card.moveStep()
 
-	for event in pygame.event.get():
-		if event.type == pygame.QUIT: sys.exit()
+		objectImagesToUpdateQueue.append(card)
+
+	objectImagesToUpdateQueue.append(deck)
+
+
+	
 
 
 	for each in objectImagesToUpdateQueue:
@@ -64,27 +72,43 @@ def handleEvents():
 	UserInterface.updateDisplay(objectImagesToUpdateSequence)
 
 
-	return
+	for event in pygame.event.get():
+		if event.type == pygame.QUIT: sys.exit()
+		if event.type == pygame.KEYDOWN:
+			if event.key == pygame.K_LEFT:
+				initializeGameObjects()
+			if event.key == pygame.K_RIGHT:
+				for each in cardList:
+					each.flip()
+
+
+def initializeGameObjects():
+	playerList.clear()
+	buttonList.clear()
+	cardList.clear()
+	deck.resetDeck()
+
+	initializePlayers(3, 100)
+	initializeButtons()
+	initializeCards()
 
 
 def initializePlayers(numberOfPlayers, chips):
-	playerList.clear()
-
 	player1 = Player.Player(1, chips, confidence=100, posX = 80, posY = 400)
 	player1.setCards([deck.drawCard(), deck.drawCard()])
 	player1.setCardsFaceUp(True)
 	playerList.append(player1)
+	cardList.extend(player1.getCards())
 
 	for i in range(2, numberOfPlayers+1):
 		xValue = (width/numberOfPlayers) * (i-1)
 		player = Player.Player(i, chips, confidence=100, posX=xValue, posY=(height/6))
 		player.setCards([deck.drawCard(), deck.drawCard()])
 		playerList.append(player)
-	return
+		cardList.extend(player.getCards())
+	
 
 def initializeButtons():
-	buttonList.clear()
-
 	btn1 = Button.Button(id=1, name="Fold", posX= 500, posY=540)
 	btn2 = Button.Button(id=2, name="Check", posX= 640, posY=540)
 	btn3 = Button.Button(id=3, name="Bet", posX= 780, posY=540)
@@ -92,8 +116,13 @@ def initializeButtons():
 	buttonList.append(btn1)
 	buttonList.append(btn2)
 	buttonList.append(btn3)
-	#def __init__(self, id, name, posX = 0, posY = 0):
+	
 
+def initializeCards():
+	testCard = deck.drawCard()
+	testCard.moveTo(100, 100)
+	testCard.move(600, 400)
+	cardList.append(testCard)
 
 
 def main():
@@ -106,10 +135,9 @@ def main():
 
 	UserInterface.initDisplay()
 
-	
+	initializeGameObjects()
 
-	initializePlayers(3, 100)
-	initializeButtons()
+	
 
 
 	mousepos = [0, 0]
@@ -123,6 +151,6 @@ def main():
 
 
 
-		clock.tick(30)
+		clock.tick(60)
 
 if __name__ == '__main__': main()
