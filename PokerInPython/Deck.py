@@ -2,62 +2,51 @@ import Card
 import random
 import pygame
 
-basepath = "./"
+base_path = "./"
+
 
 class Deck:
 
-	def __init__(self):
-		CardPath = f"{basepath}Images/Cards/"
-		self.deck = []
-		self.image = pygame.image.load(f"{CardPath}Card_Deck.png")
-		self.rect = self.image.get_rect(topleft=(100, 400))
-		self.resetDeck()
-		
-		
+    def __init__(self):
+        deck_image_path = f"{base_path}Images/Cards/"
+        self.deck = []
+        self.image = pygame.image.load(f"{deck_image_path}Card_Deck.png")
+        self.rect = self.image.get_rect(topleft=(100, 400))
+        self.reset_deck()
 
-	def resetDeck(self):
+    def reset_deck(self):
 
-		self.deck.clear()
+        self.deck.clear()
 
-		for i in range(1, 14):
-			self.deck.append(Card.Card(i, 'C', self.rect.x, self.rect.y))
-		for i in range(1, 14):
-			self.deck.append(Card.Card(i, 'D', self.rect.x, self.rect.y))
-		for i in range(1, 14):
-			self.deck.append(Card.Card(i, 'H', self.rect.x, self.rect.y))
-		for i in range(1, 14):
-			self.deck.append(Card.Card(i, 'S', self.rect.x, self.rect.y))
+        for i in range(1, 14):
+            self.deck.append(Card.Card(i, 'C', self.rect.x, self.rect.y))
+        for i in range(1, 14):
+            self.deck.append(Card.Card(i, 'D', self.rect.x, self.rect.y))
+        for i in range(1, 14):
+            self.deck.append(Card.Card(i, 'H', self.rect.x, self.rect.y))
+        for i in range(1, 14):
+            self.deck.append(Card.Card(i, 'S', self.rect.x, self.rect.y))
 
-		self.shuffleDeck()
+        self.shuffle_deck()
 
+    # Function taken from https://www.geeksforgeeks.org/shuffle-a-given-array-using-fisher-yates-shuffle-algorithm/
+    def shuffle_deck(self):
 
-	#Function taken from https://www.geeksforgeeks.org/shuffle-a-given-array-using-fisher-yates-shuffle-algorithm/
-	def shuffleDeck(self):
+        arr = self.deck
 
-		arr = self.deck
+        n = len(arr)
+        for i in range(n - 1, 0, -1):
+            j = random.randint(0, i)
 
-		n = len(arr)
-		for i in range(n-1, 0, -1):
-			j = random.randint(0, i)
+            arr[i], arr[j] = arr[j], arr[i]
 
-			#print(arr[i].getValue()["number"])
-			#print(arr[j].getValue()["number"])
-			#print(f"i = {i}")
-			#print(f"j = {j}")
+        self.deck = arr
 
-			try:
-				arr[i], arr[j] = arr[j], arr[i]
-			except Exception as e:
-				print(f"i = {i}")
-				print(f"j = {j}")
+    def draw_card(self):
+        return self.deck.pop()
 
-		self.deck = arr
+    def get_image(self):
+        return self.image
 
-	def drawCard(self):
-		return self.deck.pop()
-
-	def getImage(self):
-		return self.image
-
-	def getRect(self):
-		return self.rect
+    def get_rect(self):
+        return self.rect

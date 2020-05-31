@@ -1,4 +1,4 @@
-#UserInterface layer
+# UserInterface layer
 import sys
 import pygame
 
@@ -17,105 +17,105 @@ CharacterPath = "./Images/Characters/"
 cNumber = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13]
 cSuit = ['H', 'D', 'C', 'S']
 
-#myfont = pygame.font.SysFont('Elephant', 16)
+
+# myfont = pygame.font.SysFont('Elephant', 16)
 
 class Card:
-	number = None
-	suit = None
+    number = None
+    suit = None
 
-	image = None
-	rect = None
+    image = None
+    rect = None
 
-	def __init__(self, number, suit, posX=0, posY=0):
-		self.number = number
-		self.suit = suit
+    def __init__(self, number, suit, pos_x=0, pos_y=0):
+        self.number = number
+        self.suit = suit
 
-		self.image = pygame.image.load(f"{CardPath}Card_{number}{suit}.png")
-		self.rect = self.image.get_rect(topleft=(posX, posY))
+        self.image = pygame.image.load(f"{CardPath}Card_{number}{suit}.png")
+        self.rect = self.image.get_rect(topleft=(pos_x, pos_y))
 
-	def getRect(self):
-		return self.rect
+    def get_rect(self):
+        return self.rect
 
+    def get_number(self):
+        return self.number
 
-	def getNumber(self):
-		return self.number
+    def get_suit(self):
+        return self.suit
 
-	def getSuit(self):
-		return self.suit
+    # Move a cards rect coords relative to the current coords
+    def move_relative(self, x=0, y=0):
+        if (self.rect.x + x) >= 0:
+            self.rect.x += x
+        else:
+            self.rect.x = 0
 
-	#Move a cards rect coords relative to the current coords
-	def moveRelative(self, x=0, y=0):
-		if ((self.rect.x + x) >= 0):
-			self.rect.x += x
-		else:
-			self.rect.x = 0
+        if (self.rect.y + y) >= 0:
+            self.rect.y += y
+        else:
+            self.rect.y = 0
 
-		if ((self.rect.y + y) >= 0):
-			self.rect.y += y
-		else:
-			self.rect.y = 0
+    # Move a cards rect coords to an absolute position
+    def move_absolute(self, x=0, y=0):
+        if x >= 0:
+            self.rect.x = x
+        else:
+            self.rect.x = 0
 
-	#Move a cards rect coords to an absolute position
-	def moveAbsolute(self, x=0, y=0):
-		if (x >= 0):
-			self.rect.x = x
-		else:
-			self.rect.x = 0
+        if y >= 0:
+            self.rect.y = y
+        else:
+            self.rect.y = 0
 
-		if (y >= 0):
-			self.rect.y = y
-		else:
-			self.rect.y = 0
 
 class Opponent:
+    rect = None
+    image = None
+    card = {"Card1": None, "Card2": None}
+    chips = 100
 
-	rect = None
-	image = None
-	card = {"Card1": None, "Card2": None}
-	chips = 100
+    def __init__(self, x, y, number):
+        self.image = pygame.image.load(f"{CharacterPath}Player{number}.png")
+        chips = 100
+        self.rect = self.image.get_rect(topleft=(x, y))
 
-	def __init__(self, x, y, number):
-		self.image = pygame.image.load(f"{CharacterPath}Player{number}.png")
-		chips = 100
-		self.rect = self.image.get_rect(topleft=(x, y))
+    def get_chips(self):
+        return self.chips
 
-	def getChips(self):
-		return self.chips
+    def get_rect(self):
+        return self.rect
 
-	def getRect(self):
-		return self.rect
+    def get_image(self):
+        return self.image
 
-	def getImage(self):
-		return self.image
+    def get_cards(self):
+        return self.card
 
-	def getCards(self):
-		return self.card
+    def clear_cards(self):
+        card = [None, None]
 
-	def clearCards(self):
-		card = [None, None]
 
-def initDisplay():
-	global screen 
-	screen = pygame.display.set_mode(size)
-	return
+def init_display():
+    global screen
+    screen = pygame.display.set_mode(size)
+    return
 
-def updateDisplay(sequence):
 
-	screen.fill(background)
+def update_display(sequence):
+    screen.fill(background)
 
-	screen.blits(sequence)
-	
+    screen.blits(sequence)
 
-	pygame.display.flip()
+    pygame.display.flip()
 
-	return
+    return
 
-def playerMouseOverCard(Card1, Card2):
 
-	if (Card1.rect.collidepoint(mouse_pos) and not Card2.rect.collidepoint(mouse_pos)):
-		Card1.moveRelative(0, -10)
+def player_mouse_over_card(card1, card2):
+    if card1.rect.collidepoint(mouse_pos) and not card2.rect.collidepoint(mouse_pos):
+        card1.move_relative(0, -10)
 
-	if Card2.rect.collidepoint(mouse_pos):
-		Card2.moveRelative(0, -10)
+    if card2.rect.collidepoint(mouse_pos):
+        card2.move_relative(0, -10)
 
-	return
+    return

@@ -1,24 +1,23 @@
 import sys
 import pygame
-import random
 import os
 
 import UserInterface
-import Card
+# import Card
 import Player
 import Deck
 import Button
 
-os.environ['SDL_VIDEO_WINDOW_POS'] = "%d,%d" % (5,35)
+os.environ['SDL_VIDEO_WINDOW_POS'] = "%d,%d" % (5, 35)
 
 size = width, height = 920, 640
 speed = [2, 2]
 black = 0, 0, 0
 background = 49, 117, 61
 
-#Queue of objects to be added to the sequence to update
+# Queue of objects to be added to the sequence to update
 objectImagesToUpdateQueue = []
-#List of (image, rect) tuples to provide to UserInterface layer to update screen
+# List of (image, rect) tuples to provide to UserInterface layer to update screen
 objectImagesToUpdateSequence = [None, None]
 
 playerList = []
@@ -27,134 +26,110 @@ cardList = []
 
 deck = Deck.Deck()
 
-# player2 = Player.Player(2, 300, 50, 230, 30)
-# player3 = Player.Player(3, 300, 50, 690, 30)
+
+def handle_events():
+    mouse_pos = pygame.mouse.get_pos()
+    UserInterface.mouse_pos = mouse_pos
+
+    # Clear the sequence of images that will be updated
+    objectImagesToUpdateSequence.clear()
+    objectImagesToUpdateQueue.clear()
+
+    # objectImagesToUpdateQueue.append(player2)
+    # objectImagesToUpdateQueue.append(player3)
+    # objectImagesToUpdateQueue.extend(player2.getCards())
+    # objectImagesToUpdateQueue.extend(player3.getCards())
+
+    for player in playerList:
+        objectImagesToUpdateQueue.append(player)
+    # objectImagesToUpdateQueue.extend(player.getCards())
+
+    for button in buttonList:
+        objectImagesToUpdateQueue.append(button)
+
+    for card in cardList:
+        if card.is_moving():
+            card.move_step()
+
+        objectImagesToUpdateQueue.append(card)
+
+    objectImagesToUpdateQueue.append(deck)
+
+    for each in objectImagesToUpdateQueue:
+        objectImagesToUpdateSequence.append((each.get_image(), each.get_rect()))
+
+    UserInterface.update_display(objectImagesToUpdateSequence)
+
+    for event in pygame.event.get():
+        if event.type == pygame.QUIT: sys.exit()
+        if event.type == pygame.KEYDOWN:
+            if event.key == pygame.K_LEFT:
+                initialize_game_objects()
+            if event.key == pygame.K_RIGHT:
+                for each in cardList:
+                    each.set_face_up(True)
 
 
+def initialize_game_objects():
+    playerList.clear()
+    buttonList.clear()
+    cardList.clear()
+    deck.reset_deck()
 
-def handleEvents():
+    initialize_players(4, 100)
+    initialize_buttons()
+    initialize_cards()
 
-	mousepos = pygame.mouse.get_pos()
-	UserInterface.mouse_pos = mousepos
-
-	#Clear the sequence of images that will be updated
-	objectImagesToUpdateSequence.clear()
-	objectImagesToUpdateQueue.clear()
-
-	# objectImagesToUpdateQueue.append(player2)
-	# objectImagesToUpdateQueue.append(player3)
-	# objectImagesToUpdateQueue.extend(player2.getCards())
-	# objectImagesToUpdateQueue.extend(player3.getCards())
-
-	for player in playerList:
-		objectImagesToUpdateQueue.append(player)
-		#objectImagesToUpdateQueue.extend(player.getCards())
-
-	for button in buttonList:
-		objectImagesToUpdateQueue.append(button)
-
-	for card in cardList:
-		if card.isMoving():
-			card.moveStep()
-
-		objectImagesToUpdateQueue.append(card)
-
-	objectImagesToUpdateQueue.append(deck)
+    # Add wait frames to each card to create ripple effect
+    for i in range(0, len(cardList)):
+        cardList[i].set_wait_frames((len(cardList) - i) * 3)
 
 
-	
+def initialize_players(number_of_players, chips):
+    player1 = Player.Player(1, chips, confidence=100, pos_x=80, pos_y=400)
+    player1.set_cards([deck.draw_card(), deck.draw_card()])
+    player1.set_cards_face_up(True)
+    playerList.append(player1)
+    cardList.extend(player1.get_cards())
+
+    for i in range(2, number_of_players + 1):
+        x_value = (width / number_of_players) * (i - 1)
+        player = Player.Player(i, chips, confidence=100, pos_x=x_value, pos_y=(height / 6))
+        player.set_cards([deck.draw_card(), deck.draw_card()])
+        playerList.append(player)
+        cardList.extend(player.get_cards())
 
 
-	for each in objectImagesToUpdateQueue:
-		objectImagesToUpdateSequence.append((each.getImage(), each.getRect()))
+def initialize_buttons():
+    btn1 = Button.Button(button_id=1, name="Fold", pos_x=500, pos_y=540)
+    btn2 = Button.Button(button_id=2, name="Check", pos_x=640, pos_y=540)
+    btn3 = Button.Button(button_id=3, name="Bet", pos_x=780, pos_y=540)
 
-	
-	UserInterface.updateDisplay(objectImagesToUpdateSequence)
-
-
-	for event in pygame.event.get():
-		if event.type == pygame.QUIT: sys.exit()
-		if event.type == pygame.KEYDOWN:
-			if event.key == pygame.K_LEFT:
-				initializeGameObjects()
-			if event.key == pygame.K_RIGHT:
-				for each in cardList:
-					each.setFaceUp(True)
+    buttonList.append(btn1)
+    buttonList.append(btn2)
+    buttonList.append(btn3)
 
 
-def initializeGameObjects():
-	playerList.clear()
-	buttonList.clear()
-	cardList.clear()
-	deck.resetDeck()
-
-	initializePlayers(4, 100)
-	initializeButtons()
-	initializeCards()
-
-	#Add wait frames to each card to create ripple effect
-	for i in range(0, len(cardList)):
-		cardList[i].setWaitFrames((len(cardList)-i) * 3)
-
-
-def initializePlayers(numberOfPlayers, chips):
-	player1 = Player.Player(1, chips, confidence=100, posX = 80, posY = 400)
-	player1.setCards([deck.drawCard(), deck.drawCard()])
-	player1.setCardsFaceUp(True)
-	playerList.append(player1)
-	cardList.extend(player1.getCards())
-
-	for i in range(2, numberOfPlayers+1):
-		xValue = (width/numberOfPlayers) * (i-1)
-		player = Player.Player(i, chips, confidence=100, posX=xValue, posY=(height/6))
-		player.setCards([deck.drawCard(), deck.drawCard()])
-		playerList.append(player)
-		cardList.extend(player.getCards())
-	
-
-def initializeButtons():
-	btn1 = Button.Button(id=1, name="Fold", posX= 500, posY=540)
-	btn2 = Button.Button(id=2, name="Check", posX= 640, posY=540)
-	btn3 = Button.Button(id=3, name="Bet", posX= 780, posY=540)
-
-	buttonList.append(btn1)
-	buttonList.append(btn2)
-	buttonList.append(btn3)
-	
-
-def initializeCards():
-	testCard = deck.drawCard()
-	testCard.moveTo(100, 100)
-	testCard.move(600, 400)
-	cardList.append(testCard)
+def initialize_cards():
+    test_card = deck.draw_card()
+    test_card.move_to(100, 100)
+    test_card.move(600, 400)
+    cardList.append(test_card)
 
 
 def main():
+    pygame.init()
+    clock = pygame.time.Clock()
+
+    UserInterface.init_display()
+
+    initialize_game_objects()
+
+    while True:
+        handle_events()
+
+        clock.tick(60)
 
 
-	pygame.init()
-	clock = pygame.time.Clock()
-
-
-
-	UserInterface.initDisplay()
-
-	initializeGameObjects()
-
-	
-
-
-	mousepos = [0, 0]
-
-	
-
-	while True:
-
-		handleEvents()
-		
-
-
-
-		clock.tick(60)
-
-if __name__ == '__main__': main()
+if __name__ == '__main__':
+    main()

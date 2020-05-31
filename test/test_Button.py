@@ -2,64 +2,61 @@ import unittest
 import Button
 import sys
 
+
 class TestButtonMethods(unittest.TestCase):
+    Button.base_path = "../PokerInPython/"
 
-	Button.basepath = "../PokerInPython/"
+    def test_smoke(self):
+        # print(os.getcwd())
 
-	def test_smoke(self):
+        button = Button.Button(button_id=1, name="Bet", pos_x=30, pos_y=30)
 
-		#print(os.getcwd())
+        self.assertEqual(button.get_button_id(), 1)
+        self.assertEqual(button.get_name(), "Bet")
+        self.assertEqual(button.get_rect().x, 30)
 
-		button = Button.Button(id=1, name="Bet", posX=30, posY=30)
+    def test_canMoveButtonRelative(self):
+        button = Button.Button(button_id=1, name="Call", pos_x=10, pos_y=20)
 
-		self.assertEqual(button.getId(), 1)
-		self.assertEqual(button.getName(), "Bet")
-		self.assertEqual(button.getRect().x, 30)
+        self.assertEqual(10, button.get_rect().x, "Button was not initialized with the correct parameters")
+        self.assertEqual(20, button.get_rect().y, "Button was not initialized with the correct parameters")
 
-	def test_canMoveButtonRelative(self):
-		button = Button.Button(id=1, name="Call", posX=10, posY=20)
+        button.move_by(30, 0)
 
+        self.assertEqual(40, button.get_rect().x, "Button did not move in the x direction")
+        self.assertNotEqual(10, button.get_rect().x, "Button did not move in the x direction")
 
-		self.assertEqual(10, button.getRect().x, "Button was not initialized with the correct parameters")
-		self.assertEqual(20, button.getRect().y, "Button was not initialized with the correct parameters")
+        button.move_by(0, 15)
 
-		button.moveBy(30, 0)
+        self.assertEqual(35, button.get_rect().y, "Button did not move in the y direction")
+        self.assertNotEqual(20, button.get_rect().y, "Button did not move in the y direction")
 
-		self.assertEqual(40, button.getRect().x, "Button did not move in the x direction")
-		self.assertNotEqual(10, button.getRect().x, "Button did not move in the x direction")
+        button.move_by(-30, -20)
 
-		button.moveBy(0, 15)
+        self.assertEqual(10, button.get_rect().x, "Button did not move negatively in the x direction")
+        self.assertEqual(15, button.get_rect().y, "Button did not move negatively in the y direction")
 
-		self.assertEqual(35, button.getRect().y, "Button did not move in the y direction")
-		self.assertNotEqual(20, button.getRect().y, "Button did not move in the y direction")
+    def test_canMoveButtonAbsolute(self):
+        button = Button.Button(button_id=1, name="Call", pos_x=10, pos_y=20)
 
-		button.moveBy(-30, -20)
+        self.assertEqual(10, button.get_rect().x, "Button was not initialized with the correct parameters")
+        self.assertEqual(20, button.get_rect().y, "Button was not initialized with the correct parameters")
 
-		self.assertEqual(10, button.getRect().x, "Button did not move negatively in the x direction")
-		self.assertEqual(15, button.getRect().y, "Button did not move negatively in the y direction")
+        button.move_to(30, 0)
 
-	def test_canMoveButtonAbsolute(self):
-		button = Button.Button(id=1, name="Call", posX=10, posY=20)
+        self.assertEqual(30, button.get_rect().x, "Button did not move in the x direction")
+        self.assertNotEqual(10, button.get_rect().x, "Button did not move in the x direction")
 
+        button.move_to(0, 15)
 
-		self.assertEqual(10, button.getRect().x, "Button was not initialized with the correct parameters")
-		self.assertEqual(20, button.getRect().y, "Button was not initialized with the correct parameters")
+        self.assertEqual(15, button.get_rect().y, "Button did not move in the y direction")
+        self.assertNotEqual(20, button.get_rect().y, "Button did not move in the y direction")
 
-		button.moveTo(30, 0)
+        button.move_to(-30, -20)
 
-		self.assertEqual(30, button.getRect().x, "Button did not move in the x direction")
-		self.assertNotEqual(10, button.getRect().x, "Button did not move in the x direction")
-
-		button.moveTo(0, 15)
-
-		self.assertEqual(15, button.getRect().y, "Button did not move in the y direction")
-		self.assertNotEqual(20, button.getRect().y, "Button did not move in the y direction")
-
-		button.moveTo(-30, -20)
-
-		self.assertEqual(0, button.getRect().x, "Button did not move negatively in the x direction")
-		self.assertEqual(0, button.getRect().y, "Button did not move negatively in the y direction")
+        self.assertEqual(0, button.get_rect().x, "Button did not move negatively in the x direction")
+        self.assertEqual(0, button.get_rect().y, "Button did not move negatively in the y direction")
 
 
 if __name__ == '__main__':
-	unittest.main()
+    unittest.main()
