@@ -1,6 +1,6 @@
 import pygame
 
-
+basepath = "./"
 
 class Button:
 
@@ -43,7 +43,9 @@ class Button:
 
 	class View:
 		def __init__(self, name, posX, posY):
-			ButtonPath = "./Images/Buttons/"
+
+			ButtonPath = f"{basepath}Images/Buttons/"
+
 			self.image = pygame.image.load(f"{ButtonPath}Btn_{name}.png")
 			self.rect = self.image.get_rect(topleft=(posX, posY))
 

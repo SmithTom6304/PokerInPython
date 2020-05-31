@@ -2,10 +2,12 @@ import Card
 import random
 import pygame
 
+basepath = "./"
+
 class Deck:
 
 	def __init__(self):
-		CardPath = "./Images/Cards/"
+		CardPath = f"{basepath}Images/Cards/"
 		self.deck = []
 		self.image = pygame.image.load(f"{CardPath}Card_Deck.png")
 		self.rect = self.image.get_rect(topleft=(100, 400))

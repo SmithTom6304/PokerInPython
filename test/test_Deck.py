@@ -3,6 +3,8 @@ import Deck
 
 class TestDeckMethods(unittest.TestCase):
 
+	Deck.basepath = "../PokerInPython/"
+
 	def test_smoke(self):
 		deck = Deck.Deck()
 

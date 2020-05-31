@@ -1,6 +1,6 @@
 import pygame
 
-
+basepath = "./"
 
 class Card:
 
@@ -110,7 +110,7 @@ class Card:
 	class View:
 		
 		def __init__(self, number, suit, posX=0, posY=0, waitFrames=0):
-			CardPath = "./Images/Cards/"
+			CardPath = f"{basepath}Images/Cards/"
 			self.imageFaceUp = pygame.image.load(f"{CardPath}Card_{number}{suit}.png")
 			self.imageFaceDown = pygame.image.load(f"{CardPath}Card_Back.png")
 			self.image = self.imageFaceDown

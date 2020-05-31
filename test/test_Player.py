@@ -5,6 +5,8 @@ import Card
 
 class TestPlayerMethods(unittest.TestCase):
 
+	Player.basepath = "../PokerInPython/"
+
 	def test_smoke(self):
 		player = Player.Player(2, 30, 60, 30, 15)
 

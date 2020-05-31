@@ -1,9 +1,15 @@
 import unittest
 import Button
+import os
 
 class TestButtonMethods(unittest.TestCase):
 
+	Button.basepath = "../PokerInPython/"
+
 	def test_smoke(self):
+
+		#print(os.getcwd())
+
 		button = Button.Button(id=1, name="Bet", posX=30, posY=30)
 
 		self.assertEqual(button.getId(), 1)
