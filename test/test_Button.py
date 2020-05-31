@@ -1,6 +1,6 @@
 import unittest
 import Button
-import os
+import sys
 
 class TestButtonMethods(unittest.TestCase):
 
