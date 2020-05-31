@@ -1,4 +1,8 @@
 # UserInterface layer
+<<<<<<< HEAD
+=======
+import sys
+>>>>>>> develop
 import pygame
 
 size = width, height = 920, 640
@@ -75,6 +79,10 @@ class Opponent:
 
     def __init__(self, x, y, number):
         self.image = pygame.image.load(f"{CharacterPath}Player{number}.png")
+<<<<<<< HEAD
+=======
+        chips = 100
+>>>>>>> develop
         self.rect = self.image.get_rect(topleft=(x, y))
 
     def get_chips(self):
@@ -89,6 +97,12 @@ class Opponent:
     def get_cards(self):
         return self.card
 
+<<<<<<< HEAD
+=======
+    def clear_cards(self):
+        card = [None, None]
+
+>>>>>>> develop
 
 def init_display():
     global screen
