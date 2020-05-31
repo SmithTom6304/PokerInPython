@@ -81,11 +81,8 @@ class TestPlayerMethods(unittest.TestCase):
         player.set_cards([card1, card2])
 
         playerCard1 = player.get_cards()[0]
-<<<<<<< HEAD
         # playerCard2 = player.get_cards()[1]
-=======
-        playerCard2 = player.get_cards()[1]
->>>>>>> develop
+
 
         self.assertEqual(playerCard1.is_face_up(), False)
 
