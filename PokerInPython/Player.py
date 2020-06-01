@@ -42,11 +42,11 @@ class Player:
 
     # Returns true if the players cards are both face up, false if at least one is face down
     def is_cards_face_up(self):
-        return self.get_cards()[0].isFaceUp() and self.get_cards()[1].isFaceUp()
+        return self.get_cards()[0].is_face_up() and self.get_cards()[1].is_face_up()
 
     # Sets the players cards to be faceup/facedown based on value. Returns false if assertion fails
     def set_cards_face_up(self, value):
-        return self.get_cards()[0].setFaceUp(value) and self.get_cards()[1].setFaceUp(value)
+        return self.get_cards()[0].set_face_up(value) and self.get_cards()[1].set_face_up(value)
 
     def flip_cards(self):
         are_cards_face_up = self.is_cards_face_up()

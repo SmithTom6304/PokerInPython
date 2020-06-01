@@ -68,7 +68,7 @@ class Card:
             if number < 1 or number > 13:
                 self.number = None
                 return
-            if suit != 'H' and suit != 'D' and suit != 'C' and suit != 'S':
+            if suit not in ('H', 'D', 'C', 'S'):
                 self.suit = None
                 return
 

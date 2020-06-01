@@ -25,11 +25,12 @@ buttonList = []
 cardList = []
 
 deck = Deck.Deck()
+user_interface = UserInterface.UserInterface()
 
 
 def handle_events():
     mouse_pos = pygame.mouse.get_pos()
-    UserInterface.mouse_pos = mouse_pos
+    user_interface.mouse_pos = mouse_pos
 
     # Clear the sequence of images that will be updated
     objectImagesToUpdateSequence.clear()
@@ -58,7 +59,7 @@ def handle_events():
     for each in objectImagesToUpdateQueue:
         objectImagesToUpdateSequence.append((each.get_image(), each.get_rect()))
 
-    UserInterface.update_display(objectImagesToUpdateSequence)
+    user_interface.update_display(objectImagesToUpdateSequence)
 
     for event in pygame.event.get():
         if event.type == pygame.QUIT: sys.exit()
@@ -81,8 +82,8 @@ def initialize_game_objects():
     initialize_cards()
 
     # Add wait frames to each card to create ripple effect
-    for i in range(0, len(cardList)):
-        cardList[i].set_wait_frames((len(cardList) - i) * 3)
+    for i, card in enumerate(cardList):
+        card.set_wait_frames((len(cardList) - i) * 3)
 
 
 def initialize_players(number_of_players, chips):
@@ -121,7 +122,7 @@ def main():
     pygame.init()
     clock = pygame.time.Clock()
 
-    UserInterface.init_display()
+    user_interface.init_display()
 
     initialize_game_objects()
 
