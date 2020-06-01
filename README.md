@@ -1,37 +1,30 @@
-## Welcome to GitHub Pages
+# Poker In Python
 
-You can use the [editor on GitHub](https://github.com/Smith1999Tom/PokerInPython/edit/master/README.md) to maintain and preview the content for your website in Markdown files.
+A simple Poker game, programmed in Python using PyGame.
 
-Whenever you commit to this repository, GitHub Pages will run [Jekyll](https://jekyllrb.com/) to rebuild the pages in your site, from the content in your Markdown files.
+***Currently work in progress.***
 
-### Markdown
+## Getting Started
 
-Markdown is a lightweight and easy-to-use syntax for styling your writing. It includes conventions for
+1. Install prerequisites
+2. [Add the repository to your PYTHONPATH](https://www.devdungeon.com/content/python-import-syspath-and-pythonpath-tutorial#toc-13), so that the modules can be imported by the test classes
+3. Execute [PokerInPython/PokerInPython.py](./PokerInPython/PokerInPython.py) to run the program
 
-```markdown
-Syntax highlighted code block
+### Prerequisites
 
-# Header 1
-## Header 2
-### Header 3
+* [Python 3.x](https://www.python.org/downloads/)
+* [PyGame](https://www.pygame.org/wiki/GettingStarted)
 
-- Bulleted
-- List
+## Running the tests
 
-1. Numbered
-2. List
+Use `python -m unittest` in the test directory to run all tests.
 
-**Bold** and _Italic_ and `Code` text
+Tests can be run individually by executing them like a normal python file.
 
-[Link](url) and ![Image](src)
-```
+## Authors
 
-For more details see [GitHub Flavored Markdown](https://guides.github.com/features/mastering-markdown/).
+* **Tom Smith** - [Smith1999Tom](https://github.com/Smith1999Tom)
 
-### Jekyll Themes
+## Acknowledgments
 
-Your Pages site will use the layout and styles from the Jekyll theme you have selected in your [repository settings](https://github.com/Smith1999Tom/PokerInPython/settings). The name of this theme is saved in the Jekyll `_config.yml` configuration file.
-
-### Support or Contact
-
-Having trouble with Pages? Check out our [documentation](https://help.github.com/categories/github-pages-basics/) or [contact support](https://github.com/contact) and we’ll help you sort it out.
+* Thank you to [PurpleBooth](https://gist.github.com/PurpleBooth/109311bb0361f32d87a2) for creating a readme template.
