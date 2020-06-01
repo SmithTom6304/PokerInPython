@@ -21,6 +21,11 @@ Use `python -m unittest` in the test directory to run all tests.
 
 Tests can be run individually by executing them like a normal python file.
 
+## External Tools
+
+* [GitKraken Boards](https://app.gitkraken.com/glo/board/XtOu87jc9QARLJ6S) - Used to track issues.
+* [DeepSource](https://deepsource.io/gh/Smith1999Tom/PokerInPython/) - Used to analyse the quality and styling of the codebase.
+
 ## Authors
 
 * **Tom Smith** - [Smith1999Tom](https://github.com/Smith1999Tom)
