@@ -23,12 +23,36 @@ objectImagesToUpdateSequence = [None, None]
 playerList = []
 buttonList = []
 cardList = []
+communityCards = []
+
+phase = 0  # https://www.poker-king.com/dictionary/community_cards/
+# Phase 1 - Deal private cards, then bet
+# Phase 2 - Deal three community cards to form the flop, then bet
+# Phase 3 - Deal fourth community card, called the turn, then bet
+# Phase 4 - Deal last community card, called the river, then bet
+# Showdown - show cards
 
 deck = Deck.Deck()
 user_interface = UserInterface.UserInterface()
 
 
 def handle_events():
+
+    for event in pygame.event.get():
+        if event.type == pygame.QUIT:
+            sys.exit()
+        if event.type == pygame.KEYDOWN:
+            if event.key == pygame.K_LEFT:
+                initialize_game_objects()
+            if event.key == pygame.K_RIGHT:
+                for each in cardList:
+                    each.set_face_up(True)
+        if event.type == pygame.MOUSEBUTTONDOWN:
+            # Check button presses
+            button_pressed = user_interface.check_button_presses(buttonList)
+            if button_pressed is not None:
+                print(button_pressed.get_name())  # TODO Change to button function
+
     mouse_pos = pygame.mouse.get_pos()
     user_interface.mouse_pos = mouse_pos
 
@@ -36,10 +60,7 @@ def handle_events():
     objectImagesToUpdateSequence.clear()
     objectImagesToUpdateQueue.clear()
 
-    # objectImagesToUpdateQueue.append(player2)
-    # objectImagesToUpdateQueue.append(player3)
-    # objectImagesToUpdateQueue.extend(player2.getCards())
-    # objectImagesToUpdateQueue.extend(player3.getCards())
+
 
     for player in playerList:
         objectImagesToUpdateQueue.append(player)
@@ -61,14 +82,7 @@ def handle_events():
 
     user_interface.update_display(objectImagesToUpdateSequence)
 
-    for event in pygame.event.get():
-        if event.type == pygame.QUIT: sys.exit()
-        if event.type == pygame.KEYDOWN:
-            if event.key == pygame.K_LEFT:
-                initialize_game_objects()
-            if event.key == pygame.K_RIGHT:
-                for each in cardList:
-                    each.set_face_up(True)
+
 
 
 def initialize_game_objects():

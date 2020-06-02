@@ -323,7 +323,7 @@ class Card:
             self.rect = self.image.get_rect(topleft=(pos_x, pos_y))
             self.waitFrames = wait_frames
 
-            self.movingTo = [0.0, 0.0]
+            self.movingTo = [0, 0]
             self.moving = False
 
         def set_image(self, face_up_value: bool):

@@ -56,6 +56,12 @@ class TestButtonMethods(unittest.TestCase):
         self.assertEqual(0, button.get_rect().x, "Button did not move negatively in the x direction")
         self.assertEqual(0, button.get_rect().y, "Button did not move negatively in the y direction")
 
+    def test_canMouseOverButton(self):
+        button = Button.Button(button_id=1, name="Call", pos_x=10, pos_y=20)
+        self.assertTrue(button.is_mouse_over(15, 35))
+        button.move_to(400, 500)
+        self.assertFalse(button.is_mouse_over(15, 35))
+        self.assertTrue(button.is_mouse_over(410, 520))
 
 if __name__ == '__main__':
     unittest.main()

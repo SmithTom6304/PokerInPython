@@ -102,6 +102,16 @@ class Button:
         """
         return self.view.get_rect()
 
+    def is_mouse_over(self, mouse_x, mouse_y):
+        """Returns true if the mouse is over the button
+
+        :param mouse_x: x position of the mouse
+        :param mouse_y: y position of the mouse
+        :return: True if mouse is over the button
+        """
+        a_rect = self.get_rect()
+        return a_rect.collidepoint(mouse_x, mouse_y)
+
     class Model:
         """
         Inner class to keep track of buttons values
