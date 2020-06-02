@@ -25,18 +25,12 @@ buttonList = []
 cardList = []
 communityCards = []
 
-phase = 0  # https://www.poker-king.com/dictionary/community_cards/
-# Phase 1 - Deal private cards, then bet
-# Phase 2 - Deal three community cards to form the flop, then bet
-# Phase 3 - Deal fourth community card, called the turn, then bet
-# Phase 4 - Deal last community card, called the river, then bet
-# Showdown - show cards
-
 deck = Deck.Deck()
 user_interface = UserInterface.UserInterface()
 
 
 def handle_events():
+    button_pressed = None
 
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
@@ -50,50 +44,25 @@ def handle_events():
         if event.type == pygame.MOUSEBUTTONDOWN:
             # Check button presses
             button_pressed = user_interface.check_button_presses(buttonList)
-            if button_pressed is not None:
-                print(button_pressed.get_name())  # TODO Change to button function
 
     mouse_pos = pygame.mouse.get_pos()
     user_interface.mouse_pos = mouse_pos
 
-    # Clear the sequence of images that will be updated
-    objectImagesToUpdateSequence.clear()
-    objectImagesToUpdateQueue.clear()
-
-
-
-    for player in playerList:
-        objectImagesToUpdateQueue.append(player)
-    # objectImagesToUpdateQueue.extend(player.getCards())
-
-    for button in buttonList:
-        objectImagesToUpdateQueue.append(button)
-
-    for card in cardList:
-        if card.is_moving():
-            card.move_step()
-
-        objectImagesToUpdateQueue.append(card)
-
-    objectImagesToUpdateQueue.append(deck)
-
-    for each in objectImagesToUpdateQueue:
-        objectImagesToUpdateSequence.append((each.get_image(), each.get_rect()))
-
-    user_interface.update_display(objectImagesToUpdateSequence)
-
-
+    if button_pressed is not None:
+        print(button_pressed.get_name())  # TODO Change to button function
+        return button_pressed
 
 
 def initialize_game_objects():
     playerList.clear()
     buttonList.clear()
     cardList.clear()
+    communityCards.clear()
     deck.reset_deck()
 
     initialize_players(4, 100)
     initialize_buttons()
-    initialize_cards()
+    # initialize_cards()
 
     # Add wait frames to each card to create ripple effect
     for i, card in enumerate(cardList):
@@ -115,6 +84,8 @@ def initialize_players(number_of_players, chips):
         cardList.extend(player.get_cards())
 
 
+
+
 def initialize_buttons():
     btn1 = Button.Button(button_id=1, name="Fold", pos_x=500, pos_y=540)
     btn2 = Button.Button(button_id=2, name="Check", pos_x=640, pos_y=540)
@@ -131,6 +102,69 @@ def initialize_cards():
     test_card.move(600, 400)
     cardList.append(test_card)
 
+def deal_community_cards(phase):
+    if phase == 1:
+        return
+    if phase == 2:
+        for i in range(0, 3):
+            card = deck.draw_card()
+            card.set_wait_frames(i * 3)
+            card.move(200 + (100 * (i+1)), 400)
+            card.set_face_up(True)
+            communityCards.append(card)
+            cardList.append(card)
+    if phase == 3:
+        card = deck.draw_card()
+        card.move(200 + (100 * (3 + 1)), 400)
+        card.set_face_up(True)
+        communityCards.append(card)
+        cardList.append(card)
+    if phase == 4:
+        card = deck.draw_card()
+        card.move(200 + (100 * (4 + 1)), 400)
+        card.set_face_up(True)
+        communityCards.append(card)
+        cardList.append(card)
+
+
+
+
+
+def game_loop(leadPosition, turn, button_pressed):
+    index = leadPosition + turn % len(playerList)
+    current_player = playerList[index]
+
+    action = button_pressed.get_name()
+
+    if action == "Fold":
+        print(f"Player {index} folded")
+        return
+
+
+def update():
+    # Clear the sequence of images that will be updated
+    objectImagesToUpdateSequence.clear()
+    objectImagesToUpdateQueue.clear()
+
+    for player in playerList:
+        objectImagesToUpdateQueue.append(player)
+    # objectImagesToUpdateQueue.extend(player.getCards())
+
+    for button in buttonList:
+        objectImagesToUpdateQueue.append(button)
+
+    for card in cardList:
+        if card.is_moving():
+            card.move_step()
+
+        objectImagesToUpdateQueue.append(card)
+
+    objectImagesToUpdateQueue.append(deck)
+
+    for each in objectImagesToUpdateQueue:
+        objectImagesToUpdateSequence.append((each.get_image(), each.get_rect()))
+
+    user_interface.update_display(objectImagesToUpdateSequence)
 
 def main():
     pygame.init()
@@ -139,10 +173,26 @@ def main():
     user_interface.init_display()
 
     initialize_game_objects()
+    lead_position = 0
+    turn = 0
+    phase = 1  # https://www.poker-king.com/dictionary/community_cards/
+    # Phase 1 - Deal private cards, then bet
+    # Phase 2 - Deal three community cards to form the flop, then bet
+    # Phase 3 - Deal fourth community card, called the turn, then bet
+    # Phase 4 - Deal last community card, called the river, then bet
+    # Showdown - show cards
 
     while True:
-        handle_events()
+        button_pressed = handle_events()
+        if button_pressed is not None:
+            if lead_position == (turn + 1) % len(playerList):
+                phase += 1
+                print(f"Starting phase {phase}")
+                deal_community_cards(phase)
+            game_loop(lead_position, turn, button_pressed)
+            turn = (turn + 1) % len(playerList)
 
+        update()
         clock.tick(60)
 
 
