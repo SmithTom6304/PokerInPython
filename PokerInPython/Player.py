@@ -52,12 +52,28 @@ class Player:
         are_cards_face_up = self.is_cards_face_up()
         return self.set_cards_face_up(not are_cards_face_up)
 
+    def start_turn(self):
+        self.view.image = pygame.transform.scale(self.view.image, (144+50, 200+50))
+
+    def end_turn(self):
+        self.view.image = pygame.transform.scale(self.view.image, (144, 200))
+
+    def fold(self):
+        self.model.set_folded(True)
+
+    def has_folded(self):
+        return self.model.get_folded()
+
+    def reset(self):
+        self.model.set_folded(False)
+
     class Model:
 
         def __init__(self, number, chips, confidence):
             self.number = number
             self.chips = chips
             self.confidence = confidence
+            self.folded = False
 
         def get_number(self):
             return self.number
@@ -67,6 +83,12 @@ class Player:
 
         def get_confidence(self):
             return self.confidence
+
+        def get_folded(self):
+            return self.folded
+
+        def set_folded(self, value):
+            self.folded = value
 
     class View:
 

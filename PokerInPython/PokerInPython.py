@@ -34,6 +34,16 @@ class PokerInPython:
         self.deck = Deck.Deck()
         self.user_interface = UserInterface.UserInterface()
 
+        self.lead_position = 0
+        self.turn = 0
+        self.phase = 1  # https://www.poker-king.com/dictionary/community_cards/
+        # Phase 1 - Deal private cards, then bet
+        # Phase 2 - Deal three community cards to form the flop, then bet
+        # Phase 3 - Deal fourth community card, called the turn, then bet
+        # Phase 4 - Deal last community card, called the river, then bet
+        # Showdown - show cards
+        self.current_player = None
+
 
     def handle_events(self):
         button_pressed = None
@@ -66,6 +76,8 @@ class PokerInPython:
         self.communityCards.clear()
         self.deck.reset_deck()
 
+        self.phase = 1
+
         self.initialize_players(4, 100)
         self.initialize_buttons()
         # initialize_cards()
@@ -88,6 +100,11 @@ class PokerInPython:
             player.set_cards([self.deck.draw_card(), self.deck.draw_card()])
             self.playerList.append(player)
             self.cardList.extend(player.get_cards())
+
+        for player in self.playerList:
+            player.reset()
+
+        self.current_player = self.playerList[0]
 
 
 
@@ -136,16 +153,38 @@ class PokerInPython:
 
 
 
-    def game_loop(self, leadPosition, turn, button_pressed):
+    def game_loop(self):
+        button_pressed = self.handle_events()
+        if self.current_player.has_folded():
+            self.next_player()
+            return
+        if button_pressed is not None:
+            if self.lead_position == (self.turn + 1) % len(self.playerList):
+                self.phase += 1
+                print(f"Starting phase {self.phase}")
+                self.deal_community_cards(self.phase)
+
+            self.do_action(self.lead_position, self.turn, button_pressed)
+            self.next_player()
+
+    def next_player(self):
+        self.turn = (self.turn + 1) % len(self.playerList)
+        self.current_player.end_turn()
+        self.current_player = self.playerList[self.turn]
+        self.current_player.start_turn()
+
+    def do_action(self, leadPosition, turn, button_pressed):
         index = leadPosition + turn % len(self.playerList)
-        current_player = self.playerList[index]
 
         action = button_pressed.get_name()
 
         if action == "Fold":
             print(f"Player {index} folded")
+            self.current_player.fold()
             return
-
+        if action == "Check":
+            print(f"Player {index} checked")
+            return
 
     def update(self):
         # Clear the sequence of images that will be updated
@@ -179,25 +218,11 @@ class PokerInPython:
         self.user_interface.init_display()
 
         self.initialize_game_objects()
-        lead_position = 0
-        turn = 0
-        phase = 1  # https://www.poker-king.com/dictionary/community_cards/
-        # Phase 1 - Deal private cards, then bet
-        # Phase 2 - Deal three community cards to form the flop, then bet
-        # Phase 3 - Deal fourth community card, called the turn, then bet
-        # Phase 4 - Deal last community card, called the river, then bet
-        # Showdown - show cards
+
 
         while True:
-            button_pressed = self.handle_events()
-            if button_pressed is not None:
-                if lead_position == (turn + 1) % len(self.playerList):
-                    phase += 1
-                    print(f"Starting phase {phase}")
-                    self.deal_community_cards(phase)
-                self.game_loop(lead_position, turn, button_pressed)
-                turn = (turn + 1) % len(self.playerList)
 
+            self.game_loop()
             self.update()
             clock.tick(60)
 
