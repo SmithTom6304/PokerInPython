@@ -55,8 +55,6 @@ class Card:
         Move the card to (x, y)
     move_by(x, y)
         Move the card by (x, y)
-    move_step()
-        Move the card towards it's final destination
     set_wait_frames(wait_frames)
         Set the cards wait_frames, stopping it from moving initially
     """
@@ -79,7 +77,7 @@ class Card:
 
     def update_position(self):
         """Updates the cards position, if it's moving to a new position."""
-        self.move_step()
+        self.view.move_step()
 
     def get_value(self):
         """Returns the cards value, as a dict {"number", "suit"}
@@ -139,7 +137,7 @@ class Card:
         :param x: x value to move to
         :param y: y value to move to
         """
-        self.view.new_move_absolute(x, y)
+        self.view.set_final_destination(x, y)
         self.model.moving = True
 
     def move_to(self, x: int, y: int):
@@ -157,10 +155,6 @@ class Card:
         :param y: y value to move by
         """
         self.view.move_relative(x, y)
-
-    def move_step(self):
-        """Move the card towards it's final destination"""
-        self.view.move_step()
 
     def set_wait_frames(self, wait_frames: int):
         """Set the cards wait_frames, stopping it from moving initially
@@ -300,10 +294,10 @@ class Card:
             Move the card by (x, y)
         move_absolute(x, y)
             Move the card to (x, y)
-        new_move_absolute(x, y)
+        set_final_destination(x, y)
             Set the cards final destination to (x, y)
         move_step()
-            Move the card towards it final destination
+            Move the card a step towards it final destination
         """
 
         def __init__(self, number: int, suit: str, pos_x: int = 0, pos_y: int = 0, wait_frames: int = 0):
@@ -383,7 +377,7 @@ class Card:
             else:
                 self.rect.y = 0
 
-        def new_move_absolute(self, x: int, y: int):
+        def set_final_destination(self, x: int, y: int):
             """Set the cards final destination to (x, y)
 
             :param x: x value to move card towards
@@ -400,7 +394,7 @@ class Card:
                 self.movingTo[1] = 0
 
         def move_step(self):
-            """Move the card towards it final destination
+            """Move the card a step towards it final destination
 
             :return: None
             """

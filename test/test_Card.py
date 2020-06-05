@@ -86,10 +86,10 @@ class TestCardMethods(unittest.TestCase):
     def test_canSetMoving(self):
         card1 = Card.Card(1, 'S')
         self.assertEqual(card1.is_moving(), False)
+        card1.move(100, 100)
+        self.assertEqual(card1.is_moving(), True)
 
 
-# card1.setMoving(True)
-# self.assertEqual(card1.isMoving(), True)
 
 
 if __name__ == '__main__':

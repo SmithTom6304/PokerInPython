@@ -200,7 +200,7 @@ class PokerInPython:
 
         for card in self.cardList:
             if card.is_moving():
-                card.move_step()
+                card.update_position()
 
             self.objectImagesToUpdateQueue.append(card)
 
