@@ -33,7 +33,8 @@ class UserInterface:
             return None
 
         self.mouse_pos = pygame.mouse.get_pos()
-        for button in enumerate(button_list):   # button is a list of tuples (index, button)
+        # button is a list of tuples (index, button)
+        for button in enumerate(button_list):
             if button[1].is_mouse_over(self.mouse_pos[0], self.mouse_pos[1]):
                 return button[1]
         return None

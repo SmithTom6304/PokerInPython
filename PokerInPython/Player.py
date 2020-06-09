@@ -9,12 +9,17 @@ class Player:
         self.model = self.Model(number, chips, confidence)
         self.view = self.View(number, pos_x, pos_y)
         self.cards = [None, None]
+        self.set_chips(chips)
 
     def get_number(self):
         return self.model.get_number()
 
     def get_chips(self):
         return self.model.get_chips()
+
+    def set_chips(self, amount):
+        self.model.set_chips(amount)
+        self.view.update_text(amount)
 
     def get_confidence(self):
         return self.model.get_confidence()
@@ -24,6 +29,12 @@ class Player:
 
     def get_rect(self):
         return self.view.get_rect()
+
+    def get_text(self):
+        return self.view.get_text()
+
+    def get_text_rect(self):
+        return self.view.get_text_rect()
 
     def move_to(self, x, y):
         self.view.move_absolute(x, y)
@@ -81,6 +92,9 @@ class Player:
         def get_chips(self):
             return self.chips
 
+        def set_chips(self, amount):
+            self.chips = amount
+
         def get_confidence(self):
             return self.confidence
 
@@ -92,16 +106,39 @@ class Player:
 
     class View:
 
+        black = (0, 0, 0)
+        white = (255, 255, 255)
+
         def __init__(self, number, pos_x, pos_y):
             player_image_path = f"{base_path}Images/Characters/"
             self.image = pygame.image.load(f"{player_image_path}Player{number}.png")
             self.rect = self.image.get_rect(topleft=(pos_x, pos_y))
+            self.chip_count = -1
+            self.chips_text = None
+            self.text = None
+            self.text_rect = None
+            self.update_text(0)
+
+        def update_text(self, a_chip_count):
+            font = pygame.font.Font("Font/Minecraft.ttf", 32)
+            self.chip_count = a_chip_count
+            self.chips_text = f"Chips: {self.chip_count}"
+            self.text = font.render(self.chips_text, True, self.black, None)
+            self.text_rect = self.text.get_rect()
+            self.text_rect.center = self.get_rect().center
+            self.text_rect.y -= 120
 
         def get_image(self):
             return self.image
 
         def get_rect(self):
             return self.rect
+
+        def get_text(self):
+            return self.text
+
+        def get_text_rect(self):
+            return self.text_rect
 
         def move_relative(self, x, y):
 

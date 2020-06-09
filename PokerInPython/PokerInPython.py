@@ -149,10 +149,6 @@ class PokerInPython:
             self.communityCards.append(card)
             self.cardList.append(card)
 
-
-
-
-
     def game_loop(self):
         button_pressed = self.handle_events()
         if self.current_player.has_folded():
@@ -193,6 +189,7 @@ class PokerInPython:
 
         for player in self.playerList:
             self.objectImagesToUpdateQueue.append(player)
+            self.objectImagesToUpdateSequence.append((player.get_text(), player.get_text_rect()))   #Add text
         # objectImagesToUpdateQueue.extend(player.getCards())
 
         for button in self.buttonList:
