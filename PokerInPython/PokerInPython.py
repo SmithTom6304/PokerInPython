@@ -33,7 +33,10 @@ class PokerInPython:
 
 
 
+
+
     def __init__(self):
+        self.pot = Pot()
         self.deck = Deck.Deck()
         self.user_interface = UserInterface.UserInterface()
 
@@ -76,8 +79,10 @@ class PokerInPython:
         self.playerList.clear()
         self.buttonList.clear()
         self.cardList.clear()
+        self.textObjectList.clear()
         self.communityCards.clear()
         self.deck.reset_deck()
+        self.pot.pot = 0  # TODO Change to pot.reset
 
         self.phase = 1
 
@@ -185,6 +190,10 @@ class PokerInPython:
         if action == "Check":
             print(f"Player {index} checked")
             return
+        if action == "Bet":
+            print(f"Player {index} bet")
+            self.pot.bet(self.current_player)
+
 
     def update(self):
         # Clear the sequence of images that will be updated
@@ -208,6 +217,7 @@ class PokerInPython:
             self.objectImagesToUpdateQueue.append(text)
 
         self.objectImagesToUpdateQueue.append(self.deck)
+        self.objectImagesToUpdateQueue.append(self.pot.text)
 
         for each in self.objectImagesToUpdateQueue:
             self.objectImagesToUpdateSequence.append((each.get_image(), each.get_rect()))
@@ -228,6 +238,35 @@ class PokerInPython:
             self.game_loop()
             self.update()
             clock.tick(60)
+
+class Pot:
+
+    def __init__(self):
+        self.pot = 0
+        self.min_bet = 0
+        self.max_bet = 20
+        self.big_blind = 2
+        self.small_blind = 1
+        self.text = Text.Text(f"Pot: -1", 32, (0, 0, 0), None)
+        self.text.move_to(100, 200)
+        self.update_text()
+
+    def bet(self, player: Player.Player) -> bool:
+        player_chips = player.get_chips()
+        bet_amount = self.max_bet - self.min_bet
+        if player_chips >= bet_amount:
+            player.set_chips(player_chips - bet_amount)
+            self.add_to_pot(bet_amount)
+            return True
+        else:
+            return False
+
+    def add_to_pot(self, amount):
+        self.pot += amount
+        self.update_text()
+
+    def update_text(self):
+        self.text.set_text(f"Pot: {self.pot}")
 
 
 if __name__ == '__main__':

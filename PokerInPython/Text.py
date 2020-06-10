@@ -23,6 +23,7 @@ class Text:
 
         self.set_font()
         self.set_text(self.text_string)
+        self.text_rect = self.text.get_rect()
 
     def set_font(self):
         self.font = pygame.font.Font(font_path, self.text_size)
@@ -30,7 +31,7 @@ class Text:
     def set_text(self, a_text_string):
         self.text_string = a_text_string
         self.text = self.font.render(self.text_string, True, self.text_colour, self.text_background_colour)
-        self.text_rect = self.text.get_rect()
+
 
     def move_to(self, pos_x, pos_y):
         if pos_x >= 0:
