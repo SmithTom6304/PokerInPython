@@ -1,4 +1,5 @@
 import pygame
+import Text
 
 base_path = "./"
 
@@ -113,20 +114,16 @@ class Player:
             player_image_path = f"{base_path}Images/Characters/"
             self.image = pygame.image.load(f"{player_image_path}Player{number}.png")
             self.rect = self.image.get_rect(topleft=(pos_x, pos_y))
-            self.chip_count = -1
             self.chips_text = None
-            self.text = None
-            self.text_rect = None
-            self.update_text(0)
+            self.text = self.set_text()
+
+        def set_text(self):
+            text = Text.Text(f"Chips: -1", 32, self.black, None)
+            return text
 
         def update_text(self, a_chip_count):
-            font = pygame.font.Font("Font/Minecraft.ttf", 32)
-            self.chip_count = a_chip_count
-            self.chips_text = f"Chips: {self.chip_count}"
-            self.text = font.render(self.chips_text, True, self.black, None)
-            self.text_rect = self.text.get_rect()
-            self.text_rect.center = self.get_rect().center
-            self.text_rect.y -= 120
+            self.text.set_text(f"Chips: {a_chip_count}")
+            self.text.move_to(self.get_rect().x, self.get_rect().y - 20)
 
         def get_image(self):
             return self.image
@@ -136,9 +133,6 @@ class Player:
 
         def get_text(self):
             return self.text
-
-        def get_text_rect(self):
-            return self.text_rect
 
         def move_relative(self, x, y):
 

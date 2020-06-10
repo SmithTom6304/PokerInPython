@@ -7,6 +7,7 @@ import UserInterface
 import Player
 import Deck
 import Button
+import Text
 
 os.environ['SDL_VIDEO_WINDOW_POS'] = "%d,%d" % (5, 35)
 
@@ -25,6 +26,8 @@ class PokerInPython:
     playerList = []
     buttonList = []
     cardList = []
+    textObjectList = []
+
     communityCards = []
 
 
@@ -103,6 +106,7 @@ class PokerInPython:
 
         for player in self.playerList:
             player.reset()
+            self.textObjectList.append(player.get_text())
 
         self.current_player = self.playerList[0]
 
@@ -189,7 +193,6 @@ class PokerInPython:
 
         for player in self.playerList:
             self.objectImagesToUpdateQueue.append(player)
-            self.objectImagesToUpdateSequence.append((player.get_text(), player.get_text_rect()))   #Add text
         # objectImagesToUpdateQueue.extend(player.getCards())
 
         for button in self.buttonList:
@@ -200,6 +203,9 @@ class PokerInPython:
                 card.update_position()
 
             self.objectImagesToUpdateQueue.append(card)
+
+        for text in self.textObjectList:
+            self.objectImagesToUpdateQueue.append(text)
 
         self.objectImagesToUpdateQueue.append(self.deck)
 

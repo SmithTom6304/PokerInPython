@@ -1,10 +1,13 @@
 import unittest
 import Player
 import Card
+import Text
 
 
 class TestPlayerMethods(unittest.TestCase):
     Player.base_path = "../PokerInPython/"
+    Text.base_path = "../PokerInPython/"
+    Text.font_path = f"../PokerInPython/Font/Minecraft.ttf"
 
     def test_smoke(self):
         player = Player.Player(2, 30, 60, 30, 15)
