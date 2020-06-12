@@ -49,6 +49,9 @@ class Text:
 
     def get_rect(self):
         return self.text_rect
+
+    def get_text_string(self):
+        return self.text_string
 """
 def update_text(self, a_chip_count):
     font = pygame.font.Font("Font/Minecraft.ttf", 32)

@@ -37,6 +37,7 @@ class PokerInPython:
 
     def __init__(self):
         self.pot = Pot()
+        self.bet_display = None
         self.deck = Deck.Deck()
         self.user_interface = UserInterface.UserInterface()
 
@@ -49,6 +50,7 @@ class PokerInPython:
         # Phase 4 - Deal last community card, called the river, then bet
         # Showdown - show cards
         self.current_player = None
+
 
 
     def handle_events(self):
@@ -136,8 +138,9 @@ class PokerInPython:
         self.buttonList.append(btn6)
 
         bet_text = Text.Text("10", 26, (0, 0, 0), None)
-        bet_text.move_to(818, 517)
+        bet_text.move_to(815, 517)
         self.textObjectList.append(bet_text)
+        self.bet_display = bet_text
 
 
     def initialize_cards(self):
@@ -176,13 +179,27 @@ class PokerInPython:
             self.next_player()
             return
         if button_pressed is not None:
-            if self.lead_position == (self.turn + 1) % len(self.playerList):
-                self.phase += 1
-                print(f"Starting phase {self.phase}")
-                self.deal_community_cards(self.phase)
+            if button_pressed.get_name() in ("Fold", "Check", "Bet"):  # Do action and advance to next player
+                if self.lead_position == (self.turn + 1) % len(self.playerList):
+                    self.phase += 1
+                    print(f"Starting phase {self.phase}")
+                    self.deal_community_cards(self.phase)
 
-            self.do_action(self.lead_position, self.turn, button_pressed)
-            self.next_player()
+                self.do_action(self.lead_position, self.turn, button_pressed)
+                self.next_player()
+            if button_pressed.get_name() in ("Bet_Arrow_Left", "Bet_Arrow_Right"):
+                a_bet_display = self.bet_display
+                curr_bet_amount = int(a_bet_display.get_text_string())
+                if button_pressed.get_name() == "Bet_Arrow_Left":
+                    if self.pot.min_bet <= curr_bet_amount - self.pot.increment:
+                        curr_bet_amount -= self.pot.increment
+                        self.bet_display.set_text(str(curr_bet_amount))
+                if button_pressed.get_name() == "Bet_Arrow_Right":
+                    if self.pot.max_bet >= curr_bet_amount + self.pot.increment:
+                        curr_bet_amount += self.pot.increment
+                        self.bet_display.set_text(str(curr_bet_amount))
+
+
 
     def next_player(self):
         self.turn = (self.turn + 1) % len(self.playerList)
@@ -204,7 +221,7 @@ class PokerInPython:
             return
         if action == "Bet":
             print(f"Player {index} bet")
-            self.pot.bet(self.current_player)
+            self.pot.bet(self.current_player, int(self.bet_display.get_text_string()))
 
 
     def update(self):
@@ -256,16 +273,17 @@ class Pot:
     def __init__(self):
         self.pot = 0
         self.min_bet = 0
-        self.max_bet = 20
+        self.max_bet = 50
+        self.increment = 5
         self.big_blind = 2
         self.small_blind = 1
         self.text = Text.Text(f"Pot: -1", 32, (0, 0, 0), None)
         self.text.move_to(100, 200)
         self.update_text()
 
-    def bet(self, player: Player.Player) -> bool:
+    def bet(self, player: Player.Player, a_bet_amount) -> bool:
         player_chips = player.get_chips()
-        bet_amount = self.max_bet - self.min_bet
+        bet_amount = a_bet_amount
         if player_chips >= bet_amount:
             player.set_chips(player_chips - bet_amount)
             self.add_to_pot(bet_amount)
