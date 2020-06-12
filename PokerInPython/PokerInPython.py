@@ -277,7 +277,7 @@ class Pot:
         self.increment = 5
         self.big_blind = 2
         self.small_blind = 1
-        self.text = Text.Text(f"Pot: -1", 32, (0, 0, 0), None)
+        self.text = Text.Text("Pot: -1", 32, (0, 0, 0), None)
         self.text.move_to(100, 200)
         self.update_text()
 
@@ -288,8 +288,8 @@ class Pot:
             player.set_chips(player_chips - bet_amount)
             self.add_to_pot(bet_amount)
             return True
-        else:
-            return False
+        # else
+        return False
 
     def add_to_pot(self, amount):
         self.pot += amount

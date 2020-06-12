@@ -4,7 +4,7 @@ import Text
 
 class TestTextMethods(unittest.TestCase):
     Text.base_path = "../PokerInPython/"
-    Text.font_path = f"../PokerInPython/Font/Minecraft.ttf"
+    Text.font_path = "../PokerInPython/Font/Minecraft.ttf"
 
     def test_smoke(self):
         text = Text.Text("Test", 32, (0, 0, 0), (255, 255, 255))

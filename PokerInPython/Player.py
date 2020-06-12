@@ -118,7 +118,7 @@ class Player:
             self.text = self.set_text()
 
         def set_text(self):
-            text = Text.Text(f"Chips: -1", 32, self.black, None)
+            text = Text.Text("Chips: -1", 32, self.black, None)
             return text
 
         def update_text(self, a_chip_count):
