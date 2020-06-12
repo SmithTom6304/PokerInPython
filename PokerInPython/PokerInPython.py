@@ -127,6 +127,18 @@ class PokerInPython:
         self.buttonList.append(btn2)
         self.buttonList.append(btn3)
 
+        btn4 = Button.Button(button_id=4, name="Bet_Arrow_Left", pos_x=786, pos_y=515)
+        btn5 = Button.Button(button_id=5, name="Bet_Arrow_Right", pos_x=849, pos_y=515)
+        btn6 = Button.Button(button_id=6, name="Bet_Display", pos_x=810, pos_y=515)
+
+        self.buttonList.append(btn4)
+        self.buttonList.append(btn5)
+        self.buttonList.append(btn6)
+
+        bet_text = Text.Text("10", 26, (0, 0, 0), None)
+        bet_text.move_to(818, 517)
+        self.textObjectList.append(bet_text)
+
 
     def initialize_cards(self):
         test_card = self.deck.draw_card()
