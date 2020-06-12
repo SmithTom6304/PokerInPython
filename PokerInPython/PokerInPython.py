@@ -1,201 +1,304 @@
 import sys
 import pygame
-import random
 import os
 
 import UserInterface
+# import Card
+import Player
+import Deck
+import Button
+import Text
 
-os.environ['SDL_VIDEO_WINDOW_POS'] = "%d,%d" % (5,35)
+os.environ['SDL_VIDEO_WINDOW_POS'] = "%d,%d" % (5, 35)
 
-size = width, height = 920, 640
-speed = [2, 2]
-black = 0, 0, 0
-background = 49, 117, 61
+class PokerInPython:
 
-test = "f"
+    size = width, height = 920, 640
+    speed = [2, 2]
+    black = 0, 0, 0
+    background = 49, 117, 61
 
-CardPath = "./Images/Cards/"
-ButtonPath = "./Images/Buttons/"
-CharacterPath = "./Images/Characters/"
+    # Queue of objects to be added to the sequence to update
+    objectImagesToUpdateQueue = []
+    # List of (image, rect) tuples to provide to UserInterface layer to update screen
+    objectImagesToUpdateSequence = [None, None]
 
-cNumber = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13]
-cSuit = ['H', 'D', 'C', 'S']
+    playerList = []
+    buttonList = []
+    cardList = []
+    textObjectList = []
 
-playerCards = {"Card1": None,"Card2": None}
-
-#Queue of objects to be added to the sequence to update
-objectImagesToUpdateQueue = []
-#List of (image, rect) tuples to provide to UserInterface layer to update screen
-objectImagesToUpdateSequence = [None, None]
-
-class Opponent:
-	rect = None
-	image = None
-	card = [None, None]
-	chips = 100
-	confidence = 0
-	cool = 0
-	def __init__(self, x, y, image):
-		self.image = pygame.image.load(image)
-		chips = 100
-		confidence = 1
-		cool = 1
-		self.rect = self.image.get_rect(topleft=(x, y))
-	def getChips(self):
-		return self.chips
-
-	def getRect(self):
-		return self.rect
-
-	def getImage(self):
-		return self.image
-
-	def getCards(self):
-		return self.card
-
-	def clearCards(self):
-		card = [None, None]
-
-
-class Player:
-	card = [None, None]
-	def __init__(self):
-		chips = 100
-	def getChips(self):
-		return self.chips
-
-	def getCards(self):
-		return self.card
-
-	def clearCards(self):
-		card = [None, None]
-
-
-def shuffleDeck():
-	return
-
-def loadObjectIntoUpdateQueue(objectToLoad):
-	return
-
-#Sets the players cards back to their original position
-def resetPlayerCards():
-	playerCards["Card1"].moveAbsolute(440, 480)
-	objectImagesToUpdateQueue.append(playerCards["Card1"])
-
-	playerCards["Card2"].moveAbsolute(480, 480)
-	objectImagesToUpdateQueue.append(playerCards["Card2"])
-	return
-
-
-def handleEvents():
-
-	mousepos = pygame.mouse.get_pos()
-	UserInterface.mouse_pos = mousepos
-
-	#Clear the sequence of images that will be updated
-	objectImagesToUpdateSequence.clear()
-
-	resetPlayerCards()
-
-	for event in pygame.event.get():
-		if event.type == pygame.QUIT: sys.exit()
-
-	UserInterface.playerMouseOverCard(playerCards["Card1"], playerCards["Card2"])		
-
-	for each in objectImagesToUpdateQueue:
-		objectImagesToUpdateSequence.append((each.image, each.rect))
-	
-	UserInterface.updateDisplay(objectImagesToUpdateSequence)
-
-	return
-
-def main():
-
-
-	pygame.init()
-	clock = pygame.time.Clock()
-
-	#myfont = pygame.font.SysFont('Elephant', 16)
-	
-
-	#screen = pygame.display.set_mode(size)
-
-	UserInterface.initDisplay()
-
-	#r1 = random.randint(1, 13)
-	#r2 = random.randint(1, 13)
-	#s1 = random.randint(0, 3)
-	#s2 = random.randint(0, 3)
-
-
-	#card1 = pygame.image.load(f"{CardPath}Card_{r1}{cSuit[s1]}.png")
-	#card2 = pygame.image.load(f"{CardPath}Card_{r2}{cSuit[s2]}.png")
-	#card1rect = card1.get_rect(center=((width/2) - 20, height - 80)) #center=((width/2) - 40, height - 150)
-	#card2rect = card2.get_rect(center=((width/2) + 20, height - 80)) #topleft=((width/2) + 40, height - 150)
-
-	Card1 = UserInterface.Card(3, 'S', (width/2) - 20, height - 160)
-	Card2 = UserInterface.Card(5, 'H', (width/2) + 20, height - 160)
-
-	playerCards["Card1"] = Card1
-	playerCards["Card2"] = Card2
-	
-	#player1 = Opponent(40, 20, f"{CharacterPath}Player2.png")
-	#player1text = myfont.render(str(player1.getChips()), False, (0, 0, 0))
-	#player2 = Opponent(388, 20, f"{CharacterPath}Player3.png")
-	#player2text = myfont.render(str(player2.getChips()), False, (0, 0, 0))
-	#player3 = Opponent(736, 20, f"{CharacterPath}Player4.png")
-	#player3text = myfont.render(str(player3.getChips()), False, (0, 0, 0))
-
-	#btnFold = pygame.image.load(f"{ButtonPath}Btn_Fold.png")
-	#btnFoldRect = btnFold.get_rect(center=(340, 460))
-	#btnCheck = pygame.image.load(f"{ButtonPath}Btn_Check.png")
-	#btnCheckRect = btnCheck.get_rect(center=(460, 460))
-	#btnRaise = pygame.image.load(f"{ButtonPath}Btn_Raise.png")
-	#btnRaiseRect = btnRaise.get_rect(center=(580, 460))
-
-	#fold check raise
-	#	  call
-
-	
-	
-
-
-	mousepos = [0, 0]
-
-	
-
-	while True:
-
-		handleEvents()
-		
+    communityCards = []
 
 
 
-		
-
-		
-
-		
-		
 
 
-		#screen.fill(background)
-		
-			#screen.blit(Card1.image, Card1.rect)
-			#screen.blit(Card2.image, Card2.rect)
-		#screen.blit(player1.getImage(), player1.getRect())
-		#screen.blit(player1text, player1.getRect())
-		#screen.blit(player2.getImage(), player2.getRect())
-		#screen.blit(player2text, player2.getRect())
-		#screen.blit(player3.getImage(), player3.getRect())
-		#screen.blit(player3text, player3.getRect())
 
-		#screen.blit(btnFold, btnFoldRect)
-		#screen.blit(btnCheck, btnCheckRect)
-		#screen.blit(btnRaise, btnRaiseRect)
-			#pygame.display.flip()
+    def __init__(self):
+        self.pot = Pot()
+        self.bet_display = None
+        self.deck = Deck.Deck()
+        self.user_interface = UserInterface.UserInterface()
+
+        self.lead_position = 0
+        self.turn = 0
+        self.phase = 1  # https://www.poker-king.com/dictionary/community_cards/
+        # Phase 1 - Deal private cards, then bet
+        # Phase 2 - Deal three community cards to form the flop, then bet
+        # Phase 3 - Deal fourth community card, called the turn, then bet
+        # Phase 4 - Deal last community card, called the river, then bet
+        # Showdown - show cards
+        self.current_player = None
 
 
-		clock.tick(30)
 
-if __name__ == '__main__': main()
+    def handle_events(self):
+        button_pressed = None
+
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                sys.exit()
+            if event.type == pygame.KEYDOWN:
+                if event.key == pygame.K_LEFT:
+                    self.initialize_game_objects()
+                if event.key == pygame.K_RIGHT:
+                    for each in self.cardList:
+                        each.set_face_up(True)
+            if event.type == pygame.MOUSEBUTTONDOWN:
+                # Check button presses
+                button_pressed = self.user_interface.check_button_presses(self.buttonList)
+
+        mouse_pos = pygame.mouse.get_pos()
+        self.user_interface.mouse_pos = mouse_pos
+
+        if button_pressed is not None:
+            print(button_pressed.get_name())  # TODO Change to button function
+            return button_pressed
+
+
+    def initialize_game_objects(self):
+        self.playerList.clear()
+        self.buttonList.clear()
+        self.cardList.clear()
+        self.textObjectList.clear()
+        self.communityCards.clear()
+        self.deck.reset_deck()
+        self.pot.pot = 0  # TODO Change to pot.reset
+
+        self.phase = 1
+
+        self.initialize_players(4, 100)
+        self.initialize_buttons()
+        # initialize_cards()
+
+        # Add wait frames to each card to create ripple effect
+        for i, card in enumerate(self.cardList):
+            card.set_wait_frames((len(self.cardList) - i) * 3)
+
+
+    def initialize_players(self, number_of_players, chips):
+        player1 = Player.Player(1, chips, confidence=100, pos_x=80, pos_y=400)
+        player1.set_cards([self.deck.draw_card(), self.deck.draw_card()])
+        player1.set_cards_face_up(True)
+        self.playerList.append(player1)
+        self.cardList.extend(player1.get_cards())
+
+        for i in range(2, number_of_players + 1):
+            x_value = (self.width / number_of_players) * (i - 1)
+            player = Player.Player(i, chips, confidence=100, pos_x=x_value, pos_y=(self.height / 6))
+            player.set_cards([self.deck.draw_card(), self.deck.draw_card()])
+            self.playerList.append(player)
+            self.cardList.extend(player.get_cards())
+
+        for player in self.playerList:
+            player.reset()
+            self.textObjectList.append(player.get_text())
+
+        self.current_player = self.playerList[0]
+
+
+
+
+    def initialize_buttons(self):
+        btn1 = Button.Button(button_id=1, name="Fold", pos_x=500, pos_y=540)
+        btn2 = Button.Button(button_id=2, name="Check", pos_x=640, pos_y=540)
+        btn3 = Button.Button(button_id=3, name="Bet", pos_x=780, pos_y=540)
+
+        self.buttonList.append(btn1)
+        self.buttonList.append(btn2)
+        self.buttonList.append(btn3)
+
+        btn4 = Button.Button(button_id=4, name="Bet_Arrow_Left", pos_x=786, pos_y=515)
+        btn5 = Button.Button(button_id=5, name="Bet_Arrow_Right", pos_x=849, pos_y=515)
+        btn6 = Button.Button(button_id=6, name="Bet_Display", pos_x=810, pos_y=515)
+
+        self.buttonList.append(btn4)
+        self.buttonList.append(btn5)
+        self.buttonList.append(btn6)
+
+        bet_text = Text.Text("10", 26, (0, 0, 0), None)
+        bet_text.move_to(815, 517)
+        self.textObjectList.append(bet_text)
+        self.bet_display = bet_text
+
+
+    def initialize_cards(self):
+        test_card = self.deck.draw_card()
+        test_card.move_to(100, 100)
+        test_card.move(600, 400)
+        self.cardList.append(test_card)
+
+    def deal_community_cards(self, phase):
+        if phase == 1:
+            return
+        if phase == 2:
+            for i in range(0, 3):
+                card = self.deck.draw_card()
+                card.set_wait_frames(i * 3)
+                card.move(200 + (100 * (i+1)), 400)
+                card.set_face_up(True)
+                self.communityCards.append(card)
+                self.cardList.append(card)
+        if phase == 3:
+            card = self.deck.draw_card()
+            card.move(200 + (100 * (3 + 1)), 400)
+            card.set_face_up(True)
+            self.communityCards.append(card)
+            self.cardList.append(card)
+        if phase == 4:
+            card = self.deck.draw_card()
+            card.move(200 + (100 * (4 + 1)), 400)
+            card.set_face_up(True)
+            self.communityCards.append(card)
+            self.cardList.append(card)
+
+    def game_loop(self):
+        button_pressed = self.handle_events()
+        if self.current_player.has_folded():
+            self.next_player()
+            return
+        if button_pressed is not None:
+            if button_pressed.get_name() in ("Fold", "Check", "Bet"):  # Do action and advance to next player
+                if self.lead_position == (self.turn + 1) % len(self.playerList):
+                    self.phase += 1
+                    print(f"Starting phase {self.phase}")
+                    self.deal_community_cards(self.phase)
+
+                self.do_action(self.lead_position, self.turn, button_pressed)
+                self.next_player()
+            if button_pressed.get_name() in ("Bet_Arrow_Left", "Bet_Arrow_Right"):
+                a_bet_display = self.bet_display
+                curr_bet_amount = int(a_bet_display.get_text_string())
+                if button_pressed.get_name() == "Bet_Arrow_Left":
+                    if self.pot.min_bet <= curr_bet_amount - self.pot.increment:
+                        curr_bet_amount -= self.pot.increment
+                        self.bet_display.set_text(str(curr_bet_amount))
+                if button_pressed.get_name() == "Bet_Arrow_Right":
+                    if self.pot.max_bet >= curr_bet_amount + self.pot.increment:
+                        curr_bet_amount += self.pot.increment
+                        self.bet_display.set_text(str(curr_bet_amount))
+
+
+
+    def next_player(self):
+        self.turn = (self.turn + 1) % len(self.playerList)
+        self.current_player.end_turn()
+        self.current_player = self.playerList[self.turn]
+        self.current_player.start_turn()
+
+    def do_action(self, leadPosition, turn, button_pressed):
+        index = leadPosition + turn % len(self.playerList)
+
+        action = button_pressed.get_name()
+
+        if action == "Fold":
+            print(f"Player {index} folded")
+            self.current_player.fold()
+            return
+        if action == "Check":
+            print(f"Player {index} checked")
+            return
+        if action == "Bet":
+            print(f"Player {index} bet")
+            self.pot.bet(self.current_player, int(self.bet_display.get_text_string()))
+
+
+    def update(self):
+        # Clear the sequence of images that will be updated
+        self.objectImagesToUpdateSequence.clear()
+        self.objectImagesToUpdateQueue.clear()
+
+        for player in self.playerList:
+            self.objectImagesToUpdateQueue.append(player)
+        # objectImagesToUpdateQueue.extend(player.getCards())
+
+        for button in self.buttonList:
+            self.objectImagesToUpdateQueue.append(button)
+
+        for card in self.cardList:
+            if card.is_moving():
+                card.update_position()
+
+            self.objectImagesToUpdateQueue.append(card)
+
+        for text in self.textObjectList:
+            self.objectImagesToUpdateQueue.append(text)
+
+        self.objectImagesToUpdateQueue.append(self.deck)
+        self.objectImagesToUpdateQueue.append(self.pot.text)
+
+        for each in self.objectImagesToUpdateQueue:
+            self.objectImagesToUpdateSequence.append((each.get_image(), each.get_rect()))
+
+        self.user_interface.update_display(self.objectImagesToUpdateSequence)
+
+    def main(self):
+        pygame.init()
+        clock = pygame.time.Clock()
+
+        self.user_interface.init_display()
+
+        self.initialize_game_objects()
+
+
+        while True:
+
+            self.game_loop()
+            self.update()
+            clock.tick(60)
+
+class Pot:
+
+    def __init__(self):
+        self.pot = 0
+        self.min_bet = 0
+        self.max_bet = 50
+        self.increment = 5
+        self.big_blind = 2
+        self.small_blind = 1
+        self.text = Text.Text("Pot: -1", 32, (0, 0, 0), None)
+        self.text.move_to(100, 200)
+        self.update_text()
+
+    def bet(self, player: Player.Player, a_bet_amount) -> bool:
+        player_chips = player.get_chips()
+        bet_amount = a_bet_amount
+        if player_chips >= bet_amount:
+            player.set_chips(player_chips - bet_amount)
+            self.add_to_pot(bet_amount)
+            return True
+        # else
+        return False
+
+    def add_to_pot(self, amount):
+        self.pot += amount
+        self.update_text()
+
+    def update_text(self):
+        self.text.set_text(f"Pot: {self.pot}")
+
+
+if __name__ == '__main__':
+    game = PokerInPython()
+    game.main()
