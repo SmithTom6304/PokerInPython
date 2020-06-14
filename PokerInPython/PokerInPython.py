@@ -37,6 +37,7 @@ class PokerInPython:
         self.deck = Deck.Deck()
         self.user_interface = UserInterface.UserInterface()
 
+        self.start_lead_position = 0
         self.lead_position = 0
         self.turn = 0
         self.phase = 1  # https://www.poker-king.com/dictionary/community_cards/
@@ -171,18 +172,12 @@ class PokerInPython:
 
     def game_loop(self):
         button_pressed = self.handle_events()
-        if self.current_player.has_folded():
-            self.next_player()
-            return
-        if button_pressed is not None:
-            if button_pressed.get_name() in ("Fold", "Check", "Bet"):  # Do action and advance to next player
-                if self.lead_position == (self.turn + 1) % len(self.playerList):
-                    self.phase += 1
-                    print(f"Starting phase {self.phase}")
-                    self.deal_community_cards(self.phase)
 
+        if button_pressed is not None:
+            if button_pressed.get_name() in ("Fold", "Check", "Bet", "Call", "Raise"):  # Do action and advance to next player
                 if self.do_action(self.lead_position, self.turn, button_pressed):
                     self.next_player()
+
             if button_pressed.get_name() in ("Bet_Arrow_Left", "Bet_Arrow_Right"):
                 a_bet_display = self.bet_display
                 curr_bet_amount = int(a_bet_display.get_text_string())
@@ -194,7 +189,9 @@ class PokerInPython:
                     if self.pot.max_bet >= curr_bet_amount + self.pot.increment:
                         curr_bet_amount += self.pot.increment
                         self.bet_display.set_text(str(curr_bet_amount))
-
+        if self.current_player.has_folded():
+            self.next_player()
+            return
 
 
     def next_player(self):
@@ -202,6 +199,11 @@ class PokerInPython:
         self.current_player.end_turn()
         self.current_player = self.playerList[self.turn]
         self.current_player.start_turn()
+        if self.lead_position == self.turn % len(self.playerList):
+            self.phase += 1
+            print(f"Starting phase {self.phase}")
+            self.deal_community_cards(self.phase)
+            self.pot.set_min_bet(0)
 
     def do_action(self, leadPosition, turn, button_pressed):
         index = leadPosition + turn % len(self.playerList)
@@ -217,6 +219,10 @@ class PokerInPython:
             return True
         if action == "Bet":
             print(f"Player {index} bet")
+            self.lead_position = turn
+            return self.pot.bet(self.current_player, int(self.bet_display.get_text_string()))
+        if action == "Call":
+            print(f"Player {index} called")
             return self.pot.bet(self.current_player, int(self.bet_display.get_text_string()))
 
 
@@ -303,7 +309,7 @@ class Pot:
         if player_chips >= bet_amount:
             player.set_chips(player_chips - bet_amount)
             self.add_to_pot(bet_amount)
-            self.min_bet = bet_amount
+            self.set_min_bet(bet_amount)
             return True
         # else
         return False

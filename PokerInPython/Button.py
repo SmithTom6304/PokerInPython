@@ -114,7 +114,6 @@ class Button:
 
     def change_button(self, name):
         self.model.name = name
-        self.view.name = name
         self.view.set_image(name)
 
     class Model:
