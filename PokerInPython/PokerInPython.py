@@ -31,13 +31,9 @@ class PokerInPython:
     communityCards = []
 
 
-
-
-
-
     def __init__(self):
         self.pot = Pot()
-        self.bet_display = None
+        self.bet_display: Text.Text = None
         self.deck = Deck.Deck()
         self.user_interface = UserInterface.UserInterface()
 
@@ -49,7 +45,7 @@ class PokerInPython:
         # Phase 3 - Deal fourth community card, called the turn, then bet
         # Phase 4 - Deal last community card, called the river, then bet
         # Showdown - show cards
-        self.current_player = None
+        self.current_player: Player.Player = None
 
 
 
@@ -185,8 +181,8 @@ class PokerInPython:
                     print(f"Starting phase {self.phase}")
                     self.deal_community_cards(self.phase)
 
-                self.do_action(self.lead_position, self.turn, button_pressed)
-                self.next_player()
+                if self.do_action(self.lead_position, self.turn, button_pressed):
+                    self.next_player()
             if button_pressed.get_name() in ("Bet_Arrow_Left", "Bet_Arrow_Right"):
                 a_bet_display = self.bet_display
                 curr_bet_amount = int(a_bet_display.get_text_string())
@@ -215,13 +211,14 @@ class PokerInPython:
         if action == "Fold":
             print(f"Player {index} folded")
             self.current_player.fold()
-            return
+            return True
         if action == "Check":
             print(f"Player {index} checked")
-            return
+            return True
         if action == "Bet":
             print(f"Player {index} bet")
-            self.pot.bet(self.current_player, int(self.bet_display.get_text_string()))
+            return self.pot.bet(self.current_player, int(self.bet_display.get_text_string()))
+
 
 
     def update(self):
@@ -234,6 +231,22 @@ class PokerInPython:
         # objectImagesToUpdateQueue.extend(player.getCards())
 
         for button in self.buttonList:
+
+            def _update_buttons():
+                if button.get_name() == "Check":
+                    if self.pot.min_bet > 0:
+                        button.change_button("Call")
+                if button.get_name() == "Call":
+                    if self.pot.min_bet == 0:
+                        button.change_button("Check")
+                if button.get_name() == "Bet":
+                    if self.pot.min_bet > 0:
+                        button.change_button("Raise")
+                if button.get_name() == "Raise":
+                    if self.pot.min_bet == 0:
+                        button.change_button("Bet")
+
+            _update_buttons()
             self.objectImagesToUpdateQueue.append(button)
 
         for card in self.cardList:
@@ -281,12 +294,16 @@ class Pot:
         self.text.move_to(100, 200)
         self.update_text()
 
+    def set_min_bet(self, min_bet: int):
+        self.min_bet = min_bet
+
     def bet(self, player: Player.Player, a_bet_amount) -> bool:
         player_chips = player.get_chips()
         bet_amount = a_bet_amount
         if player_chips >= bet_amount:
             player.set_chips(player_chips - bet_amount)
             self.add_to_pot(bet_amount)
+            self.min_bet = bet_amount
             return True
         # else
         return False
