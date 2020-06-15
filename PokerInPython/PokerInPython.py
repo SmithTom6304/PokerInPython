@@ -48,9 +48,12 @@ class PokerInPython:
         # Showdown - show cards
         self.current_player: Player.Player = None
 
-
-
+    # ---INPUT HANDLING---
     def handle_events(self):
+        """Handle input events
+
+        :return: Button pressed
+        """
         button_pressed = None
 
         for event in pygame.event.get():
@@ -70,10 +73,10 @@ class PokerInPython:
         self.user_interface.mouse_pos = mouse_pos
 
         if button_pressed is not None:
-            print(button_pressed.get_name())  # TODO Change to button function
             return button_pressed
+    # --------------------
 
-
+    # ---INITIALIZE OBJECTS---
     def initialize_game_objects(self):
         self.playerList.clear()
         self.buttonList.clear()
@@ -92,7 +95,6 @@ class PokerInPython:
         # Add wait frames to each card to create ripple effect
         for i, card in enumerate(self.cardList):
             card.set_wait_frames((len(self.cardList) - i) * 3)
-
 
     def initialize_players(self, number_of_players, chips):
         player1 = Player.Player(1, chips, confidence=100, pos_x=80, pos_y=400)
@@ -113,9 +115,6 @@ class PokerInPython:
             self.textObjectList.append(player.get_text())
 
         self.current_player = self.playerList[0]
-
-
-
 
     def initialize_buttons(self):
         btn1 = Button.Button(button_id=1, name="Fold", pos_x=500, pos_y=540)
@@ -139,13 +138,14 @@ class PokerInPython:
         self.textObjectList.append(bet_text)
         self.bet_display = bet_text
 
-
     def initialize_cards(self):
         test_card = self.deck.draw_card()
         test_card.move_to(100, 100)
         test_card.move(600, 400)
         self.cardList.append(test_card)
+    # ------------------------
 
+    # ---DEAL COMMUNITY CARDS---
     def deal_community_cards(self, phase):
         if phase == 1:
             return
@@ -169,14 +169,50 @@ class PokerInPython:
             card.set_face_up(True)
             self.communityCards.append(card)
             self.cardList.append(card)
+    # --------------------------
 
+    # ---HANDLE GAME LOOP---
     def game_loop(self):
+
+        # ---SWITCH TO NEXT PLAYER---
+        def next_player():
+            self.turn = (self.turn + 1) % len(self.playerList)
+            self.current_player.end_turn()
+            self.current_player = self.playerList[self.turn]
+            self.current_player.start_turn()
+            if self.lead_position == self.turn % len(self.playerList):
+                self.phase += 1
+                print(f"Starting phase {self.phase}")
+                self.deal_community_cards(self.phase)
+                self.pot.set_min_bet(0)
+
+        # ---REACT TO BUTTON PRESS---
+        def do_action(leadPosition, turn, button_pressed):
+            index = leadPosition + turn % len(self.playerList)
+
+            action = button_pressed.get_name()
+
+            if action == "Fold":
+                print(f"Player {index} folded")
+                self.current_player.fold()
+                return True
+            if action == "Check":
+                print(f"Player {index} checked")
+                return True
+            if action == "Bet":
+                print(f"Player {index} bet")
+                self.lead_position = turn
+                return self.pot.bet(self.current_player, int(self.bet_display.get_text_string()))
+            if action == "Call":
+                print(f"Player {index} called")
+                return self.pot.bet(self.current_player, int(self.bet_display.get_text_string()))
+
         button_pressed = self.handle_events()
 
         if button_pressed is not None:
             if button_pressed.get_name() in ("Fold", "Check", "Bet", "Call", "Raise"):  # Do action and advance to next player
-                if self.do_action(self.lead_position, self.turn, button_pressed):
-                    self.next_player()
+                if do_action(self.lead_position, self.turn, button_pressed):
+                    next_player()
 
             if button_pressed.get_name() in ("Bet_Arrow_Left", "Bet_Arrow_Right"):
                 a_bet_display = self.bet_display
@@ -190,43 +226,11 @@ class PokerInPython:
                         curr_bet_amount += self.pot.increment
                         self.bet_display.set_text(str(curr_bet_amount))
         if self.current_player.has_folded():
-            self.next_player()
+            next_player()
             return
+    # ----------------------
 
-
-    def next_player(self):
-        self.turn = (self.turn + 1) % len(self.playerList)
-        self.current_player.end_turn()
-        self.current_player = self.playerList[self.turn]
-        self.current_player.start_turn()
-        if self.lead_position == self.turn % len(self.playerList):
-            self.phase += 1
-            print(f"Starting phase {self.phase}")
-            self.deal_community_cards(self.phase)
-            self.pot.set_min_bet(0)
-
-    def do_action(self, leadPosition, turn, button_pressed):
-        index = leadPosition + turn % len(self.playerList)
-
-        action = button_pressed.get_name()
-
-        if action == "Fold":
-            print(f"Player {index} folded")
-            self.current_player.fold()
-            return True
-        if action == "Check":
-            print(f"Player {index} checked")
-            return True
-        if action == "Bet":
-            print(f"Player {index} bet")
-            self.lead_position = turn
-            return self.pot.bet(self.current_player, int(self.bet_display.get_text_string()))
-        if action == "Call":
-            print(f"Player {index} called")
-            return self.pot.bet(self.current_player, int(self.bet_display.get_text_string()))
-
-
-
+    # ---UPDATE DISPLAY---
     def update(self):
         # Clear the sequence of images that will be updated
         self.objectImagesToUpdateSequence.clear()
@@ -271,18 +275,16 @@ class PokerInPython:
             self.objectImagesToUpdateSequence.append((each.get_image(), each.get_rect()))
 
         self.user_interface.update_display(self.objectImagesToUpdateSequence)
+    # --------------------
 
     def main(self):
         pygame.init()
         clock = pygame.time.Clock()
 
         self.user_interface.init_display()
-
         self.initialize_game_objects()
 
-
         while True:
-
             self.game_loop()
             self.update()
             clock.tick(60)
