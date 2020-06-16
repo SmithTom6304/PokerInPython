@@ -289,8 +289,10 @@ class PokerInPython:
                 card_list = player.get_cards()
                 card_list.extend(self.communityCards)
                 player_score = self.calculate_hand_score(card_list)
-                if player_score["pair"] is True:
-                    print(f"Player {player.get_number()} has a pair.")
+                for key, value in player_score.items():
+                    if value is True:
+                        print(f"Player {player.get_number()} has a {key}.")
+                        break
 
     def calculate_hand_score(self, card_list: list):
 
@@ -303,12 +305,53 @@ class PokerInPython:
                         return True
             return False
 
+        def two_pair(a_card_list: list):
+            pairs = 0
+            pair_cards = []  # Cards already made into pairs
+            for card in a_card_list:
+                for compare_card in a_card_list:
+                    if card == compare_card or card in pair_cards or compare_card in pair_cards:
+                        continue
+                    if card.get_value()["number"] == compare_card.get_value()["number"]:
+                        pairs += 1
+                        pair_cards.extend([card, compare_card])
+                        continue
+            if pairs >= 2:
+                return True
+            return False
+
+        def three_of_a_kind(a_card_list: list):
+            for card in a_card_list:
+                no_of_card_matches = 1
+                i = a_card_list.index(card) + 1
+                for compare_card in a_card_list[i:]:
+                    if card.get_value()["number"] == compare_card.get_value()["number"]:
+                        no_of_card_matches += 1
+                        if no_of_card_matches == 3:
+                            return True
+            return False
+
+        def straight(a_card_list: list):
+            a_card_list.sort(key=lambda x: x.get_value()["number"])
+            last_number = a_card_list[0].get_value()["number"]
+            count = 1
+            for card in a_card_list[1:]:
+                if card.get_value()["number"] == last_number + 1:
+                    count += 1
+                    last_number = card.get_value()["number"]
+                    if count == 5:
+                        return True
+                else:
+                    count = 1
+                    last_number = card.get_value()["number"]
+            return False
+
         if card_list is None:
             print("card_list is empty")
             return
 
         hand_score = {"royal_flush": False, "straight_flush": False, "four_of_a_kind": False, "full_house": False,
-                      "flush": False, "straight": False, "three_of_a_kind": False, "two_pair": False,
+                      "flush": False, "straight": straight(card_list), "three_of_a_kind": three_of_a_kind(card_list), "two_pair": two_pair(card_list),
                       "pair": pair(card_list), "high_card": True}
 
         return hand_score
