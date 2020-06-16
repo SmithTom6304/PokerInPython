@@ -269,7 +269,8 @@ class PokerInPython:
             self.objectImagesToUpdateQueue.append(text)
 
         self.objectImagesToUpdateQueue.append(self.deck)
-        self.objectImagesToUpdateQueue.append(self.pot.text)
+        self.objectImagesToUpdateQueue.append(self.pot.pot_text)
+        self.objectImagesToUpdateQueue.append(self.pot.min_bet_text)
 
         for each in self.objectImagesToUpdateQueue:
             self.objectImagesToUpdateSequence.append((each.get_image(), each.get_rect()))
@@ -298,12 +299,15 @@ class Pot:
         self.increment = 5
         self.big_blind = 2
         self.small_blind = 1
-        self.text = Text.Text("Pot: -1", 32, (0, 0, 0), None)
-        self.text.move_to(100, 200)
+        self.pot_text = Text.Text("Pot: -1", 32, (0, 0, 0), None)
+        self.pot_text.move_to(30, 30)
+        self.min_bet_text = Text.Text("Min bet: -1", 32, (0, 0, 0), None)
+        self.min_bet_text.move_to(30, 60)
         self.update_text()
 
     def set_min_bet(self, min_bet: int):
         self.min_bet = min_bet
+        self.update_text()
 
     def bet(self, player: Player.Player, a_bet_amount) -> bool:
         player_chips = player.get_chips()
@@ -321,7 +325,8 @@ class Pot:
         self.update_text()
 
     def update_text(self):
-        self.text.set_text(f"Pot: {self.pot}")
+        self.pot_text.set_text(f"Pot: {self.pot}")
+        self.min_bet_text.set_text(f"Min bet: {self.min_bet}")
 
 
 if __name__ == '__main__':
