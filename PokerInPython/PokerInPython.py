@@ -182,6 +182,9 @@ class PokerInPython:
             self.current_player.start_turn()
             if self.lead_position == self.turn % len(self.playerList):
                 self.phase += 1
+                if self.phase == 5:
+                    self.showdown()
+                    return
                 print(f"Starting phase {self.phase}")
                 self.deal_community_cards(self.phase)
                 self.pot.set_min_bet(0)
@@ -210,7 +213,8 @@ class PokerInPython:
         button_pressed = self.handle_events()
 
         if button_pressed is not None:
-            if button_pressed.get_name() in ("Fold", "Check", "Bet", "Call", "Raise"):  # Do action and advance to next player
+            if button_pressed.get_name() in ("Fold", "Check", "Bet", "Call", "Raise"):  # Do action and advance to
+                # next player
                 if do_action(self.lead_position, self.turn, button_pressed):
                     next_player()
 
@@ -277,6 +281,37 @@ class PokerInPython:
 
         self.user_interface.update_display(self.objectImagesToUpdateSequence)
     # --------------------
+
+    def showdown(self):
+        print("SHOWDOWN!")
+        for player in self.playerList:
+            if player.has_folded() is False:
+                card_list = player.get_cards()
+                card_list.extend(self.communityCards)
+                player_score = self.calculate_hand_score(card_list)
+                if player_score["pair"] is True:
+                    print(f"Player {player.get_number()} has a pair.")
+
+    def calculate_hand_score(self, card_list: list):
+
+        def pair(a_card_list: list):
+            for card in a_card_list:
+                for compare_card in a_card_list:
+                    if card == compare_card:
+                        continue
+                    if card.get_value()["number"] == compare_card.get_value()["number"]:
+                        return True
+            return False
+
+        if card_list is None:
+            print("card_list is empty")
+            return
+
+        hand_score = {"royal_flush": False, "straight_flush": False, "four_of_a_kind": False, "full_house": False,
+                      "flush": False, "straight": False, "three_of_a_kind": False, "two_pair": False,
+                      "pair": pair(card_list), "high_card": True}
+
+        return hand_score
 
     def main(self):
         pygame.init()
