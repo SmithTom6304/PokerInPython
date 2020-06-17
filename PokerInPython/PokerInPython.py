@@ -312,6 +312,20 @@ class PokerInPython:
             print(f"Player {player.get_number()} wins!")
             player.set_chips(player.get_chips() + int(self.pot.pot/len(win_list)))
 
+        if len(win_list) == 1:
+            win_text = Text.Text(f"Player {win_list[0][1].get_number()} wins!", 64, (0, 0, 0), None)
+            win_text.move_to(320, 320)
+        else:
+            win_string = "Players "
+            for winner in win_list:
+                win_string += f"{winner[1].get_number()}, "
+            win_string = win_string[:-2]
+            win_string += " split the pot!"
+            win_text = Text.Text(win_string, 32, (0, 0, 0), None)
+            win_text.move_to(460, 320)
+
+        self.textObjectList.append(win_text)
+
         clock = pygame.time.Clock()
         self.update()
         clock.tick(60)
