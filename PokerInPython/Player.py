@@ -78,6 +78,7 @@ class Player:
 
     def reset(self):
         self.model.set_folded(False)
+        self.cards = [None, None]
 
     class Model:
 

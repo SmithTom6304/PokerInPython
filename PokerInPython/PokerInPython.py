@@ -77,8 +77,10 @@ class PokerInPython:
     # --------------------
 
     # ---INITIALIZE OBJECTS---
-    def initialize_game_objects(self):
-        self.playerList.clear()
+    def initialize_game_objects(self, initialize_players=True):
+        if initialize_players is True:
+            self.playerList.clear()
+
         self.buttonList.clear()
         self.cardList.clear()
         self.textObjectList.clear()
@@ -87,8 +89,14 @@ class PokerInPython:
         self.pot.pot = 0  # TODO Change to pot.reset
 
         self.phase = 1
+        if initialize_players is True:
+            self.initialize_players(4, 100)
 
-        self.initialize_players(4, 100)
+        for player in self.playerList:
+            player.reset()
+            self.textObjectList.append(player.get_text())
+
+        self.initialize_cards()
         self.initialize_buttons()
         # initialize_cards()
 
@@ -98,21 +106,12 @@ class PokerInPython:
 
     def initialize_players(self, number_of_players, chips):
         player1 = Player.Player(1, chips, confidence=100, pos_x=80, pos_y=400)
-        player1.set_cards([self.deck.draw_card(), self.deck.draw_card()])
-        player1.set_cards_face_up(True)
         self.playerList.append(player1)
-        self.cardList.extend(player1.get_cards())
 
         for i in range(2, number_of_players + 1):
             x_value = (self.width / number_of_players) * (i - 1)
             player = Player.Player(i, chips, confidence=100, pos_x=x_value, pos_y=(self.height / 6))
-            player.set_cards([self.deck.draw_card(), self.deck.draw_card()])
             self.playerList.append(player)
-            self.cardList.extend(player.get_cards())
-
-        for player in self.playerList:
-            player.reset()
-            self.textObjectList.append(player.get_text())
 
         self.current_player = self.playerList[0]
 
@@ -139,10 +138,11 @@ class PokerInPython:
         self.bet_display = bet_text
 
     def initialize_cards(self):
-        test_card = self.deck.draw_card()
-        test_card.move_to(100, 100)
-        test_card.move(600, 400)
-        self.cardList.append(test_card)
+        for player in self.playerList:
+            player.set_cards([self.deck.draw_card(), self.deck.draw_card()])
+            self.cardList.extend(player.get_cards())
+            if player.get_number() == 1:
+                player.set_cards_face_up(True)
     # ------------------------
 
     # ---DEAL COMMUNITY CARDS---
@@ -284,15 +284,40 @@ class PokerInPython:
 
     def showdown(self):
         print("SHOWDOWN!")
+        win_list = [[100, -1, "none"]]
+
         for player in self.playerList:
             if player.has_folded() is False:
+                player.set_cards_face_up(True)
                 card_list = player.get_cards()
                 card_list.extend(self.communityCards)
                 player_score = self.calculate_hand_score(card_list)
+                count = 1
                 for key, value in player_score.items():
                     if value is True:
                         print(f"Player {player.get_number()} has a {key}.")
+                        if win_list[0][0] > count:
+                            win_list.clear()
+                            win_list.append([count, player, key])
+                            break
+                        if win_list[0][0] == count:
+                            win_list.append([count, player, key])
+                            break
                         break
+                    count += 1
+
+        for winner in win_list:
+            player: Player.Player = winner[1]
+
+            print(f"Player {player.get_number()} wins!")
+            player.set_chips(player.get_chips() + int(self.pot.pot/len(win_list)))
+
+        clock = pygame.time.Clock()
+        self.update()
+        clock.tick(60)
+        pygame.time.delay(3000)
+        self.initialize_game_objects(False)
+
 
     def calculate_hand_score(self, card_list: list):
 
