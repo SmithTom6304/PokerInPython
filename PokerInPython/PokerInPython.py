@@ -40,6 +40,8 @@ class PokerInPython:
         self.start_lead_position = 0
         self.lead_position = 0
         self.turn = 0
+        self.big_blind = -1
+        self.small_blind = -1
         self.phase = 1  # https://www.poker-king.com/dictionary/community_cards/
         # Phase 1 - Deal private cards, then bet
         # Phase 2 - Deal three community cards to form the flop, then bet
@@ -92,6 +94,7 @@ class PokerInPython:
         if initialize_players is True:
             self.initialize_players(4, 100)
 
+
         for player in self.playerList:
             player.reset()
             self.textObjectList.append(player.get_text())
@@ -103,6 +106,27 @@ class PokerInPython:
         # Add wait frames to each card to create ripple effect
         for i, card in enumerate(self.cardList):
             card.set_wait_frames((len(self.cardList) - i) * 3)
+
+        self.round_initialization()
+
+    def round_initialization(self):
+        self.lead_position = self.start_lead_position
+        self.start_lead_position = (self.start_lead_position + 1) % len(self.playerList)
+        self.turn = self.lead_position
+        self.current_player = self.playerList[self.lead_position]
+        self.current_player.start_turn()
+
+        self.big_blind = self.lead_position - 1
+        self.small_blind = self.lead_position - 2
+        if self.big_blind < 0:
+            self.big_blind += len(self.playerList)
+        if self.small_blind < 0:
+            self.small_blind += len(self.playerList)
+
+        self.pot.bet(self.playerList[self.big_blind], self.pot.base_min_bet)
+        self.pot.bet(self.playerList[self.small_blind], int(self.pot.base_min_bet / 2))
+
+        self.pot.set_min_bet(self.pot.base_min_bet)
 
     def initialize_players(self, number_of_players, chips):
         player1 = Player.Player(1, chips, confidence=100, pos_x=80, pos_y=400)
@@ -180,6 +204,16 @@ class PokerInPython:
             self.current_player.end_turn()
             self.current_player = self.playerList[self.turn]
             self.current_player.start_turn()
+
+            if self.phase == 1:
+                if self.turn == self.big_blind:
+                    self.pot.set_min_bet(0)
+                elif self.turn == self.small_blind:
+                    self.pot.set_min_bet(int(self.pot.min_bet / 2))
+                else:
+                    self.pot.set_min_bet(self.pot.base_min_bet)
+
+
             if self.lead_position == self.turn % len(self.playerList):
                 self.phase += 1
                 if self.phase == 5:
@@ -208,9 +242,11 @@ class PokerInPython:
                 return self.pot.bet(self.current_player, int(self.bet_display.get_text_string()))
             if action == "Call":
                 print(f"Player {index} called")
-                return self.pot.bet(self.current_player, int(self.bet_display.get_text_string()))
+                return self.pot.bet(self.current_player, self.pot.min_bet)
 
         button_pressed = self.handle_events()
+
+
 
         if button_pressed is not None:
             if button_pressed.get_name() in ("Fold", "Check", "Bet", "Call", "Raise"):  # Do action and advance to
@@ -410,12 +446,11 @@ class PokerInPython:
 class Pot:
 
     def __init__(self):
-        self.pot = 0
-        self.min_bet = 0
-        self.max_bet = 50
+        self.pot: int = 0
+        self.min_bet: int = 10
+        self.base_min_bet = self.min_bet    # Used to hold onto min_bet when it is modified for blinds
+        self.max_bet: int = 50
         self.increment = 5
-        self.big_blind = 2
-        self.small_blind = 1
         self.pot_text = Text.Text("Pot: -1", 32, (0, 0, 0), None)
         self.pot_text.move_to(30, 30)
         self.min_bet_text = Text.Text("Min bet: -1", 32, (0, 0, 0), None)

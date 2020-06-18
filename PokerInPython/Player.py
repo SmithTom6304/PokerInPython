@@ -79,12 +79,13 @@ class Player:
     def reset(self):
         self.model.set_folded(False)
         self.cards = [None, None]
+        self.end_turn()
 
     class Model:
 
         def __init__(self, number, chips, confidence):
             self.number = number
-            self.chips = chips
+            self.chips: int = chips
             self.confidence = confidence
             self.folded = False
 
