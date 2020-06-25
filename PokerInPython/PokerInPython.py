@@ -33,7 +33,6 @@ class PokerInPython:
 
     def __init__(self):
         self.pot = Pot()
-        self.bet_display: Text.Text = None
         self.deck = Deck.Deck()
         self.user_interface = UserInterface.UserInterface()
 
@@ -123,8 +122,7 @@ class PokerInPython:
         if self.small_blind < 0:
             self.small_blind += len(self.playerList)
 
-        self.pot.bet(self.playerList[self.big_blind], self.pot.base_min_bet)
-        self.pot.bet(self.playerList[self.small_blind], int(self.pot.base_min_bet / 2))
+        self.pot.bet_blinds(self.playerList[self.big_blind], self.playerList[self.small_blind])
 
         self.pot.set_min_bet(self.pot.base_min_bet)
 
@@ -147,19 +145,6 @@ class PokerInPython:
         self.buttonList.append(btn1)
         self.buttonList.append(btn2)
         self.buttonList.append(btn3)
-
-        btn4 = Button.Button(button_id=4, name="Bet_Arrow_Left", pos_x=786, pos_y=515)
-        btn5 = Button.Button(button_id=5, name="Bet_Arrow_Right", pos_x=849, pos_y=515)
-        btn6 = Button.Button(button_id=6, name="Bet_Display", pos_x=810, pos_y=515)
-
-        self.buttonList.append(btn4)
-        self.buttonList.append(btn5)
-        self.buttonList.append(btn6)
-
-        bet_text = Text.Text("10", 26, (0, 0, 0), None)
-        bet_text.move_to(815, 517)
-        self.textObjectList.append(bet_text)
-        self.bet_display = bet_text
 
     def initialize_cards(self):
         for player in self.playerList:
@@ -239,10 +224,15 @@ class PokerInPython:
             if action == "Bet":
                 print(f"Player {index} bet")
                 self.lead_position = turn
-                return self.pot.bet(self.current_player, int(self.bet_display.get_text_string()))
+                return self.pot.bet(self.current_player)
             if action == "Call":
                 print(f"Player {index} called")
-                return self.pot.bet(self.current_player, self.pot.min_bet)
+                return self.pot.bet(self.current_player, self.phase == 1 and
+                                    self.current_player is self.playerList[self.small_blind])
+            if action == "Raise":
+                print(f"Player {index} raised")
+                self.lead_position = turn
+                return self.pot.raise_bet(self.current_player)
 
         button_pressed = self.handle_events()
 
@@ -254,17 +244,6 @@ class PokerInPython:
                 if do_action(self.lead_position, self.turn, button_pressed):
                     next_player()
 
-            if button_pressed.get_name() in ("Bet_Arrow_Left", "Bet_Arrow_Right"):
-                a_bet_display = self.bet_display
-                curr_bet_amount = int(a_bet_display.get_text_string())
-                if button_pressed.get_name() == "Bet_Arrow_Left":
-                    if self.pot.min_bet <= curr_bet_amount - self.pot.increment:
-                        curr_bet_amount -= self.pot.increment
-                        self.bet_display.set_text(str(curr_bet_amount))
-                if button_pressed.get_name() == "Bet_Arrow_Right":
-                    if self.pot.max_bet >= curr_bet_amount + self.pot.increment:
-                        curr_bet_amount += self.pot.increment
-                        self.bet_display.set_text(str(curr_bet_amount))
         if self.current_player.has_folded():
             next_player()
             return
@@ -447,10 +426,10 @@ class Pot:
 
     def __init__(self):
         self.pot: int = 0
-        self.min_bet: int = 10
+        self.min_bet: int = 4
         self.base_min_bet = self.min_bet    # Used to hold onto min_bet when it is modified for blinds
-        self.max_bet: int = 50
-        self.increment = 5
+        self.max_bet: int = 8
+        self.increment = 4
         self.pot_text = Text.Text("Pot: -1", 32, (0, 0, 0), None)
         self.pot_text.move_to(30, 30)
         self.min_bet_text = Text.Text("Min bet: -1", 32, (0, 0, 0), None)
@@ -461,9 +440,30 @@ class Pot:
         self.min_bet = min_bet
         self.update_text()
 
-    def bet(self, player: Player.Player, a_bet_amount) -> bool:
+    def bet_blinds(self, big_blind_player: Player.Player, small_blind_player: Player.Player):
+        big_blind_player.set_chips(big_blind_player.get_chips() - self.base_min_bet)
+        small_blind_player.set_chips(small_blind_player.get_chips() - int(self.base_min_bet/2))
+        self.add_to_pot(6)
+        pass
+
+    def bet(self, player: Player.Player, is_small_blind=False) -> bool:
         player_chips = player.get_chips()
-        bet_amount = a_bet_amount
+        bet_amount = self.base_min_bet
+        if is_small_blind:
+            bet_amount = int(bet_amount/2)
+
+        if player_chips >= bet_amount:
+            player.set_chips(player_chips - bet_amount)
+            self.add_to_pot(bet_amount)
+            self.set_min_bet(bet_amount)
+            return True
+        # else
+        return False
+
+    def raise_bet(self ,player: Player.Player):
+        player_chips = player.get_chips()
+        bet_amount = self.max_bet
+
         if player_chips >= bet_amount:
             player.set_chips(player_chips - bet_amount)
             self.add_to_pot(bet_amount)
