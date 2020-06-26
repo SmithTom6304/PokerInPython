@@ -52,6 +52,12 @@ class Player:
     def get_cards(self):
         return self.cards
 
+    def get_chips_bet_in_round(self):
+        return self.model.get_chips_bet_in_round()
+
+    def set_chips_bet_in_round(self, value):
+        self.model.chips_bet_in_round = value
+
     # Returns true if the players cards are both face up, false if at least one is face down
     def is_cards_face_up(self):
         return self.get_cards()[0].is_face_up() and self.get_cards()[1].is_face_up()
@@ -88,6 +94,7 @@ class Player:
             self.chips: int = chips
             self.confidence = confidence
             self.folded = False
+            self.chips_bet_in_round = 0
 
         def get_number(self):
             return self.number
@@ -106,6 +113,12 @@ class Player:
 
         def set_folded(self, value):
             self.folded = value
+
+        def get_chips_bet_in_round(self):
+            return self.get_chips_bet_in_round()
+
+        def set_chips_bet_in_round(self, value):
+            self.chips_bet_in_round = value
 
     class View:
 
