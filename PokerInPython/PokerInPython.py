@@ -146,6 +146,21 @@ class PokerInPython:
         self.buttonList.append(btn2)
         self.buttonList.append(btn3)
 
+        bet_panel = Button.Button(button_id=4, name="Bet_Display", pos_x=669, pos_y=515)
+        raise_panel = Button.Button(button_id=4, name="Bet_Display", pos_x=809, pos_y=515)
+        self.buttonList.append(bet_panel)
+        self.buttonList.append(raise_panel)
+
+        bet_text = Text.Text("4", 26, (0, 0, 0), None)
+        bet_text.move_to(680, 517)
+        raise_text = Text.Text("8", 26, (0, 0, 0), None)
+        raise_text.move_to(820, 517)
+
+        self.textObjectList.append(bet_text)
+        self.textObjectList.append(raise_text)
+        self.pot.bet_text = bet_text
+        self.pot.raise_text = raise_text
+
     def initialize_cards(self):
         for player in self.playerList:
             player.set_cards([self.deck.draw_card(), self.deck.draw_card()])
@@ -189,6 +204,9 @@ class PokerInPython:
             self.current_player.end_turn()
             self.current_player = self.playerList[self.turn]
             self.current_player.start_turn()
+
+            if self.current_player.get_number() == 1:
+                self.pot.update_call_raise_display(self.current_player.get_chips_bet_in_round())
 
             # if self.phase == 1:
             #     if self.turn == self.big_blind:
@@ -290,7 +308,6 @@ class PokerInPython:
 
         self.objectImagesToUpdateQueue.append(self.deck)
         self.objectImagesToUpdateQueue.append(self.pot.pot_text)
-        self.objectImagesToUpdateQueue.append(self.pot.min_bet_text)
 
         for each in self.objectImagesToUpdateQueue:
             self.objectImagesToUpdateSequence.append((each.get_image(), each.get_rect()))
@@ -433,9 +450,12 @@ class Pot:
         self.increment = 4
         self.pot_text = Text.Text("Pot: -1", 32, (0, 0, 0), None)
         self.pot_text.move_to(30, 30)
-        self.min_bet_text = Text.Text("Min bet: -1", 32, (0, 0, 0), None)
-        self.min_bet_text.move_to(30, 60)
+
+        self.bet_text = Text.Text("none", 32, (0, 0, 0), None)
+        self.raise_text = Text.Text("none", 32, (0, 0, 0), None)
+
         self.update_text()
+
 
     def set_min_bet(self, min_bet: int):
         self.required_to_call = min_bet
@@ -492,8 +512,10 @@ class Pot:
 
     def update_text(self):
         self.pot_text.set_text(f"Pot: {self.pot}")
-        self.min_bet_text.set_text(f"Min bet: {self.required_to_call}")
 
+    def update_call_raise_display(self, amount_already_bet: int):
+        self.bet_text.set_text(f"{self.required_to_call - amount_already_bet}")
+        self.raise_text.set_text(f"{self.raise_amount - amount_already_bet}")
 
 if __name__ == '__main__':
     game = PokerInPython()
