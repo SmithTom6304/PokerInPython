@@ -115,7 +115,7 @@ class Player:
             self.folded = value
 
         def get_chips_bet_in_round(self):
-            return self.get_chips_bet_in_round()
+            return self.chips_bet_in_round
 
         def set_chips_bet_in_round(self, value):
             self.chips_bet_in_round = value
