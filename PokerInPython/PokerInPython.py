@@ -124,7 +124,7 @@ class PokerInPython:
 
         self.pot.bet_blinds(self.playerList[self.big_blind], self.playerList[self.small_blind])
 
-        self.pot.set_min_bet(self.pot.bet_amount)
+        self.pot.set_min_bet(self.pot.small_bet)
 
     def initialize_players(self, number_of_players, chips):
         player1 = Player.Player(1, chips, confidence=100, pos_x=80, pos_y=400)
@@ -206,7 +206,7 @@ class PokerInPython:
             self.current_player.start_turn()
 
             if self.current_player.get_number() == 1:
-                self.pot.update_call_raise_display(self.current_player.get_chips_bet_in_round())
+                self.pot.update_call_raise_display(self.current_player.get_chips_bet_in_round(), self.phase)
 
             # if self.phase == 1:
             #     if self.turn == self.big_blind:
@@ -244,14 +244,14 @@ class PokerInPython:
             if action == "Bet":
                 print(f"Player {index} bet")
                 self.lead_position = turn
-                return self.pot.bet(self.current_player)
+                return self.pot.bet(self.current_player, self.phase)
             if action == "Call":
                 print(f"Player {index} called")
                 return self.pot.call(self.current_player)
             if action == "Raise":
                 print(f"Player {index} raised")
                 self.lead_position = turn
-                return self.pot.raise_bet(self.current_player)
+                return self.pot.raise_bet(self.current_player, self.phase)
 
         button_pressed = self.handle_events()
 
@@ -444,10 +444,9 @@ class Pot:
 
     def __init__(self):
         self.pot: int = 0
-        self.required_to_call: int = 4
-        self.bet_amount = self.required_to_call    # Used to hold onto min_bet when it is modified for blinds
-        self.raise_amount: int = 8
-        self.increment = 4
+        self.small_bet: int = 4
+        self.big_bet: int = 8
+        self.required_to_call = 0
         self.pot_text = Text.Text("Pot: -1", 32, (0, 0, 0), None)
         self.pot_text.move_to(30, 30)
 
@@ -462,16 +461,19 @@ class Pot:
         self.update_text()
 
     def bet_blinds(self, big_blind_player: Player.Player, small_blind_player: Player.Player):
-        big_blind_player.set_chips(big_blind_player.get_chips() - self.bet_amount)
-        big_blind_player.set_chips_bet_in_round(self.bet_amount)
-        small_blind_player.set_chips(small_blind_player.get_chips() - int(self.bet_amount / 2))
-        small_blind_player.set_chips_bet_in_round(int(self.bet_amount / 2))
+        big_blind_player.set_chips(big_blind_player.get_chips() - self.small_bet)
+        big_blind_player.set_chips_bet_in_round(self.small_bet)
+        small_blind_player.set_chips(small_blind_player.get_chips() - int(self.small_bet / 2))
+        small_blind_player.set_chips_bet_in_round(int(self.small_bet / 2))
         self.add_to_pot(6)
         pass
 
-    def bet(self, player: Player.Player) -> bool:
+    def bet(self, player: Player.Player, phase: int) -> bool:
         player_chips = player.get_chips()
-        bet_amount = self.bet_amount
+        if phase in (0, 1, 2):
+            bet_amount = self.small_bet
+        else:
+            bet_amount = self.big_bet
 
         if player_chips >= bet_amount:
             player.set_chips(player_chips - bet_amount)
@@ -488,14 +490,18 @@ class Pot:
         chips_required_to_call = self.required_to_call - player_chips_bet_in_round
         if chips_required_to_call <= player_chips:
             player.set_chips(player_chips - chips_required_to_call)
-            player.set_chips_bet_in_round(chips_required_to_call)
+            player.set_chips_bet_in_round(chips_required_to_call + player.get_chips_bet_in_round())
             self.add_to_pot(chips_required_to_call)
             return True
         return False
 
-    def raise_bet(self, player: Player.Player):
+    def raise_bet(self, player: Player.Player, phase: int):
         player_chips = player.get_chips()
-        bet_amount = self.required_to_call + self.increment
+
+        if phase in (0, 1, 2):
+            bet_amount = self.required_to_call + self.small_bet
+        else:
+            bet_amount = self.required_to_call + self.big_bet
 
         if player_chips >= bet_amount:
             player.set_chips(player_chips - (bet_amount - player.get_chips_bet_in_round()))
@@ -513,9 +519,13 @@ class Pot:
     def update_text(self):
         self.pot_text.set_text(f"Pot: {self.pot}")
 
-    def update_call_raise_display(self, amount_already_bet: int):
+    def update_call_raise_display(self, amount_already_bet: int, phase: int):
         self.bet_text.set_text(f"{self.required_to_call - amount_already_bet}")
-        self.raise_text.set_text(f"{self.raise_amount - amount_already_bet}")
+        if phase in (0, 1):
+            self.raise_text.set_text(f"{self.small_bet + self.required_to_call - amount_already_bet}")
+        else:
+            self.raise_text.set_text(f"{self.big_bet + self.required_to_call - amount_already_bet}")
+
 
 if __name__ == '__main__':
     game = PokerInPython()
