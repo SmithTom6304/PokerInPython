@@ -62,13 +62,13 @@ class Deck:
         """
         self.deck.clear()
 
-        for i in range(1, 14):
+        for i in range(2, 15):
             self.deck.append(Card.Card(i, 'C', self.rect.x, self.rect.y))
-        for i in range(1, 14):
+        for i in range(2, 15):
             self.deck.append(Card.Card(i, 'D', self.rect.x, self.rect.y))
-        for i in range(1, 14):
+        for i in range(2, 15):
             self.deck.append(Card.Card(i, 'H', self.rect.x, self.rect.y))
-        for i in range(1, 14):
+        for i in range(2, 15):
             self.deck.append(Card.Card(i, 'S', self.rect.x, self.rect.y))
 
         self.shuffle_deck()

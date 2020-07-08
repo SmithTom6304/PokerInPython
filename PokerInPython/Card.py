@@ -204,7 +204,7 @@ class Card:
             self.moving = False
 
             # Ensure given card values are valid. Set to None and return if not.
-            if number < 1 or number > 13:
+            if number < 2 or number > 14:
                 self.number = None
                 return
             if suit not in ('H', 'D', 'C', 'S'):

@@ -30,7 +30,7 @@ class TestCardMethods(unittest.TestCase):
         self.assertEqual(card4.get_value()["suit"], None)
 
     def test_canSetFacedown(self):
-        card1 = Card.Card(1, 'S')
+        card1 = Card.Card(14, 'S')
         self.assertEqual(card1.is_face_up(), False)
 
         card1.set_face_up(True)
@@ -84,7 +84,7 @@ class TestCardMethods(unittest.TestCase):
         self.assertEqual(0, card.get_rect().y, "Card did not move negatively in the y direction")
 
     def test_canSetMoving(self):
-        card1 = Card.Card(1, 'S')
+        card1 = Card.Card(14, 'S')
         self.assertEqual(card1.is_moving(), False)
         card1.move(100, 100)
         self.assertEqual(card1.is_moving(), True)
