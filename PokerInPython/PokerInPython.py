@@ -327,8 +327,12 @@ class PokerInPython:
                         if card == compare_card:
                             continue
                         if card.get_value()["number"] == compare_card.get_value()["number"]:
-                            return True
-                return False
+                            a_card_list.remove(card)
+                            a_card_list.remove(compare_card)
+                            a_card_list.sort(key=lambda x: x.get_value()["number"])
+                            a_card_list = a_card_list[0:3]
+                            return a_card_list
+                return []
 
             def two_pair(a_card_list: list):
                 pairs = 0
@@ -375,10 +379,26 @@ class PokerInPython:
                 print("card_list is empty")
                 return
 
-            hand_score = {"royal_flush": False, "straight_flush": False, "four_of_a_kind": False, "full_house": False,
-                          "flush": False, "straight": straight(card_list),
-                          "three_of_a_kind": three_of_a_kind(card_list), "two_pair": two_pair(card_list),
-                          "pair": pair(card_list), "high_card": True}
+            hand_score = [0, 0, 0, 0, 0, 0]
+
+            kicker_list = []
+
+            #pair
+            kicker_list = pair(card_list)
+            if len(kicker_list) > 0:
+                hand_score[0] = 2
+                kicker_list.sort(key=lambda x: x.get_value()["number"], reverse=True)
+                for i, kicker in enumerate(kicker_list):
+                    hand_score[i+1] = kicker.get_value()["number"]
+
+
+
+            #updated score: list of integers
+            #[hand rank][kicker rank][kicker rank][kicker rank][kicker rank][kicker rank]
+            #To compare hands, work through the list comparing the values.
+            #Kicker values can be left at 0, eg 3ofakind will only have two kickers
+            #So 3 of a kind could look like [4, 7, 2, 0, 0, 0]
+
 
             return hand_score
 
@@ -388,7 +408,10 @@ class PokerInPython:
                 card_list = player.get_cards()
                 card_list.extend(self.communityCards)
                 player_score = calculate_hand_score(card_list)
-                count = 1
+                if player_score[0] == 2:
+                    print(f'Player {player.get_number()} has a pair, with {player_score[1]} kicker')
+
+                '''
                 for key, value in player_score.items():
                     if value is True:
                         print(f"Player {player.get_number()} has a {key}.")
@@ -401,6 +424,7 @@ class PokerInPython:
                             break
                         break
                     count += 1
+                    
 
         for winner in win_list:
             player: Player.Player = winner[1]
@@ -421,7 +445,7 @@ class PokerInPython:
             win_text.move_to(460, 320)
 
         self.textObjectList.append(win_text)
-
+                '''
         clock = pygame.time.Clock()
         self.update()
         clock.tick(60)
