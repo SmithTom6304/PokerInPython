@@ -385,15 +385,28 @@ class PokerInPython:
             kicker_list = []
 
             def add_rank_to_hand_score(a_kicker_list, rank_value):
+                ''' Add rank and value to hand_score
+                eg A pair of 5's would set hand score to [2, 5, 0, 0, 0, 0]
+
+                Parameters
+                ----------
+                a_kicker_list
+                rank_value
+
+                Returns
+                -------
+
+                '''
+                kicker_start = 1  # Beginning of kicker cards in card list
                 if len(a_kicker_list) > 0:
                     hand_score[0] = rank_value
                     hand_score[1] = a_kicker_list[0].get_value()["number"]
-                    add_kickers_to_hand_score(a_kicker_list[1:])
+                    add_kickers_to_hand_score(a_kicker_list[kicker_start:], kicker_start)
 
-            def add_kickers_to_hand_score(a_kicker_list):
+            def add_kickers_to_hand_score(a_kicker_list, a_kicker_start):
                 a_kicker_list.sort(key=lambda x: x.get_value()["number"], reverse=True)
                 for i, kicker in enumerate(a_kicker_list):
-                    hand_score[i + 2] = kicker.get_value()["number"]
+                    hand_score[i + 1 + a_kicker_start] = kicker.get_value()["number"]
 
 
 
