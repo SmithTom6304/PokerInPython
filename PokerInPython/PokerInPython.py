@@ -317,7 +317,7 @@ class PokerInPython:
 
     def showdown(self):
         print("SHOWDOWN!")
-        win_list = [[100, -1, "none"]]
+
 
         def calculate_hand_score(card_list: list):
 
@@ -329,8 +329,9 @@ class PokerInPython:
                         if card.get_value()["number"] == compare_card.get_value()["number"]:
                             a_card_list.remove(card)
                             a_card_list.remove(compare_card)
-                            a_card_list.sort(key=lambda x: x.get_value()["number"])
-                            a_card_list = a_card_list[0:3]
+                            a_card_list.sort(key=lambda x: x.get_value()["number"], reverse=True)
+                            a_card_list.insert(0, card)
+                            a_card_list = a_card_list[0:4]
                             return a_card_list
                 return []
 
@@ -383,13 +384,24 @@ class PokerInPython:
 
             kicker_list = []
 
+            def add_rank_to_hand_score(a_kicker_list, rank_value):
+                if len(a_kicker_list) > 0:
+                    hand_score[0] = rank_value
+                    hand_score[1] = a_kicker_list[0].get_value()["number"]
+                    add_kickers_to_hand_score(a_kicker_list[1:])
+
+            def add_kickers_to_hand_score(a_kicker_list):
+                a_kicker_list.sort(key=lambda x: x.get_value()["number"], reverse=True)
+                for i, kicker in enumerate(a_kicker_list):
+                    hand_score[i + 2] = kicker.get_value()["number"]
+
+
+
             #pair
             kicker_list = pair(card_list)
-            if len(kicker_list) > 0:
-                hand_score[0] = 2
-                kicker_list.sort(key=lambda x: x.get_value()["number"], reverse=True)
-                for i, kicker in enumerate(kicker_list):
-                    hand_score[i+1] = kicker.get_value()["number"]
+            add_rank_to_hand_score(kicker_list, 2)
+
+
 
 
 
@@ -402,16 +414,36 @@ class PokerInPython:
 
             return hand_score
 
+
+        def compare_hands(a_player_score, a_win_score):
+            print("compare")
+            for i in range(0, len(a_player_score)):
+                if a_player_score[i] > a_win_score[i]:
+                    return 1
+                if a_player_score[i] < a_win_score[i]:
+                    return -1
+            return 0
+
+        win_list = [[self.playerList[0], [0, 0, 0, 0, 0, 0]]]
+
         for player in self.playerList:
             if player.has_folded() is False:
                 player.set_cards_face_up(True)
                 card_list = player.get_cards()
                 card_list.extend(self.communityCards)
                 player_score = calculate_hand_score(card_list)
-                if player_score[0] == 2:
-                    print(f'Player {player.get_number()} has a pair, with {player_score[1]} kicker')
 
-                '''
+                is_better = compare_hands(player_score, win_list[0][1])
+                if is_better > 0:
+                    win_list.clear()
+                    win_list = [[player, player_score]]
+                if is_better == 0:
+                    win_list.append([player, player_score])
+
+        for winner in win_list:
+            print(f"{winner[0].get_number()} wins")
+
+        '''
                 for key, value in player_score.items():
                     if value is True:
                         print(f"Player {player.get_number()} has a {key}.")
