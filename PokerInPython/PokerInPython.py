@@ -415,7 +415,11 @@ class PokerInPython:
                     hand_score[i + 1 + a_kicker_start] = kicker.get_value()["number"]
 
 
+<<<<<<< HEAD
             # two pair
+=======
+            #two pair
+>>>>>>> updated-hand-score
             kicker_list = two_pair(card_list)
             if len(kicker_list) > 0:
                 add_rank_to_hand_score(kicker_list, 3)
