@@ -347,8 +347,14 @@ class PokerInPython:
                             pair_cards.extend([card, compare_card])
                             continue
                 if pairs >= 2:
-                    return True
-                return False
+                    pair_cards.sort(key=lambda x: x.get_value()["number"], reverse=True)
+                    for card in pair_cards:
+                        a_card_list.remove(card)
+                    a_card_list.sort(key=lambda x: x.get_value()["number"], reverse=True)
+                    a_card_list.insert(0, pair_cards[0])
+                    a_card_list.insert(1, pair_cards[2])
+                    return a_card_list[0:3]
+                return []
 
             def three_of_a_kind(a_card_list: list):
                 for card in a_card_list:
@@ -397,11 +403,11 @@ class PokerInPython:
                 -------
 
                 '''
-                kicker_start = 1  # Beginning of kicker cards in card list
+
                 if len(a_kicker_list) > 0:
                     hand_score[0] = rank_value
-                    hand_score[1] = a_kicker_list[0].get_value()["number"]
-                    add_kickers_to_hand_score(a_kicker_list[kicker_start:], kicker_start)
+                    for i, card in enumerate(a_kicker_list):
+                        hand_score[i+1] = card.get_value()["number"]
 
             def add_kickers_to_hand_score(a_kicker_list, a_kicker_start):
                 a_kicker_list.sort(key=lambda x: x.get_value()["number"], reverse=True)
@@ -409,10 +415,16 @@ class PokerInPython:
                     hand_score[i + 1 + a_kicker_start] = kicker.get_value()["number"]
 
 
+            # two pair
+            kicker_list = two_pair(card_list)
+            if len(kicker_list) > 0:
+                add_rank_to_hand_score(kicker_list, 3)
+            else:
+                # pair
+                kicker_list = pair(card_list)
+                if len(kicker_list) > 0:
+                    add_rank_to_hand_score(kicker_list, 2)
 
-            #pair
-            kicker_list = pair(card_list)
-            add_rank_to_hand_score(kicker_list, 2)
 
 
 
@@ -453,44 +465,28 @@ class PokerInPython:
                 if is_better == 0:
                     win_list.append([player, player_score])
 
-        for winner in win_list:
-            print(f"{winner[0].get_number()} wins")
-
-        '''
-                for key, value in player_score.items():
-                    if value is True:
-                        print(f"Player {player.get_number()} has a {key}.")
-                        if win_list[0][0] > count:
-                            win_list.clear()
-                            win_list.append([count, player, key])
-                            break
-                        if win_list[0][0] == count:
-                            win_list.append([count, player, key])
-                            break
-                        break
-                    count += 1
-                    
 
         for winner in win_list:
-            player: Player.Player = winner[1]
+            player = winner[0]
 
             print(f"Player {player.get_number()} wins!")
             player.set_chips(player.get_chips() + int(self.pot.pot/len(win_list)))
 
+
         if len(win_list) == 1:
-            win_text = Text.Text(f"Player {win_list[0][1].get_number()} wins!", 64, (0, 0, 0), None)
+            win_text = Text.Text(f"Player {win_list[0][0].get_number()} wins!", 64, (0, 0, 0), None)
             win_text.move_to(320, 320)
         else:
             win_string = "Players "
             for winner in win_list:
-                win_string += f"{winner[1].get_number()}, "
+                win_string += f"{winner[0].get_number()}, "
             win_string = win_string[:-2]
             win_string += " split the pot!"
             win_text = Text.Text(win_string, 32, (0, 0, 0), None)
             win_text.move_to(460, 320)
 
         self.textObjectList.append(win_text)
-                '''
+
         clock = pygame.time.Clock()
         self.update()
         clock.tick(60)
