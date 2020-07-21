@@ -3,7 +3,7 @@ import pygame
 import os
 
 import UserInterface
-# import Card
+import Card
 import Player
 import Deck
 import Button
@@ -55,7 +55,7 @@ class PokerInPython:
 
         :return: Button pressed
         """
-        button_pressed = None
+        object_pressed = None
 
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
@@ -68,13 +68,15 @@ class PokerInPython:
                         each.set_face_up(True)
             if event.type == pygame.MOUSEBUTTONDOWN:
                 # Check button presses
-                button_pressed = self.user_interface.check_button_presses(self.buttonList)
+                object_pressed = self.user_interface.check_button_presses(self.buttonList)
+                if object_pressed is None:  # Check card presses
+                    object_pressed = self.user_interface.check_card_presses(self.cardList)
 
         mouse_pos = pygame.mouse.get_pos()
         self.user_interface.mouse_pos = mouse_pos
 
-        if button_pressed is not None:
-            return button_pressed
+        if object_pressed is not None:
+            return object_pressed
     # --------------------
 
     # ---INITIALIZE OBJECTS---
@@ -253,15 +255,37 @@ class PokerInPython:
                 self.lead_position = turn
                 return self.pot.raise_bet(self.current_player, self.phase)
 
-        button_pressed = self.handle_events()
+        object_pressed = self.handle_events()
+
+        if object_pressed is not None:
+            if isinstance(object_pressed, Button.Button):   # Check type of object pressed
+                if object_pressed.get_name() in ("Fold", "Check", "Bet", "Call", "Raise"):  # Do action and advance to
+                    # next player
+                    if do_action(self.lead_position, self.turn, object_pressed):
+                        next_player()
+            if isinstance(object_pressed, Card.Card):
+                card_pressed = object_pressed
+                new_card = self.user_interface.show_card_menu(self.deck)
+                for player in self.playerList:
+                    if card_pressed in player.get_cards():
+                        player.change_cards(card_pressed, new_card)
+                        self.cardList.remove(card_pressed)
+                        self.cardList.append(new_card)
+                        self.deck.remove_card(new_card)
+                        self.deck.insert_card(card_pressed)
+                        return
+                if card_pressed in self.communityCards:
+                    self.communityCards.append(new_card)
+                    self.communityCards.remove(card_pressed)
+                    self.cardList.remove(card_pressed)
+                    self.cardList.append(new_card)
+                    self.deck.remove_card(new_card)
+                    self.deck.insert_card(card_pressed)
+                    new_card.move_to(card_pressed.get_rect().x, card_pressed.get_rect().y)
+                    return
+                print("Couldn't find card")
 
 
-
-        if button_pressed is not None:
-            if button_pressed.get_name() in ("Fold", "Check", "Bet", "Call", "Raise"):  # Do action and advance to
-                # next player
-                if do_action(self.lead_position, self.turn, button_pressed):
-                    next_player()
 
         if self.current_player.has_folded():
             next_player()
@@ -506,6 +530,15 @@ class PokerInPython:
         self.update()
         clock.tick(60)
         pygame.time.delay(3000)
+
+        for i in range(0, 10):
+            continue
+
+        pygame.event.get()
+        while pygame.mouse.get_pressed()[0] == 0:
+            pygame.event.get()
+
+
         self.initialize_game_objects(False)
 
 

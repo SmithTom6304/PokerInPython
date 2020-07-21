@@ -52,6 +52,16 @@ class Player:
     def get_cards(self):
         return self.cards
 
+    def change_cards(self, old_card, new_card):
+        if self.cards[0] == old_card:
+            self.cards[0] = new_card
+            self.set_cards(self.cards)
+            return True
+        if self.cards[1] == old_card:
+            self.cards[1] = new_card
+            self.set_cards(self.cards)
+            return True
+
     def get_chips_bet_in_round(self):
         return self.model.get_chips_bet_in_round()
 
