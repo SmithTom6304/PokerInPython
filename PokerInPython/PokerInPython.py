@@ -331,7 +331,7 @@ class PokerInPython:
                             a_card_list.remove(compare_card)
                             a_card_list.sort(key=lambda x: x.get_value()["number"], reverse=True)
                             a_card_list.insert(0, card)
-                            a_card_list = a_card_list[0:4]
+                            a_card_list = a_card_list[:4]
                             return a_card_list
                 return []
 
@@ -353,34 +353,45 @@ class PokerInPython:
                     a_card_list.sort(key=lambda x: x.get_value()["number"], reverse=True)
                     a_card_list.insert(0, pair_cards[0])
                     a_card_list.insert(1, pair_cards[2])
-                    return a_card_list[0:3]
+                    return a_card_list[:3]
                 return []
 
             def three_of_a_kind(a_card_list: list):
+                match_cards = []
                 for card in a_card_list:
                     no_of_card_matches = 1
+                    match_cards.clear()
                     i = a_card_list.index(card) + 1
                     for compare_card in a_card_list[i:]:
                         if card.get_value()["number"] == compare_card.get_value()["number"]:
                             no_of_card_matches += 1
+                            match_cards.append(compare_card)
                             if no_of_card_matches == 3:
-                                return True
-                return False
+                                match_cards.append(card)
+                                for m_card in match_cards:
+                                    a_card_list.remove(m_card)
+                                a_card_list.sort(key=lambda x: x.get_value()["number"], reverse=True)
+                                a_card_list.insert(0, card)
+
+                                return a_card_list[:3]
+                return []
 
             def straight(a_card_list: list):
-                a_card_list.sort(key=lambda x: x.get_value()["number"])
-                last_number = a_card_list[0].get_value()["number"]
+                a_card_list.sort(key=lambda x: x.get_value()["number"], reverse=True)
+                last_number = a_card_list[0].get_value()["number"]  # The value of the last card compared
                 count = 1
+                first_card = a_card_list[0]  # The highest card in the straight
                 for card in a_card_list[1:]:
-                    if card.get_value()["number"] == last_number + 1:
+                    if card.get_value()["number"] == last_number - 1:
                         count += 1
                         last_number = card.get_value()["number"]
                         if count == 5:
-                            return True
+                            return [first_card]
                     else:
                         count = 1
                         last_number = card.get_value()["number"]
-                return False
+                        first_card = card
+                return []
 
             if card_list is None:
                 print("card_list is empty")
@@ -409,25 +420,25 @@ class PokerInPython:
                     for i, card in enumerate(a_kicker_list):
                         hand_score[i+1] = card.get_value()["number"]
 
-            def add_kickers_to_hand_score(a_kicker_list, a_kicker_start):
-                a_kicker_list.sort(key=lambda x: x.get_value()["number"], reverse=True)
-                for i, kicker in enumerate(a_kicker_list):
-                    hand_score[i + 1 + a_kicker_start] = kicker.get_value()["number"]
 
 
-<<<<<<< HEAD
-            # two pair
-=======
-            #two pair
->>>>>>> updated-hand-score
-            kicker_list = two_pair(card_list)
+            kicker_list = straight(card_list)
             if len(kicker_list) > 0:
-                add_rank_to_hand_score(kicker_list, 3)
+                add_rank_to_hand_score(kicker_list, 5)
             else:
-                # pair
-                kicker_list = pair(card_list)
+                kicker_list = three_of_a_kind(card_list)
                 if len(kicker_list) > 0:
-                    add_rank_to_hand_score(kicker_list, 2)
+                    add_rank_to_hand_score(kicker_list, 4)
+                else:
+                    # two pair
+                    kicker_list = two_pair(card_list)
+                    if len(kicker_list) > 0:
+                        add_rank_to_hand_score(kicker_list, 3)
+                    else:
+                        # pair
+                        kicker_list = pair(card_list)
+                        if len(kicker_list) > 0:
+                            add_rank_to_hand_score(kicker_list, 2)
 
 
 
@@ -473,7 +484,7 @@ class PokerInPython:
         for winner in win_list:
             player = winner[0]
 
-            print(f"Player {player.get_number()} wins!")
+            print(f"Player {player.get_number()} wins with {winner[1][0]}!")
             player.set_chips(player.get_chips() + int(self.pot.pot/len(win_list)))
 
 

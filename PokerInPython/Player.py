@@ -71,10 +71,25 @@ class Player:
         return self.set_cards_face_up(not are_cards_face_up)
 
     def start_turn(self):
-        self.view.image = pygame.transform.scale(self.view.image, (144+50, 200+50))
+        if self.get_number() == 1:
+            return
+        try:
+            self.view.set_image(f"Player{self.get_number()}Active")
+        except Exception as e:
+            print("ERROR: Failed changing player image in Player.start_turn")
+            print("Scaling image instead")
+            self.view.image = pygame.transform.scale(self.view.image, (144+50, 200+50))
 
     def end_turn(self):
-        self.view.image = pygame.transform.scale(self.view.image, (144, 200))
+        if self.get_number() == 1:
+            return
+        try:
+            self.view.set_image(f"Player{self.get_number()}")
+        except Exception as e:
+            print("ERROR: Failed changing player image in Player.end_turn")
+            print("Scaling image instead")
+            self.view.image = pygame.transform.scale(self.view.image, (144, 200))
+
 
     def fold(self):
         self.model.set_folded(True)
@@ -142,6 +157,15 @@ class Player:
 
         def get_image(self):
             return self.image
+
+        def set_image(self, image_path):
+            player_image_path = f"{base_path}Images/Characters/"
+            try:
+                self.image = pygame.image.load(f"{player_image_path}{image_path}.png")
+            except Exception as e:
+                print(e)
+                print(f"ERROR: Failed to load image with path '{player_image_path}{image_path}.png'")
+                return
 
         def get_rect(self):
             return self.rect
