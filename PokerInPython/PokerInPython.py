@@ -477,6 +477,8 @@ class PokerInPython:
 
                 threes = check_threes(a_card_list)
                 if len(threes) > 0:
+                    # Remove card from a_card_list if card in threes
+                    a_card_list = [x for x in a_card_list if x not in threes]
                     pairs = check_pairs(a_card_list)
                     if len(pairs) > 0:
                         threes.extend(pairs)
