@@ -418,6 +418,8 @@ class PokerInPython:
                         last_number = card.get_value()["number"]
                         if count == 5:
                             return [first_card]
+                    elif card.get_value()["number"] == last_number:
+                        continue
                     else:
                         count = 1
                         last_number = card.get_value()["number"]
@@ -501,6 +503,57 @@ class PokerInPython:
                                 #return four_cards
                 return []
 
+            def straight_flush(a_card_list: list):
+                a_card_list.sort(key=lambda x: (x.get_value()["suit"], x.get_value()["number"]), reverse=True)
+                last_number = a_card_list[0].get_value()["number"]  # The value of the last card compared
+                count = 1
+                first_card = a_card_list[0]  # The highest card in the straight
+                last_suit = first_card.get_value()["suit"]
+                for card in a_card_list[1:]:
+                    if card.get_value()["suit"] == last_suit:
+                        if card.get_value()["number"] == last_number - 1:
+                            count += 1
+                            last_number = card.get_value()["number"]
+                            if count == 5:
+                                return [first_card]
+                        else:
+                            count = 1
+                            last_number = card.get_value()["number"]
+                            first_card = card
+                    else:
+                        last_suit = card.get_value()["suit"]
+                        last_number = card.get_value()["number"]
+                        count = 1
+                return []
+
+            def royal_flush(a_card_list: list):
+                a_card_list.sort(key=lambda x: (x.get_value()["suit"], x.get_value()["number"]), reverse=True)
+                last_number = a_card_list[0].get_value()["number"]  # The value of the last card compared
+                count = 1
+                first_card = a_card_list[0]  # The highest card in the straight
+                last_suit = first_card.get_value()["suit"]
+                for card in a_card_list[1:]:
+                    if first_card.get_value()["number"] != 14:
+                        first_card = card
+                        last_suit = card.get_value()["suit"]
+                        last_number = card.get_value()["number"]
+                        count = 1
+                        continue
+                    if card.get_value()["suit"] == last_suit:
+                        if card.get_value()["number"] == last_number - 1:
+                            count += 1
+                            last_number = card.get_value()["number"]
+                            if count == 5:
+                                return [first_card]
+                        else:
+                            count = 1
+                            last_number = card.get_value()["number"]
+                            first_card = card
+                    else:
+                        last_suit = card.get_value()["suit"]
+                        last_number = card.get_value()["number"]
+                        count = 1
+                return []
 
             if card_list is None:
                 print("card_list is empty")
@@ -516,35 +569,43 @@ class PokerInPython:
             # Check each hand rank
             # If it returns a list of cards, turn it into a hand score
 
-            kicker_list = four_of_a_kind(card_list)
+            kicker_list = royal_flush(card_list)
             if len(kicker_list) > 0:
-                add_rank_to_hand_score(kicker_list, 8)
+                add_rank_to_hand_score(kicker_list, 10)
             else:
-                kicker_list = full_house(card_list)
+                kicker_list = straight_flush(card_list)
                 if len(kicker_list) > 0:
-                    add_rank_to_hand_score(kicker_list, 7)
+                    add_rank_to_hand_score(kicker_list, 9)
                 else:
-                    kicker_list = flush(card_list)
+                    kicker_list = four_of_a_kind(card_list)
                     if len(kicker_list) > 0:
-                        add_rank_to_hand_score(kicker_list, 6)
+                        add_rank_to_hand_score(kicker_list, 8)
                     else:
-                        kicker_list = straight(card_list)
+                        kicker_list = full_house(card_list)
                         if len(kicker_list) > 0:
-                            add_rank_to_hand_score(kicker_list, 5)
+                            add_rank_to_hand_score(kicker_list, 7)
                         else:
-                            kicker_list = three_of_a_kind(card_list)
+                            kicker_list = flush(card_list)
                             if len(kicker_list) > 0:
-                                add_rank_to_hand_score(kicker_list, 4)
+                                add_rank_to_hand_score(kicker_list, 6)
                             else:
-                                # two pair
-                                kicker_list = two_pair(card_list)
+                                kicker_list = straight(card_list)
                                 if len(kicker_list) > 0:
-                                    add_rank_to_hand_score(kicker_list, 3)
+                                    add_rank_to_hand_score(kicker_list, 5)
                                 else:
-                                    # pair
-                                    kicker_list = pair(card_list)
+                                    kicker_list = three_of_a_kind(card_list)
                                     if len(kicker_list) > 0:
-                                        add_rank_to_hand_score(kicker_list, 2)
+                                        add_rank_to_hand_score(kicker_list, 4)
+                                    else:
+                                        # two pair
+                                        kicker_list = two_pair(card_list)
+                                        if len(kicker_list) > 0:
+                                            add_rank_to_hand_score(kicker_list, 3)
+                                        else:
+                                            # pair
+                                            kicker_list = pair(card_list)
+                                            if len(kicker_list) > 0:
+                                                add_rank_to_hand_score(kicker_list, 2)
 
             return hand_score
 
