@@ -9,6 +9,8 @@ import Deck
 import Button
 import Text
 
+import time # For debugging
+
 os.environ['SDL_VIDEO_WINDOW_POS'] = "%d,%d" % (5, 35)
 
 class PokerInPython:
@@ -479,7 +481,25 @@ class PokerInPython:
                         return threes
                 return []
 
-
+            def four_of_a_kind(a_card_list: list):
+                a_card_list.sort(key=lambda x: x.get_value()["number"], reverse=True)
+                four_cards = []
+                for card in a_card_list:
+                    no_of_card_matches = 1
+                    four_cards.clear()
+                    i = a_card_list.index(card) + 1
+                    for compare_card in a_card_list[i:]:
+                        if card.get_value()["number"] == compare_card.get_value()["number"]:
+                            no_of_card_matches += 1
+                            four_cards.append(compare_card)
+                            if no_of_card_matches == 4:
+                                four_cards.append(card)
+                                # Remove card from a_card_list if card in four_cards
+                                a_card_list = [x for x in a_card_list if x not in four_cards]
+                                a_card_list.insert(0, card)
+                                return a_card_list[:2]
+                                #return four_cards
+                return []
 
 
             if card_list is None:
@@ -495,31 +515,36 @@ class PokerInPython:
 
             # Check each hand rank
             # If it returns a list of cards, turn it into a hand score
-            kicker_list = full_house(card_list)
+
+            kicker_list = four_of_a_kind(card_list)
             if len(kicker_list) > 0:
-                add_rank_to_hand_score(kicker_list, 7)
+                add_rank_to_hand_score(kicker_list, 8)
             else:
-                kicker_list = flush(card_list)
+                kicker_list = full_house(card_list)
                 if len(kicker_list) > 0:
-                    add_rank_to_hand_score(kicker_list, 6)
+                    add_rank_to_hand_score(kicker_list, 7)
                 else:
-                    kicker_list = straight(card_list)
+                    kicker_list = flush(card_list)
                     if len(kicker_list) > 0:
-                        add_rank_to_hand_score(kicker_list, 5)
+                        add_rank_to_hand_score(kicker_list, 6)
                     else:
-                        kicker_list = three_of_a_kind(card_list)
+                        kicker_list = straight(card_list)
                         if len(kicker_list) > 0:
-                            add_rank_to_hand_score(kicker_list, 4)
+                            add_rank_to_hand_score(kicker_list, 5)
                         else:
-                            # two pair
-                            kicker_list = two_pair(card_list)
+                            kicker_list = three_of_a_kind(card_list)
                             if len(kicker_list) > 0:
-                                add_rank_to_hand_score(kicker_list, 3)
+                                add_rank_to_hand_score(kicker_list, 4)
                             else:
-                                # pair
-                                kicker_list = pair(card_list)
+                                # two pair
+                                kicker_list = two_pair(card_list)
                                 if len(kicker_list) > 0:
-                                    add_rank_to_hand_score(kicker_list, 2)
+                                    add_rank_to_hand_score(kicker_list, 3)
+                                else:
+                                    # pair
+                                    kicker_list = pair(card_list)
+                                    if len(kicker_list) > 0:
+                                        add_rank_to_hand_score(kicker_list, 2)
 
             return hand_score
 
@@ -531,6 +556,8 @@ class PokerInPython:
                 if a_player_score[i] < a_win_score[i]:
                     return -1
             return 0
+
+        t1 = time.time()
 
         # A list of the winning players, with their hand score
         win_list = [[self.playerList[0], [0, 0, 0, 0, 0, 0]]]
@@ -572,6 +599,10 @@ class PokerInPython:
             win_text.move_to(460, 320)
 
         self.textObjectList.append(win_text)
+
+        t2 = time.time()
+        dt = (t2-t1)*1000
+        print(f"Time taken = {round(dt, 4)}ms")
 
         clock = pygame.time.Clock()
         self.update()
