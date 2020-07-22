@@ -255,17 +255,20 @@ class PokerInPython:
                 self.lead_position = turn
                 return self.pot.raise_bet(self.current_player, self.phase)
 
+        # Check if player has clicked on an object
         object_pressed = self.handle_events()
 
         if object_pressed is not None:
-            if isinstance(object_pressed, Button.Button):   # Check type of object pressed
+            if isinstance(object_pressed, Button.Button):   # If object is a button
                 if object_pressed.get_name() in ("Fold", "Check", "Bet", "Call", "Raise"):  # Do action and advance to
                     # next player
                     if do_action(self.lead_position, self.turn, object_pressed):
                         next_player()
-            if isinstance(object_pressed, Card.Card):
+            if isinstance(object_pressed, Card.Card):   # If object is a card
                 card_pressed = object_pressed
+                # Return the new card clicked on by the user
                 new_card = self.user_interface.show_card_menu(self.deck)
+                # Check if the card being replaced is held by a player
                 for player in self.playerList:
                     if card_pressed in player.get_cards():
                         player.change_cards(card_pressed, new_card)
@@ -274,6 +277,7 @@ class PokerInPython:
                         self.deck.remove_card(new_card)
                         self.deck.insert_card(card_pressed)
                         return
+                # Check if the card being replaced is a community card
                 if card_pressed in self.communityCards:
                     self.communityCards.append(new_card)
                     self.communityCards.remove(card_pressed)
@@ -340,12 +344,11 @@ class PokerInPython:
     # --------------------
 
     def showdown(self):
-        print("SHOWDOWN!")
-
 
         def calculate_hand_score(card_list: list):
 
             def pair(a_card_list: list):
+                a_card_list.sort(key=lambda x: x.get_value()["number"], reverse=True)
                 for card in a_card_list:
                     for compare_card in a_card_list:
                         if card == compare_card:
@@ -360,6 +363,7 @@ class PokerInPython:
                 return []
 
             def two_pair(a_card_list: list):
+                a_card_list.sort(key=lambda x: x.get_value()["number"], reverse=True)
                 pairs = 0
                 pair_cards = []  # Cards already made into pairs
                 for card in a_card_list:
@@ -381,6 +385,7 @@ class PokerInPython:
                 return []
 
             def three_of_a_kind(a_card_list: list):
+                a_card_list.sort(key=lambda x: x.get_value()["number"], reverse=True)
                 match_cards = []
                 for card in a_card_list:
                     no_of_card_matches = 1
@@ -417,70 +422,109 @@ class PokerInPython:
                         first_card = card
                 return []
 
+            def flush(a_card_list: list):
+                a_card_list.sort(key=lambda x: x.get_value()["suit"])
+                suit_count = 0
+                flush_cards = []
+                last_suit = "none"
+                for card in a_card_list:
+                    if card.get_value()["suit"] == last_suit:
+                        suit_count += 1
+                        flush_cards.append(card)
+                    else:
+                        # Don't check suit_count until we have checked all cards of a suit
+                        # That way, if we have 6 of a suit, we take the highest 5
+                        if suit_count >= 5:
+                            flush_cards.sort(key=lambda x: x.get_value()["number"])
+                            return flush_cards[:5]
+                        flush_cards.clear()
+                        suit_count = 1
+                        last_suit = card.get_value()["suit"]
+                return []
+
+            def full_house(a_card_list: list):
+                a_card_list.sort(key=lambda x: x.get_value()["number"], reverse=True)
+
+                def check_threes(b_card_list: list):
+                    three_cards = []
+                    for card in a_card_list:
+                        no_of_card_matches = 1
+                        three_cards.clear()
+                        i = a_card_list.index(card) + 1
+                        for compare_card in a_card_list[i:]:
+                            if card.get_value()["number"] == compare_card.get_value()["number"]:
+                                no_of_card_matches += 1
+                                three_cards.append(compare_card)
+                                if no_of_card_matches == 3:
+                                    three_cards.append(card)
+                                    return three_cards
+                    return []
+
+                def check_pairs(c_card_list: list):
+                    c_card_list.sort(key=lambda x: x.get_value()["number"], reverse=True)
+                    for card in a_card_list:
+                        next_index = c_card_list.index(card) + 1
+                        if next_index >= len(c_card_list):
+                            return []
+                        next_card = c_card_list[next_index]
+                        if card.get_value()["number"] == next_card.get_value()["number"]:
+                            return [card, next_card]
+                    return []
+
+                threes = check_threes(a_card_list)
+                if len(threes) > 0:
+                    pairs = check_pairs(a_card_list)
+                    if len(pairs) > 0:
+                        threes.extend(pairs)
+                        return threes
+                return []
+
+
+
+
             if card_list is None:
                 print("card_list is empty")
                 return
 
             hand_score = [0, 0, 0, 0, 0, 0]
 
-            kicker_list = []
-
             def add_rank_to_hand_score(a_kicker_list, rank_value):
-                ''' Add rank and value to hand_score
-                eg A pair of 5's would set hand score to [2, 5, 0, 0, 0, 0]
+                hand_score[0] = rank_value
+                for i, card in enumerate(a_kicker_list):
+                    hand_score[i+1] = card.get_value()["number"]
 
-                Parameters
-                ----------
-                a_kicker_list
-                rank_value
-
-                Returns
-                -------
-
-                '''
-
-                if len(a_kicker_list) > 0:
-                    hand_score[0] = rank_value
-                    for i, card in enumerate(a_kicker_list):
-                        hand_score[i+1] = card.get_value()["number"]
-
-
-
-            kicker_list = straight(card_list)
+            # Check each hand rank
+            # If it returns a list of cards, turn it into a hand score
+            kicker_list = full_house(card_list)
             if len(kicker_list) > 0:
-                add_rank_to_hand_score(kicker_list, 5)
+                add_rank_to_hand_score(kicker_list, 7)
             else:
-                kicker_list = three_of_a_kind(card_list)
+                kicker_list = flush(card_list)
                 if len(kicker_list) > 0:
-                    add_rank_to_hand_score(kicker_list, 4)
+                    add_rank_to_hand_score(kicker_list, 6)
                 else:
-                    # two pair
-                    kicker_list = two_pair(card_list)
+                    kicker_list = straight(card_list)
                     if len(kicker_list) > 0:
-                        add_rank_to_hand_score(kicker_list, 3)
+                        add_rank_to_hand_score(kicker_list, 5)
                     else:
-                        # pair
-                        kicker_list = pair(card_list)
+                        kicker_list = three_of_a_kind(card_list)
                         if len(kicker_list) > 0:
-                            add_rank_to_hand_score(kicker_list, 2)
-
-
-
-
-
-
-            #updated score: list of integers
-            #[hand rank][kicker rank][kicker rank][kicker rank][kicker rank][kicker rank]
-            #To compare hands, work through the list comparing the values.
-            #Kicker values can be left at 0, eg 3ofakind will only have two kickers
-            #So 3 of a kind could look like [4, 7, 2, 0, 0, 0]
-
+                            add_rank_to_hand_score(kicker_list, 4)
+                        else:
+                            # two pair
+                            kicker_list = two_pair(card_list)
+                            if len(kicker_list) > 0:
+                                add_rank_to_hand_score(kicker_list, 3)
+                            else:
+                                # pair
+                                kicker_list = pair(card_list)
+                                if len(kicker_list) > 0:
+                                    add_rank_to_hand_score(kicker_list, 2)
 
             return hand_score
 
 
         def compare_hands(a_player_score, a_win_score):
-            print("compare")
             for i in range(0, len(a_player_score)):
                 if a_player_score[i] > a_win_score[i]:
                     return 1
@@ -488,8 +532,10 @@ class PokerInPython:
                     return -1
             return 0
 
+        # A list of the winning players, with their hand score
         win_list = [[self.playerList[0], [0, 0, 0, 0, 0, 0]]]
 
+        # Determine each players hand
         for player in self.playerList:
             if player.has_folded() is False:
                 player.set_cards_face_up(True)
@@ -497,13 +543,14 @@ class PokerInPython:
                 card_list.extend(self.communityCards)
                 player_score = calculate_hand_score(card_list)
 
+                # Compare players hand to current winning hand
+                # is_better > 0 means it beats, == 0 means it ties
                 is_better = compare_hands(player_score, win_list[0][1])
                 if is_better > 0:
                     win_list.clear()
                     win_list = [[player, player_score]]
                 if is_better == 0:
                     win_list.append([player, player_score])
-
 
         for winner in win_list:
             player = winner[0]
