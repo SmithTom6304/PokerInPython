@@ -256,11 +256,57 @@ class PokerInPython:
 
         # AI ACTION
         if self.current_player.get_number() != 1:
+            # Code taken from http://cowboyprogramming.com/2007/01/04/programming-poker-ai/
             score = self.simulate_games(self.current_player.cards.copy(), self.communityCards.copy(), 4)
+            bet_size = self.pot.required_to_call
+            if bet_size == 0:
+                if self.phase in (0, 1, 2):
+                    bet_size = self.pot.small_bet
+                else:
+                    bet_size = self.pot.big_bet
+            pot_odds = bet_size / (bet_size + self.pot.pot)
+            rate_of_return = score/pot_odds
+
             delay = random.uniform(0.5, 3)
             t_start = time.time()
             while time.time() < t_start + delay:
                 i=0
+
+            # AI will try to stay in hands with a rate of return greater than 1
+            # rand_number will make the AI bluff occasionally on bad hands
+            action = ""
+            rand_number = random.random()
+            if rate_of_return < 0.8:
+                if rand_number >= 0.95:
+                    action = "Raise"
+                else:
+                    action = "Fold"
+            elif rate_of_return < 1.0:
+                if rand_number >= 0.85:
+                    action = "Raise"
+                elif rand_number >= 0.8:
+                    action = "Call"
+                else:
+                    action = "Fold"
+            elif rate_of_return < 1.3:
+                if rand_number >= 0.6:
+                    action = "Raise"
+                else:
+                    action = "Call"
+            else:
+                if rand_number > 0.3:
+                    action = "Raise"
+                else:
+                    action = "Call"
+
+            if self.pot.required_to_call == 0 and action == "Fold":
+                action = "Call"
+
+            if do_action(self.lead_position, self.turn, action):
+                next_player()
+
+
+            '''
             if score > 0.7:
                 if do_action(self.lead_position, self.turn, "Raise"):
                     next_player()
@@ -270,6 +316,7 @@ class PokerInPython:
             else:
                 if do_action(self.lead_position, self.turn, "Fold"):
                     next_player()
+            '''
         # PLAYER ACTION
         # Check if player has clicked on an object
         object_pressed = self.handle_events()
@@ -481,6 +528,10 @@ class PokerInPython:
         return score/simulations
 
     def calculate_hand_score(self, card_list: list):
+
+        def high_card(a_card_list: list):
+            a_card_list.sort(key=lambda x: x.get_value()["number"], reverse=True)
+            return a_card_list[:5]
 
         def pair(a_card_list: list):
             a_card_list.sort(key=lambda x: x.get_value()["number"], reverse=True)
@@ -745,6 +796,9 @@ class PokerInPython:
                                         kicker_list = pair(card_list)
                                         if len(kicker_list) > 0:
                                             add_rank_to_hand_score(kicker_list, 2)
+                                        else:
+                                            kicker_list = high_card(card_list)
+                                            add_rank_to_hand_score(kicker_list, 1)
 
         return hand_score
 
