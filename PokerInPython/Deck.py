@@ -63,9 +63,9 @@ class Deck:
         self.deck.clear()
 
         for i in range(2, 15):
-            self.deck.append(Card.Card(i, 'C', self.rect.x, self.rect.y))
-        for i in range(2, 15):
             self.deck.append(Card.Card(i, 'D', self.rect.x, self.rect.y))
+        for i in range(2, 15):
+            self.deck.append(Card.Card(i, 'C', self.rect.x, self.rect.y))
         for i in range(2, 15):
             self.deck.append(Card.Card(i, 'H', self.rect.x, self.rect.y))
         for i in range(2, 15):
@@ -94,6 +94,14 @@ class Deck:
         :return: Card
         """
         return self.deck.pop()
+
+    def remove_card(self, a_card):
+        self.deck.remove(a_card)
+
+    def insert_card(self, a_card, shuffle=True):
+        self.deck.insert(0, a_card)
+        if shuffle:
+            self.shuffle_deck()
 
     def get_image(self):
         """

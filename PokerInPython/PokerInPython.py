@@ -3,11 +3,13 @@ import pygame
 import os
 
 import UserInterface
-# import Card
+import Card
 import Player
 import Deck
 import Button
 import Text
+
+import time # For debugging
 
 os.environ['SDL_VIDEO_WINDOW_POS'] = "%d,%d" % (5, 35)
 
@@ -55,7 +57,7 @@ class PokerInPython:
 
         :return: Button pressed
         """
-        button_pressed = None
+        object_pressed = None
 
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
@@ -68,13 +70,15 @@ class PokerInPython:
                         each.set_face_up(True)
             if event.type == pygame.MOUSEBUTTONDOWN:
                 # Check button presses
-                button_pressed = self.user_interface.check_button_presses(self.buttonList)
+                object_pressed = self.user_interface.check_button_presses(self.buttonList)
+                if object_pressed is None:  # Check card presses
+                    object_pressed = self.user_interface.check_card_presses(self.cardList)
 
         mouse_pos = pygame.mouse.get_pos()
         self.user_interface.mouse_pos = mouse_pos
 
-        if button_pressed is not None:
-            return button_pressed
+        if object_pressed is not None:
+            return object_pressed
     # --------------------
 
     # ---INITIALIZE OBJECTS---
@@ -253,15 +257,41 @@ class PokerInPython:
                 self.lead_position = turn
                 return self.pot.raise_bet(self.current_player, self.phase)
 
-        button_pressed = self.handle_events()
+        # Check if player has clicked on an object
+        object_pressed = self.handle_events()
+
+        if object_pressed is not None:
+            if isinstance(object_pressed, Button.Button):   # If object is a button
+                if object_pressed.get_name() in ("Fold", "Check", "Bet", "Call", "Raise"):  # Do action and advance to
+                    # next player
+                    if do_action(self.lead_position, self.turn, object_pressed):
+                        next_player()
+            if isinstance(object_pressed, Card.Card):   # If object is a card
+                card_pressed = object_pressed
+                # Return the new card clicked on by the user
+                new_card = self.user_interface.show_card_menu(self.deck)
+                # Check if the card being replaced is held by a player
+                for player in self.playerList:
+                    if card_pressed in player.get_cards():
+                        player.change_cards(card_pressed, new_card)
+                        self.cardList.remove(card_pressed)
+                        self.cardList.append(new_card)
+                        self.deck.remove_card(new_card)
+                        self.deck.insert_card(card_pressed)
+                        return
+                # Check if the card being replaced is a community card
+                if card_pressed in self.communityCards:
+                    self.communityCards.append(new_card)
+                    self.communityCards.remove(card_pressed)
+                    self.cardList.remove(card_pressed)
+                    self.cardList.append(new_card)
+                    self.deck.remove_card(new_card)
+                    self.deck.insert_card(card_pressed)
+                    new_card.move_to(card_pressed.get_rect().x, card_pressed.get_rect().y)
+                    return
+                print("Couldn't find card")
 
 
-
-        if button_pressed is not None:
-            if button_pressed.get_name() in ("Fold", "Check", "Bet", "Call", "Raise"):  # Do action and advance to
-                # next player
-                if do_action(self.lead_position, self.turn, button_pressed):
-                    next_player()
 
         if self.current_player.has_folded():
             next_player()
@@ -316,21 +346,26 @@ class PokerInPython:
     # --------------------
 
     def showdown(self):
-        print("SHOWDOWN!")
-        win_list = [[100, -1, "none"]]
 
         def calculate_hand_score(card_list: list):
 
             def pair(a_card_list: list):
+                a_card_list.sort(key=lambda x: x.get_value()["number"], reverse=True)
                 for card in a_card_list:
                     for compare_card in a_card_list:
                         if card == compare_card:
                             continue
                         if card.get_value()["number"] == compare_card.get_value()["number"]:
-                            return True
-                return False
+                            a_card_list.remove(card)
+                            a_card_list.remove(compare_card)
+                            a_card_list.sort(key=lambda x: x.get_value()["number"], reverse=True)
+                            a_card_list.insert(0, card)
+                            a_card_list = a_card_list[:4]
+                            return a_card_list
+                return []
 
             def two_pair(a_card_list: list):
+                a_card_list.sort(key=lambda x: x.get_value()["number"], reverse=True)
                 pairs = 0
                 pair_cards = []  # Cards already made into pairs
                 for card in a_card_list:
@@ -342,90 +377,317 @@ class PokerInPython:
                             pair_cards.extend([card, compare_card])
                             continue
                 if pairs >= 2:
-                    return True
-                return False
+                    pair_cards.sort(key=lambda x: x.get_value()["number"], reverse=True)
+                    for card in pair_cards:
+                        a_card_list.remove(card)
+                    a_card_list.sort(key=lambda x: x.get_value()["number"], reverse=True)
+                    a_card_list.insert(0, pair_cards[0])
+                    a_card_list.insert(1, pair_cards[2])
+                    return a_card_list[:3]
+                return []
 
             def three_of_a_kind(a_card_list: list):
+                a_card_list.sort(key=lambda x: x.get_value()["number"], reverse=True)
+                match_cards = []
                 for card in a_card_list:
                     no_of_card_matches = 1
+                    match_cards.clear()
                     i = a_card_list.index(card) + 1
                     for compare_card in a_card_list[i:]:
                         if card.get_value()["number"] == compare_card.get_value()["number"]:
                             no_of_card_matches += 1
+                            match_cards.append(compare_card)
                             if no_of_card_matches == 3:
-                                return True
-                return False
+                                match_cards.append(card)
+                                for m_card in match_cards:
+                                    a_card_list.remove(m_card)
+                                a_card_list.sort(key=lambda x: x.get_value()["number"], reverse=True)
+                                a_card_list.insert(0, card)
+
+                                return a_card_list[:3]
+                return []
 
             def straight(a_card_list: list):
-                a_card_list.sort(key=lambda x: x.get_value()["number"])
-                last_number = a_card_list[0].get_value()["number"]
+                a_card_list.sort(key=lambda x: x.get_value()["number"], reverse=True)
+                last_number = a_card_list[0].get_value()["number"]  # The value of the last card compared
                 count = 1
+                first_card = a_card_list[0]  # The highest card in the straight
                 for card in a_card_list[1:]:
-                    if card.get_value()["number"] == last_number + 1:
+                    if card.get_value()["number"] == last_number - 1:
                         count += 1
                         last_number = card.get_value()["number"]
                         if count == 5:
-                            return True
+                            return [first_card]
+                    elif card.get_value()["number"] == last_number:
+                        continue
                     else:
                         count = 1
                         last_number = card.get_value()["number"]
-                return False
+                        first_card = card
+                return []
+
+            def flush(a_card_list: list):
+                a_card_list.sort(key=lambda x: x.get_value()["suit"])
+                suit_count = 0
+                flush_cards = []
+                last_suit = "none"
+                for card in a_card_list:
+                    if card.get_value()["suit"] == last_suit:
+                        suit_count += 1
+                        flush_cards.append(card)
+                    else:
+                        # Don't check suit_count until we have checked all cards of a suit
+                        # That way, if we have 6 of a suit, we take the highest 5
+                        if suit_count >= 5:
+                            flush_cards.sort(key=lambda x: x.get_value()["number"])
+                            return flush_cards[:5]
+                        flush_cards.clear()
+                        suit_count = 1
+                        last_suit = card.get_value()["suit"]
+                return []
+
+            def full_house(a_card_list: list):
+                a_card_list.sort(key=lambda x: x.get_value()["number"], reverse=True)
+
+                def check_threes(b_card_list: list):
+                    three_cards = []
+                    for card in a_card_list:
+                        no_of_card_matches = 1
+                        three_cards.clear()
+                        i = a_card_list.index(card) + 1
+                        for compare_card in a_card_list[i:]:
+                            if card.get_value()["number"] == compare_card.get_value()["number"]:
+                                no_of_card_matches += 1
+                                three_cards.append(compare_card)
+                                if no_of_card_matches == 3:
+                                    three_cards.append(card)
+                                    return three_cards
+                    return []
+
+                def check_pairs(c_card_list: list):
+                    c_card_list.sort(key=lambda x: x.get_value()["number"], reverse=True)
+                    for card in a_card_list:
+                        next_index = c_card_list.index(card) + 1
+                        if next_index >= len(c_card_list):
+                            return []
+                        next_card = c_card_list[next_index]
+                        if card.get_value()["number"] == next_card.get_value()["number"]:
+                            return [card, next_card]
+                    return []
+
+                threes = check_threes(a_card_list)
+                if len(threes) > 0:
+                    # Remove card from a_card_list if card in threes
+                    a_card_list = [x for x in a_card_list if x not in threes]
+                    pairs = check_pairs(a_card_list)
+                    if len(pairs) > 0:
+                        threes.extend(pairs)
+                        return threes
+                return []
+
+            def four_of_a_kind(a_card_list: list):
+                a_card_list.sort(key=lambda x: x.get_value()["number"], reverse=True)
+                four_cards = []
+                for card in a_card_list:
+                    no_of_card_matches = 1
+                    four_cards.clear()
+                    i = a_card_list.index(card) + 1
+                    for compare_card in a_card_list[i:]:
+                        if card.get_value()["number"] == compare_card.get_value()["number"]:
+                            no_of_card_matches += 1
+                            four_cards.append(compare_card)
+                            if no_of_card_matches == 4:
+                                four_cards.append(card)
+                                # Remove card from a_card_list if card in four_cards
+                                a_card_list = [x for x in a_card_list if x not in four_cards]
+                                a_card_list.insert(0, card)
+                                return a_card_list[:2]
+                                #return four_cards
+                return []
+
+            def straight_flush(a_card_list: list):
+                a_card_list.sort(key=lambda x: (x.get_value()["suit"], x.get_value()["number"]), reverse=True)
+                last_number = a_card_list[0].get_value()["number"]  # The value of the last card compared
+                count = 1
+                first_card = a_card_list[0]  # The highest card in the straight
+                last_suit = first_card.get_value()["suit"]
+                for card in a_card_list[1:]:
+                    if card.get_value()["suit"] == last_suit:
+                        if card.get_value()["number"] == last_number - 1:
+                            count += 1
+                            last_number = card.get_value()["number"]
+                            if count == 5:
+                                return [first_card]
+                        else:
+                            count = 1
+                            last_number = card.get_value()["number"]
+                            first_card = card
+                    else:
+                        last_suit = card.get_value()["suit"]
+                        last_number = card.get_value()["number"]
+                        count = 1
+                return []
+
+            def royal_flush(a_card_list: list):
+                a_card_list.sort(key=lambda x: (x.get_value()["suit"], x.get_value()["number"]), reverse=True)
+                last_number = a_card_list[0].get_value()["number"]  # The value of the last card compared
+                count = 1
+                first_card = a_card_list[0]  # The highest card in the straight
+                last_suit = first_card.get_value()["suit"]
+                for card in a_card_list[1:]:
+                    if first_card.get_value()["number"] != 14:
+                        first_card = card
+                        last_suit = card.get_value()["suit"]
+                        last_number = card.get_value()["number"]
+                        count = 1
+                        continue
+                    if card.get_value()["suit"] == last_suit:
+                        if card.get_value()["number"] == last_number - 1:
+                            count += 1
+                            last_number = card.get_value()["number"]
+                            if count == 5:
+                                return [first_card]
+                        else:
+                            count = 1
+                            last_number = card.get_value()["number"]
+                            first_card = card
+                    else:
+                        last_suit = card.get_value()["suit"]
+                        last_number = card.get_value()["number"]
+                        count = 1
+                return []
 
             if card_list is None:
                 print("card_list is empty")
                 return
 
-            hand_score = {"royal_flush": False, "straight_flush": False, "four_of_a_kind": False, "full_house": False,
-                          "flush": False, "straight": straight(card_list),
-                          "three_of_a_kind": three_of_a_kind(card_list), "two_pair": two_pair(card_list),
-                          "pair": pair(card_list), "high_card": True}
+            hand_score = [0, 0, 0, 0, 0, 0]
+
+            def add_rank_to_hand_score(a_kicker_list, rank_value):
+                hand_score[0] = rank_value
+                for i, card in enumerate(a_kicker_list):
+                    hand_score[i+1] = card.get_value()["number"]
+
+            # Check each hand rank
+            # If it returns a list of cards, turn it into a hand score
+
+            kicker_list = royal_flush(card_list)
+            if len(kicker_list) > 0:
+                add_rank_to_hand_score(kicker_list, 10)
+            else:
+                kicker_list = straight_flush(card_list)
+                if len(kicker_list) > 0:
+                    add_rank_to_hand_score(kicker_list, 9)
+                else:
+                    kicker_list = four_of_a_kind(card_list)
+                    if len(kicker_list) > 0:
+                        add_rank_to_hand_score(kicker_list, 8)
+                    else:
+                        kicker_list = full_house(card_list)
+                        if len(kicker_list) > 0:
+                            add_rank_to_hand_score(kicker_list, 7)
+                        else:
+                            kicker_list = flush(card_list)
+                            if len(kicker_list) > 0:
+                                add_rank_to_hand_score(kicker_list, 6)
+                            else:
+                                kicker_list = straight(card_list)
+                                if len(kicker_list) > 0:
+                                    add_rank_to_hand_score(kicker_list, 5)
+                                else:
+                                    kicker_list = three_of_a_kind(card_list)
+                                    if len(kicker_list) > 0:
+                                        add_rank_to_hand_score(kicker_list, 4)
+                                    else:
+                                        # two pair
+                                        kicker_list = two_pair(card_list)
+                                        if len(kicker_list) > 0:
+                                            add_rank_to_hand_score(kicker_list, 3)
+                                        else:
+                                            # pair
+                                            kicker_list = pair(card_list)
+                                            if len(kicker_list) > 0:
+                                                add_rank_to_hand_score(kicker_list, 2)
 
             return hand_score
 
+
+        def compare_hands(a_player_score, a_win_score):
+            for i in range(0, len(a_player_score)):
+                if a_player_score[i] > a_win_score[i]:
+                    return 1
+                if a_player_score[i] < a_win_score[i]:
+                    return -1
+            return 0
+
+        t1 = time.time()
+
+        # A list of the winning players, with their hand score
+        win_list = [[self.playerList[0], [0, 0, 0, 0, 0, 0]]]
+
+        # Determine each players hand
         for player in self.playerList:
             if player.has_folded() is False:
                 player.set_cards_face_up(True)
                 card_list = player.get_cards()
                 card_list.extend(self.communityCards)
                 player_score = calculate_hand_score(card_list)
-                count = 1
-                for key, value in player_score.items():
-                    if value is True:
-                        print(f"Player {player.get_number()} has a {key}.")
-                        if win_list[0][0] > count:
-                            win_list.clear()
-                            win_list.append([count, player, key])
-                            break
-                        if win_list[0][0] == count:
-                            win_list.append([count, player, key])
-                            break
-                        break
-                    count += 1
+
+                # Compare players hand to current winning hand
+                # is_better > 0 means it beats, == 0 means it ties
+                is_better = compare_hands(player_score, win_list[0][1])
+                if is_better > 0:
+                    win_list.clear()
+                    win_list = [[player, player_score]]
+                if is_better == 0:
+                    win_list.append([player, player_score])
 
         for winner in win_list:
-            player: Player.Player = winner[1]
+            player = winner[0]
 
-            print(f"Player {player.get_number()} wins!")
+            print(f"Player {player.get_number()} wins with {winner[1][0]}!")
             player.set_chips(player.get_chips() + int(self.pot.pot/len(win_list)))
 
+        win_rank = win_list[0][1][0]    # This looks worse than it is.
+        win_rank_dict = {10: "ROYAL FLUSH!!!", 9: "Straight Flush!", 8: "Four of a Kind!", 7: "Full House!", 6: "Flush!",
+                         5: "Straight!", 4: "Three of a Kind!", 3: "Two Pair!", 2: "Pair!", 1: "High Card!"}
+        win_rank_text = win_rank_dict[win_rank]
+
         if len(win_list) == 1:
-            win_text = Text.Text(f"Player {win_list[0][1].get_number()} wins!", 64, (0, 0, 0), None)
+            win_text = Text.Text(f"Player {win_list[0][0].get_number()} wins!", 64, (0, 0, 0), None)
             win_text.move_to(320, 320)
         else:
             win_string = "Players "
             for winner in win_list:
-                win_string += f"{winner[1].get_number()}, "
+                win_string += f"{winner[0].get_number()}, "
             win_string = win_string[:-2]
             win_string += " split the pot!"
             win_text = Text.Text(win_string, 32, (0, 0, 0), None)
             win_text.move_to(460, 320)
 
+        win_subtext = Text.Text(f"{win_rank_text}", 48, (0, 0, 0), None)
+        win_subtext.move_to(460, 440)
+
         self.textObjectList.append(win_text)
+        self.textObjectList.append(win_subtext)
+
+        t2 = time.time()
+        dt = (t2-t1)*1000
+        print(f"Time taken = {round(dt, 4)}ms")
 
         clock = pygame.time.Clock()
         self.update()
         clock.tick(60)
         pygame.time.delay(3000)
+
+        for i in range(0, 10):
+            continue
+
+        pygame.event.get()
+        while pygame.mouse.get_pressed()[0] == 0:
+            pygame.event.get()
+
+
         self.initialize_game_objects(False)
 
 
