@@ -98,10 +98,33 @@ class Deck:
     def remove_card(self, a_card):
         self.deck.remove(a_card)
 
+    def remove_cards(self, card_list):
+        for card in card_list:
+            self.remove_card(card)
+
+    def remove_card_by_val(self, a_card):
+        for card in self.deck:
+            if card.get_value() == a_card.get_value():
+                self.deck.remove(card)
+                return True
+        raise ValueError
+
+    def remove_cards_by_val(self, card_list):
+        for card in card_list:
+            self.remove_card_by_val(card)
+
+
     def insert_card(self, a_card, shuffle=True):
         self.deck.insert(0, a_card)
         if shuffle:
             self.shuffle_deck()
+
+    def insert_cards(self, card_list, shuffle=True):
+        for card in card_list:
+            if card == card_list[-1]:   # If card is last in list, do shuffle
+                self.insert_card(card, shuffle)
+            else:   # Dont shuffle until last card in list
+                self.insert_card(card, shuffle=False)
 
     def get_image(self):
         """

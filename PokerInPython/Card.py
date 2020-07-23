@@ -77,7 +77,8 @@ class Card:
 
     def update_position(self):
         """Updates the cards position, if it's moving to a new position."""
-        self.view.move_step()
+        if self.view.move_step():
+            self.model.moving = False
 
     def get_value(self):
         """Returns the cards value, as a dict {"number", "suit"}
@@ -425,6 +426,10 @@ class Card:
             if abs(delta_y) < step_size:
                 self.move_absolute(a_rect.x, a_move_to[1])
 
+            if abs(delta_x) < step_size and abs(delta_y) < step_size:
+                self.moving = False
+                return True
+
             # Re-calculate difference between current pos and final pos
             a_rect = self.get_rect()
             a_move_to = self.movingTo
@@ -441,5 +446,4 @@ class Card:
             if delta_y < 0:
                 self.move_relative(0, -step_size)
 
-            if delta_x == 0 and delta_y == 0:
-                self.moving = False
+
