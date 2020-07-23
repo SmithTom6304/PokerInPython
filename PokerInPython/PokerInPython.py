@@ -648,6 +648,10 @@ class PokerInPython:
             print(f"Player {player.get_number()} wins with {winner[1][0]}!")
             player.set_chips(player.get_chips() + int(self.pot.pot/len(win_list)))
 
+        win_rank = win_list[0][1][0]    # This looks worse than it is.
+        win_rank_dict = {10: "ROYAL FLUSH!!!", 9: "Straight Flush!", 8: "Four of a Kind!", 7: "Full House!", 6: "Flush!",
+                         5: "Straight!", 4: "Three of a Kind!", 3: "Two Pair!", 2: "Pair!", 1: "High Card!"}
+        win_rank_text = win_rank_dict[win_rank]
 
         if len(win_list) == 1:
             win_text = Text.Text(f"Player {win_list[0][0].get_number()} wins!", 64, (0, 0, 0), None)
@@ -661,7 +665,11 @@ class PokerInPython:
             win_text = Text.Text(win_string, 32, (0, 0, 0), None)
             win_text.move_to(460, 320)
 
+        win_subtext = Text.Text(f"{win_rank_text}", 48, (0, 0, 0), None)
+        win_subtext.move_to(460, 440)
+
         self.textObjectList.append(win_text)
+        self.textObjectList.append(win_subtext)
 
         t2 = time.time()
         dt = (t2-t1)*1000
