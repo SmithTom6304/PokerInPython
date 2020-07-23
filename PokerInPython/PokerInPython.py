@@ -50,6 +50,7 @@ class PokerInPython:
         # Phase 3 - Deal fourth community card, called the turn, then bet
         # Phase 4 - Deal last community card, called the river, then bet
         # Showdown - show cards
+        self.raises_in_round = 0
         self.current_player: Player.Player = None
 
     # ---INPUT HANDLING---
@@ -215,6 +216,7 @@ class PokerInPython:
 
             if self.lead_position == self.turn % len(self.playerList):
                 self.phase += 1
+                self.raises_in_round = 0
                 for player in self.playerList:
                     player.set_chips_bet_in_round(0)
                 if self.phase == 5:
@@ -242,8 +244,12 @@ class PokerInPython:
                 print(f"Player {self.current_player.get_number()} called")
                 return self.pot.call(self.current_player)
             if action == "Raise":
+                if self.raises_in_round == 3:
+                    print(f"Player {self.current_player.get_number()} called")
+                    return self.pot.call(self.current_player)
                 print(f"Player {self.current_player.get_number()} raised")
                 self.lead_position = turn
+                self.raises_in_round += 1
                 return self.pot.bet(self.current_player, self.phase)
 
         for card in self.cardList:
@@ -254,10 +260,15 @@ class PokerInPython:
             next_player()
             return
 
+
         # AI ACTION
         if self.current_player.get_number() != 1:
             # Code taken from http://cowboyprogramming.com/2007/01/04/programming-poker-ai/
-            score = self.simulate_games(self.current_player.cards.copy(), self.communityCards.copy(), 4)
+            players_folded = 0
+            for player in self.playerList:
+                if player.has_folded():
+                    players_folded += 1
+            score = self.simulate_games(self.current_player.cards.copy(), self.communityCards.copy(), 4-players_folded)
             bet_size = self.pot.required_to_call
             if bet_size == 0:
                 if self.phase in (0, 1, 2):
@@ -266,6 +277,7 @@ class PokerInPython:
                     bet_size = self.pot.big_bet
             pot_odds = bet_size / (bet_size + self.pot.pot)
             rate_of_return = score/pot_odds
+            print(f"Player{self.current_player.get_number()}: ROR = {round(score, 3)}/{round(pot_odds, 3)} = {round(rate_of_return, 3)}")
 
             delay = random.uniform(0.5, 3)
             t_start = time.time()
@@ -479,6 +491,7 @@ class PokerInPython:
     def simulate_games(self, hole_cards, current_community_cards, no_of_players, simulations=1000):
         # Code modified from http://cowboyprogramming.com/2007/01/04/programming-poker-ai/
         score = 0.0
+        won_games = 0
         sim_deck = Deck.Deck()
         copy_deck = Deck.Deck()
         sim_deck.remove_cards_by_val(hole_cards)
@@ -490,19 +503,21 @@ class PokerInPython:
 
             copy_deck.deck = sim_deck.deck.copy()
             copy_deck.shuffle_deck()
-            players = []
+            players = [hole_cards]
             scores = []
             win_score = [0, 0, 0, 0, 0, 0]
             winners = 1
-            community_cards = current_community_cards
+            community_cards = current_community_cards.copy()
 
-            for j in range(0, no_of_players):
+            for j in range(1, no_of_players):
                 players.append([copy_deck.draw_card(), copy_deck.draw_card()])
             while len(community_cards) < 5:
                 community_cards.append(copy_deck.draw_card())
 
             for player_hand in players:
-                player_score = self.calculate_hand_score(player_hand)
+                card_list = player_hand.copy()
+                card_list.extend(community_cards)
+                player_score = self.calculate_hand_score(card_list)
                 scores.append(player_score)
                 is_better = self.compare_hands(player_score, win_score)
                 if is_better > 0:
@@ -513,6 +528,7 @@ class PokerInPython:
 
             if scores[0] == win_score:
                 score += 1/winners
+                won_games += 1
 
 
 
@@ -522,7 +538,7 @@ class PokerInPython:
         delta_t = end_time - start_time
 
         print(f"Simulation took {round(delta_t, 3)}s")
-        print(f"Simulation scored {round(score/simulations, 3)}")
+        print(f"Simulation scored {round(score/simulations, 3)}, with {won_games} games won")
 
         # score = random.random()
         return score/simulations

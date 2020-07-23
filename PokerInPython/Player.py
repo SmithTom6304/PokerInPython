@@ -103,6 +103,8 @@ class Player:
 
     def fold(self):
         self.model.set_folded(True)
+        self.cards[0].move_by(0, 20)
+        self.cards[1].move_by(0, 20)
 
     def has_folded(self):
         return self.model.get_folded()
