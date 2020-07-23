@@ -445,22 +445,40 @@ class PokerInPython:
             copy_deck.shuffle_deck()
             players = []
             scores = []
-            winning_scores = []
+            win_score = [0, 0, 0, 0, 0, 0]
+            winners = 1
             community_cards = current_community_cards
-            # hand_scores =
 
             for j in range(0, no_of_players):
                 players.append([copy_deck.draw_card(), copy_deck.draw_card()])
             while len(community_cards) < 5:
                 community_cards.append(copy_deck.draw_card())
 
+            for player_hand in players:
+                player_score = self.calculate_hand_score(player_hand)
+                scores.append(player_score)
+                is_better = self.compare_hands(player_score, win_score)
+                if is_better > 0:
+                    win_score = player_score
+                    winners = 1
+                if is_better == 0:
+                    winners += 1
+
+            if scores[0] == win_score:
+                score += 1/winners
+
+
+
 
 
         end_time = time.time()
         delta_t = end_time - start_time
 
-        score = random.random()
-        return score
+        print(f"Simulation took {round(delta_t, 3)}s")
+        print(f"Simulation scored {round(score/simulations, 3)}")
+
+        # score = random.random()
+        return score/simulations
 
     def calculate_hand_score(self, card_list: list):
 
