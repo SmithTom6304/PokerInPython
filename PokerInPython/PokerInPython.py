@@ -442,8 +442,12 @@ class PokerInPython:
                             flush_cards.sort(key=lambda x: x.get_value()["number"])
                             return flush_cards[:5]
                         flush_cards.clear()
+                        flush_cards.append(card)
                         suit_count = 1
                         last_suit = card.get_value()["suit"]
+                if suit_count >= 5:
+                    flush_cards.sort(key=lambda x: x.get_value()["number"])
+                    return flush_cards[:5]
                 return []
 
             def full_house(a_card_list: list):
