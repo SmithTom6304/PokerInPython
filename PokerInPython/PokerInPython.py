@@ -274,7 +274,7 @@ class PokerInPython:
 
 
         # AI ACTION
-        if self.current_player.get_number() >= 1:
+        if self.current_player.get_number() != 1:
             # Code taken from http://cowboyprogramming.com/2007/01/04/programming-poker-ai/
             players_folded = 0
             for player in self.playerList:
