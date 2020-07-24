@@ -296,11 +296,33 @@ class PokerInPython:
                 if player.has_folded():
                     players_folded += 1
 
+            i_players_left = 4 - players_folded
+
             score = self.simulate_games(self.current_player.cards.copy(), self.communityCards.copy(),
-                                        4 - players_folded)
+                                        i_players_left)
 
             req = self.pot.required_to_call - self.current_player.get_chips_bet_in_round()
-            rate_of_return = score * (4-players_folded)
+            rate_of_return = score * (i_players_left)
+
+            if i_players_left == 2:
+                phase = self.phase
+                min_bet = 0
+                for i in range(phase, 5):
+                    if i in (1, 2):
+                        min_bet += self.pot.small_bet
+                    if i in (3, 4):
+                        min_bet += self.pot.big_bet
+
+                pot_odds = min_bet / (self.pot.pot + min_bet*2)
+                rate_of_return = score/pot_odds
+                print(f"TWO LEFT: Player{self.current_player.get_number()}ROR = "
+                      f"{score}/{pot_odds} = {rate_of_return}")
+
+                # Players should only call when score is bad but RoR
+                if score < 0.45 and rate_of_return > 1:
+                    print(f"TWO LEFT: Player{self.current_player.get_number()} is hanging on")
+                    rate_of_return = 1.05
+
 
             delay = random.uniform(0.5, 3)
             # delay = 1
@@ -324,6 +346,11 @@ class PokerInPython:
                     action = "Call"
                 else:
                     action = "Fold"
+            elif rate_of_return < 1.1:
+                if rand_number >= 0.95:
+                    action = "Raise"
+                else:
+                    action = "Call"
             elif rate_of_return < 1.3:
                 if rand_number >= 0.6:
                     action = "Raise"
@@ -335,9 +362,11 @@ class PokerInPython:
                 else:
                     action = "Call"
 
-            if self.pot.required_to_call == 0 and action == "Fold":
+            if req == 0 and action == "Fold":
                 action = "Check"
-            if self.pot.required_to_call == 0 and action == "Raise":
+            if req == 0 and action == "Call":
+                action = "Check"
+            if req == 0 and action == "Raise":
                 action = "Bet"
             if self.raises_in_round == 3 and action == "Raise":
                 action = "Call"
