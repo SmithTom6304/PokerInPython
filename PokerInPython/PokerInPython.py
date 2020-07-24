@@ -51,7 +51,7 @@ class PokerInPython:
         # Phase 4 - Deal last community card, called the river, then bet
         # Showdown - show cards
         self.raises_in_round = 0
-        self.avg_bet=[[6.48, 193], [4.78, 193], [9.6, 192], [7.89, 186]]
+        self.avg_bet=[[6.68, 2], [5.09, 2], [10.01, 2], [7.41, 2]]
 
 
         self.current_player: Player.Player = None
@@ -134,9 +134,6 @@ class PokerInPython:
         self.pot.bet_blinds(self.playerList[self.big_blind], self.playerList[self.small_blind])
 
         self.pot.set_min_bet(self.pot.small_bet)
-
-        for player in self.playerList:
-            player.set_chips(100)
 
         f = open("debug.txt", "a")
         for i, avg in enumerate(self.avg_bet):
@@ -241,6 +238,12 @@ class PokerInPython:
         # ---REACT TO BUTTON PRESS---
         def do_action(leadPosition, turn, action):
 
+            if self.current_player.get_number() != 1:
+                action_text = Text.Text(action, 24, (0, 0, 0), None)
+                action_text.set_timer(1)
+                action_text.move_to(self.current_player.get_rect().x + 120, self.current_player.get_rect().y + 30)
+                self.textObjectList.append(action_text)
+
             if action == "Fold":
                 print(f"Player {self.current_player.get_number()} folded")
                 self.current_player.fold()
@@ -286,28 +289,24 @@ class PokerInPython:
 
 
         # AI ACTION
-        if self.current_player.get_number() != 300:
+        if self.current_player.get_number() != 1:
             # Code taken from http://cowboyprogramming.com/2007/01/04/programming-poker-ai/
             players_folded = 0
             for player in self.playerList:
                 if player.has_folded():
                     players_folded += 1
-            score = self.simulate_games(self.current_player.cards.copy(), self.communityCards.copy(), 4-players_folded)
-            bet_size = self.pot.required_to_call
-            if bet_size == 0:
-                if self.phase in (0, 1, 2):
-                    bet_size = self.pot.small_bet
-                else:
-                    bet_size = self.pot.big_bet
-            pot_odds = bet_size / (bet_size + self.pot.pot)
-            rate_of_return = score/pot_odds
-            print(f"Player{self.current_player.get_number()}: ROR = {round(score, 3)}/{round(pot_odds, 3)} = {round(rate_of_return, 3)}")
 
-            # delay = random.uniform(0.5, 3)
-            delay = 0
+            score = self.simulate_games(self.current_player.cards.copy(), self.communityCards.copy(),
+                                        4 - players_folded)
+
+            req = self.pot.required_to_call - self.current_player.get_chips_bet_in_round()
+            rate_of_return = score * (4-players_folded)
+
+            delay = random.uniform(0.5, 3)
+            # delay = 1
             t_start = time.time()
             while time.time() < t_start + delay:
-                i=0
+                self.update()
 
             # AI will try to stay in hands with a rate of return greater than 1
             # rand_number will make the AI bluff occasionally on bad hands
@@ -337,6 +336,10 @@ class PokerInPython:
                     action = "Call"
 
             if self.pot.required_to_call == 0 and action == "Fold":
+                action = "Check"
+            if self.pot.required_to_call == 0 and action == "Raise":
+                action = "Bet"
+            if self.raises_in_round == 3 and action == "Raise":
                 action = "Call"
 
             if do_action(self.lead_position, self.turn, action):
@@ -394,6 +397,9 @@ class PokerInPython:
 
     # ---UPDATE DISPLAY---
     def update(self):
+
+
+
         # Clear the sequence of images that will be updated
         self.objectImagesToUpdateSequence.clear()
         self.objectImagesToUpdateQueue.clear()
@@ -428,6 +434,9 @@ class PokerInPython:
             self.objectImagesToUpdateQueue.append(card)
 
         for text in self.textObjectList:
+            if text.check_timer():
+                self.textObjectList.remove(text)
+                continue
             self.objectImagesToUpdateQueue.append(text)
 
         self.objectImagesToUpdateQueue.append(self.deck)
@@ -437,6 +446,8 @@ class PokerInPython:
             self.objectImagesToUpdateSequence.append((each.get_image(), each.get_rect()))
 
         self.user_interface.update_display(self.objectImagesToUpdateSequence)
+
+
     # --------------------
 
     def showdown(self, early_winner=None):
@@ -501,11 +512,13 @@ class PokerInPython:
         clock = pygame.time.Clock()
         self.update()
         clock.tick(60)
-        # pygame.time.delay(3000)
+        t1 = time.time()
+        t2 = time.time()
+        while t2 - t1 < 1.0:
+            t2 = time.time()
 
         pygame.event.get()
         while pygame.mouse.get_pressed()[0] == 0:
-            break # remove
             pygame.event.get()
 
         self.initialize_game_objects(False)
@@ -854,6 +867,10 @@ class PokerInPython:
 
 
     def main(self):
+
+        def clock_tick():
+            clock.tick(60)
+            
         pygame.init()
         clock = pygame.time.Clock()
 
@@ -863,7 +880,10 @@ class PokerInPython:
         while True:
             self.game_loop()
             self.update()
-            clock.tick(60)
+            clock_tick()
+
+
+
 
 class Pot:
 
@@ -890,7 +910,7 @@ class Pot:
         big_blind_player.set_chips_bet_in_round(self.small_bet)
         small_blind_player.set_chips(small_blind_player.get_chips() - int(self.small_bet / 2))
         small_blind_player.set_chips_bet_in_round(int(self.small_bet / 2))
-        self.add_to_pot(6)
+        self.add_to_pot(int(self.small_bet + (self.small_bet / 2)))
         pass
 
     def bet(self, player: Player.Player, phase: int) -> bool:

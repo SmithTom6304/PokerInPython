@@ -3,6 +3,7 @@ A module to implement text objects.
 """
 
 import pygame
+import time
 
 base_path = "./"
 font_path = f"{base_path}Font/Minecraft.ttf"  # Set to path to use for font
@@ -69,6 +70,7 @@ class Text:
         self.set_font()
         self.set_text(self.text_string)
         self.text_rect = self.text.get_rect()
+        self.timer = 0.0
 
     def set_font(self):
         """
@@ -120,4 +122,19 @@ class Text:
         :return: str
         """
         return self.text_string
+
+    def set_timer(self, t: float):
+        self.timer = time.time() + t
+
+    def check_timer(self):
+        if self.timer == 0:
+            return False
+        if time.time() > self.timer:
+            self.timer = 0
+            return True
+        else:
+            return False
+
+
+
 
