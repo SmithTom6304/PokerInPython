@@ -274,7 +274,7 @@ class PokerInPython:
 
 
         # AI ACTION
-        if self.current_player.get_number() != 1:
+        if self.current_player.get_number() >= 1:
             # Code taken from http://cowboyprogramming.com/2007/01/04/programming-poker-ai/
             players_folded = 0
             for player in self.playerList:
@@ -554,11 +554,9 @@ class PokerInPython:
     def calculate_hand_score(self, card_list: list):
 
         def high_card(a_card_list: list):
-            a_card_list.sort(key=lambda x: x.get_value()["number"], reverse=True)
             return a_card_list[:5]
 
         def pair(a_card_list: list):
-            a_card_list.sort(key=lambda x: x.get_value()["number"], reverse=True)
             for card in a_card_list:
                 for compare_card in a_card_list:
                     if card == compare_card:
@@ -573,7 +571,6 @@ class PokerInPython:
             return []
 
         def two_pair(a_card_list: list):
-            a_card_list.sort(key=lambda x: x.get_value()["number"], reverse=True)
             pairs = 0
             pair_cards = []  # Cards already made into pairs
             for card in a_card_list:
@@ -595,7 +592,6 @@ class PokerInPython:
             return []
 
         def three_of_a_kind(a_card_list: list):
-            a_card_list.sort(key=lambda x: x.get_value()["number"], reverse=True)
             match_cards = []
             for card in a_card_list:
                 no_of_card_matches = 1
@@ -616,7 +612,6 @@ class PokerInPython:
             return []
 
         def straight(a_card_list: list):
-            a_card_list.sort(key=lambda x: x.get_value()["number"], reverse=True)
             last_number = a_card_list[0].get_value()["number"]  # The value of the last card compared
             count = 1
             first_card = a_card_list[0]  # The highest card in the straight
@@ -659,14 +654,13 @@ class PokerInPython:
             return []
 
         def full_house(a_card_list: list):
-            a_card_list.sort(key=lambda x: x.get_value()["number"], reverse=True)
 
             def check_threes(b_card_list: list):
                 three_cards = []
                 for card in a_card_list:
                     no_of_card_matches = 1
                     three_cards.clear()
-                    i = a_card_list.index(card) + 1
+                    i = b_card_list.index(card) + 1
                     for compare_card in a_card_list[i:]:
                         if card.get_value()["number"] == compare_card.get_value()["number"]:
                             no_of_card_matches += 1
@@ -677,7 +671,6 @@ class PokerInPython:
                 return []
 
             def check_pairs(c_card_list: list):
-                c_card_list.sort(key=lambda x: x.get_value()["number"], reverse=True)
                 for card in a_card_list:
                     next_index = c_card_list.index(card) + 1
                     if next_index >= len(c_card_list):
@@ -698,7 +691,6 @@ class PokerInPython:
             return []
 
         def four_of_a_kind(a_card_list: list):
-            a_card_list.sort(key=lambda x: x.get_value()["number"], reverse=True)
             four_cards = []
             for card in a_card_list:
                 no_of_card_matches = 1
@@ -718,7 +710,7 @@ class PokerInPython:
             return []
 
         def straight_flush(a_card_list: list):
-            a_card_list.sort(key=lambda x: (x.get_value()["suit"], x.get_value()["number"]), reverse=True)
+            a_card_list.sort(key=lambda x: (x.get_value()["suit"]), reverse=True)
             last_number = a_card_list[0].get_value()["number"]  # The value of the last card compared
             count = 1
             first_card = a_card_list[0]  # The highest card in the straight
@@ -741,7 +733,7 @@ class PokerInPython:
             return []
 
         def royal_flush(a_card_list: list):
-            a_card_list.sort(key=lambda x: (x.get_value()["suit"], x.get_value()["number"]), reverse=True)
+            a_card_list.sort(key=lambda x: (x.get_value()["suit"]), reverse=True)
             last_number = a_card_list[0].get_value()["number"]  # The value of the last card compared
             count = 1
             first_card = a_card_list[0]  # The highest card in the straight
@@ -782,6 +774,8 @@ class PokerInPython:
 
         # Check each hand rank
         # If it returns a list of cards, turn it into a hand score
+
+        card_list.sort(key=lambda x: x.get_value()["number"], reverse=True)
 
         kicker_list = royal_flush(card_list)
         if len(kicker_list) > 0:
