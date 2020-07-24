@@ -51,7 +51,7 @@ class PokerInPython:
         # Phase 4 - Deal last community card, called the river, then bet
         # Showdown - show cards
         self.raises_in_round = 0
-        self.avg_bet=[[6.4, 12], [4, 12], [8.75, 12], [7.4, 12]]
+        self.avg_bet=[[6.48, 193], [4.78, 193], [9.6, 192], [7.89, 186]]
 
 
         self.current_player: Player.Player = None
@@ -137,6 +137,11 @@ class PokerInPython:
 
         for player in self.playerList:
             player.set_chips(100)
+
+        f = open("debug.txt", "a")
+        for i, avg in enumerate(self.avg_bet):
+            f.write(f"{avg}, ")
+        f.write("\n")
 
     def initialize_players(self, number_of_players, chips):
         player1 = Player.Player(1, chips, confidence=100, pos_x=80, pos_y=400)
@@ -843,6 +848,7 @@ class PokerInPython:
                 old_avg = self.avg_bet[self.phase-1][0]
                 n = self.avg_bet[self.phase-1][1]
                 new_avg = ((old_avg*n) + player.get_chips_bet_in_round()) / (n+1)
+                new_avg = round(new_avg, 2)
                 self.avg_bet[self.phase-1] = [new_avg, n+1]
                 return
 
