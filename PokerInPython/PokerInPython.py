@@ -260,6 +260,18 @@ class PokerInPython:
             next_player()
             return
 
+        players_left = len(self.playerList)
+        player_left = None
+        for player in self.playerList:
+            if player.has_folded():
+                players_left -= 1
+            else:
+                player_left = player
+        if players_left == 1:
+            self.showdown(early_winner=player_left)
+            return
+
+
 
         # AI ACTION
         if self.current_player.get_number() != 1:
@@ -414,77 +426,73 @@ class PokerInPython:
         self.user_interface.update_display(self.objectImagesToUpdateSequence)
     # --------------------
 
-    def showdown(self):
+    def showdown(self, early_winner=None):
 
+        if early_winner is None:
 
+            # A list of the winning players, with their hand score
+            win_list = [[self.playerList[0], [0, 0, 0, 0, 0, 0]]]
 
-        t1 = time.time()
+            # Determine each players hand
+            for player in self.playerList:
+                if player.has_folded() is False:
+                    player.set_cards_face_up(True)
+                    card_list = player.get_cards()
+                    card_list.extend(self.communityCards)
+                    player_score = self.calculate_hand_score(card_list)
 
-        # A list of the winning players, with their hand score
-        win_list = [[self.playerList[0], [0, 0, 0, 0, 0, 0]]]
+                    # Compare players hand to current winning hand
+                    # is_better > 0 means it beats, == 0 means it ties
+                    is_better = self.compare_hands(player_score, win_list[0][1])
+                    if is_better > 0:
+                        win_list.clear()
+                        win_list = [[player, player_score]]
+                    if is_better == 0:
+                        win_list.append([player, player_score])
 
-        # Determine each players hand
-        for player in self.playerList:
-            if player.has_folded() is False:
-                player.set_cards_face_up(True)
-                card_list = player.get_cards()
-                card_list.extend(self.communityCards)
-                player_score = self.calculate_hand_score(card_list)
-
-                # Compare players hand to current winning hand
-                # is_better > 0 means it beats, == 0 means it ties
-                is_better = self.compare_hands(player_score, win_list[0][1])
-                if is_better > 0:
-                    win_list.clear()
-                    win_list = [[player, player_score]]
-                if is_better == 0:
-                    win_list.append([player, player_score])
-
-        for winner in win_list:
-            player = winner[0]
-
-            print(f"Player {player.get_number()} wins with {winner[1][0]}!")
-            player.set_chips(player.get_chips() + int(self.pot.pot/len(win_list)))
-
-        win_rank = win_list[0][1][0]    # This looks worse than it is.
-        win_rank_dict = {10: "ROYAL FLUSH!!!", 9: "Straight Flush!", 8: "Four of a Kind!", 7: "Full House!", 6: "Flush!",
-                         5: "Straight!", 4: "Three of a Kind!", 3: "Two Pair!", 2: "Pair!", 1: "High Card!"}
-        win_rank_text = win_rank_dict[win_rank]
-
-        if len(win_list) == 1:
-            win_text = Text.Text(f"Player {win_list[0][0].get_number()} wins!", 64, (0, 0, 0), None)
-            win_text.move_to(320, 320)
-        else:
-            win_string = "Players "
             for winner in win_list:
-                win_string += f"{winner[0].get_number()}, "
-            win_string = win_string[:-2]
-            win_string += " split the pot!"
-            win_text = Text.Text(win_string, 32, (0, 0, 0), None)
-            win_text.move_to(460, 320)
+                player = winner[0]
 
-        win_subtext = Text.Text(f"{win_rank_text}", 48, (0, 0, 0), None)
-        win_subtext.move_to(460, 440)
+                print(f"Player {player.get_number()} wins with {winner[1][0]}!")
+                player.set_chips(player.get_chips() + int(self.pot.pot/len(win_list)))
 
-        self.textObjectList.append(win_text)
-        self.textObjectList.append(win_subtext)
+            win_rank = win_list[0][1][0]    # This looks worse than it is.
+            win_rank_dict = {10: "ROYAL FLUSH!!!", 9: "Straight Flush!", 8: "Four of a Kind!", 7: "Full House!", 6: "Flush!",
+                             5: "Straight!", 4: "Three of a Kind!", 3: "Two Pair!", 2: "Pair!", 1: "High Card!"}
+            win_rank_text = win_rank_dict[win_rank]
 
-        t2 = time.time()
-        dt = (t2-t1)*1000
-        print(f"Time taken = {round(dt, 4)}ms")
+            if len(win_list) == 1:
+                win_text = Text.Text(f"Player {win_list[0][0].get_number()} wins!", 64, (0, 0, 0), None)
+                win_text.move_to(320, 320)
+            else:
+                win_string = "Players "
+                for winner in win_list:
+                    win_string += f"{winner[0].get_number()}, "
+                win_string = win_string[:-2]
+                win_string += " split the pot!"
+                win_text = Text.Text(win_string, 32, (0, 0, 0), None)
+                win_text.move_to(460, 320)
+
+            win_subtext = Text.Text(f"{win_rank_text}", 48, (0, 0, 0), None)
+            win_subtext.move_to(460, 440)
+
+            self.textObjectList.append(win_text)
+            self.textObjectList.append(win_subtext)
+
+        else:
+            win_text = Text.Text(f"Player {early_winner.get_number()} wins!", 64, (0, 0, 0), None)
+            early_winner.set_chips(early_winner.get_chips() + int(self.pot.pot))
+            win_text.move_to(320, 320)
+            self.textObjectList.append(win_text)
 
         clock = pygame.time.Clock()
         self.update()
         clock.tick(60)
         pygame.time.delay(3000)
 
-        for i in range(0, 10):
-            continue
-
         pygame.event.get()
         while pygame.mouse.get_pressed()[0] == 0:
             pygame.event.get()
-
 
         self.initialize_game_objects(False)
 
