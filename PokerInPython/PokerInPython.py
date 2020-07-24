@@ -51,6 +51,9 @@ class PokerInPython:
         # Phase 4 - Deal last community card, called the river, then bet
         # Showdown - show cards
         self.raises_in_round = 0
+        self.avg_bet=[[6.4, 12], [4, 12], [8.75, 12], [7.4, 12]]
+
+
         self.current_player: Player.Player = None
 
     # ---INPUT HANDLING---
@@ -131,6 +134,9 @@ class PokerInPython:
         self.pot.bet_blinds(self.playerList[self.big_blind], self.playerList[self.small_blind])
 
         self.pot.set_min_bet(self.pot.small_bet)
+
+        for player in self.playerList:
+            player.set_chips(100)
 
     def initialize_players(self, number_of_players, chips):
         player1 = Player.Player(1, chips, confidence=100, pos_x=80, pos_y=400)
@@ -215,6 +221,7 @@ class PokerInPython:
                 self.pot.update_call_raise_display(self.current_player.get_chips_bet_in_round(), self.phase)
 
             if self.lead_position == self.turn % len(self.playerList):
+                self.update_avg_bet()
                 self.phase += 1
                 self.raises_in_round = 0
                 for player in self.playerList:
@@ -274,7 +281,7 @@ class PokerInPython:
 
 
         # AI ACTION
-        if self.current_player.get_number() >= 1:
+        if self.current_player.get_number() != 300:
             # Code taken from http://cowboyprogramming.com/2007/01/04/programming-poker-ai/
             players_folded = 0
             for player in self.playerList:
@@ -291,7 +298,8 @@ class PokerInPython:
             rate_of_return = score/pot_odds
             print(f"Player{self.current_player.get_number()}: ROR = {round(score, 3)}/{round(pot_odds, 3)} = {round(rate_of_return, 3)}")
 
-            delay = random.uniform(0.5, 3)
+            # delay = random.uniform(0.5, 3)
+            delay = 0
             t_start = time.time()
             while time.time() < t_start + delay:
                 i=0
@@ -488,10 +496,11 @@ class PokerInPython:
         clock = pygame.time.Clock()
         self.update()
         clock.tick(60)
-        pygame.time.delay(3000)
+        # pygame.time.delay(3000)
 
         pygame.event.get()
         while pygame.mouse.get_pressed()[0] == 0:
+            break # remove
             pygame.event.get()
 
         self.initialize_game_objects(False)
@@ -828,6 +837,15 @@ class PokerInPython:
                 return -1
         return 0
 
+    def update_avg_bet(self):
+        for player in self.playerList:
+            if player.has_folded() is False:
+                old_avg = self.avg_bet[self.phase-1][0]
+                n = self.avg_bet[self.phase-1][1]
+                new_avg = ((old_avg*n) + player.get_chips_bet_in_round()) / (n+1)
+                self.avg_bet[self.phase-1] = [new_avg, n+1]
+                return
+
 
     def main(self):
         pygame.init()
@@ -845,8 +863,8 @@ class Pot:
 
     def __init__(self):
         self.pot: int = 0
-        self.small_bet: int = 4
-        self.big_bet: int = 8
+        self.small_bet: int = 2
+        self.big_bet: int = 4
         self.required_to_call = 0
         self.pot_text = Text.Text("Pot: -1", 32, (0, 0, 0), None)
         self.pot_text.move_to(30, 30)
