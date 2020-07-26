@@ -9,29 +9,30 @@ import Deck
 import Button
 import Text
 
-import time # For debugging
+import time
 import random
 
 os.environ['SDL_VIDEO_WINDOW_POS'] = "%d,%d" % (5, 35)
 
 class PokerInPython:
 
-    size = width, height = 920, 640
-    speed = [2, 2]
-    black = 0, 0, 0
-    background = 49, 117, 61
-
     # Queue of objects to be added to the sequence to update
-    objectImagesToUpdateQueue = []
+    draw_queue = []
     # List of (image, rect) tuples to provide to UserInterface layer to update screen
-    objectImagesToUpdateSequence = [None, None]
+    draw_sequence = [None, None]
 
-    playerList = []
-    buttonList = []
-    cardList = []
-    textObjectList = []
+    # Lists of game objects
+    player_list = []
+    button_list = []
+    card_list = []
+    text_object_list = []
+    community_cards = []  # Sublist of card_list
 
-    communityCards = []
+    # To draw an object, we can either add the object to the update queue
+    # or we can add it to the relevant list
+    # The update function handles providing the objects to the UserInterface module
+
+    DEV_MODE = True
 
 
     def __init__(self):
@@ -39,20 +40,18 @@ class PokerInPython:
         self.deck = Deck.Deck()
         self.user_interface = UserInterface.UserInterface()
 
-        self.start_lead_position = 0
-        self.lead_position = 0
-        self.turn = 0
-        self.big_blind = -1
-        self.small_blind = -1
+        self.start_lead_position = 0    # Index of first player in round. Effectively the dealer.
+        self.lead_position = 0  # Index of the current leading player, or player who raised last
+        self.turn = 0   # Index of the player who is currently taking their turn
+
         self.phase = 1  # https://www.poker-king.com/dictionary/community_cards/
         # Phase 1 - Deal private cards, then bet
         # Phase 2 - Deal three community cards to form the flop, then bet
         # Phase 3 - Deal fourth community card, called the turn, then bet
         # Phase 4 - Deal last community card, called the river, then bet
         # Showdown - show cards
-        self.raises_in_round = 0
-        self.avg_bet=[[6.68, 2], [5.09, 2], [10.01, 2], [7.41, 2]]
 
+        self.raises_in_round = 0    # Number of times player has raised in this round. Max 3
 
         self.current_player: Player.Player = None
 
@@ -60,7 +59,7 @@ class PokerInPython:
     def handle_events(self):
         """Handle input events
 
-        :return: Button pressed
+        :return: Object pressed
         """
         object_pressed = None
 
@@ -68,19 +67,16 @@ class PokerInPython:
             if event.type == pygame.QUIT:
                 sys.exit()
             if event.type == pygame.KEYDOWN:
-                if event.key == pygame.K_LEFT:
+                if event.key == pygame.K_LEFT and self.DEV_MODE is True:
                     self.initialize_game_objects()
-                if event.key == pygame.K_RIGHT:
-                    for each in self.cardList:
-                        each.set_face_up(True)
+                if event.key == pygame.K_RIGHT and self.DEV_MODE is True:
+                    for card in self.card_list:
+                        card.set_face_up(True)
             if event.type == pygame.MOUSEBUTTONDOWN:
-                # Check button presses
-                object_pressed = self.user_interface.check_button_presses(self.buttonList)
+                # Check for object presses
+                object_pressed = self.user_interface.check_button_presses(self.button_list)
                 if object_pressed is None:  # Check card presses
-                    object_pressed = self.user_interface.check_card_presses(self.cardList)
-
-        mouse_pos = pygame.mouse.get_pos()
-        self.user_interface.mouse_pos = mouse_pos
+                    object_pressed = self.user_interface.check_card_presses(self.card_list)
 
         if object_pressed is not None:
             return object_pressed
@@ -89,96 +85,90 @@ class PokerInPython:
     # ---INITIALIZE OBJECTS---
     def initialize_game_objects(self, initialize_players=True):
         if initialize_players is True:
-            self.playerList.clear()
-
-        self.buttonList.clear()
-        self.cardList.clear()
-        self.textObjectList.clear()
-        self.communityCards.clear()
-        self.deck.reset_deck()
-        self.pot.pot = 0  # TODO Change to pot.reset
-
-        self.phase = 1
-        if initialize_players is True:
+            self.player_list.clear()
             self.initialize_players(4, 100)
 
+        self.button_list.clear()
+        self.card_list.clear()
+        self.text_object_list.clear()
+        self.community_cards.clear()
+        self.deck.reset_deck()
+        self.pot.reset()
 
-        for player in self.playerList:
+        self.phase = 1
+
+        for player in self.player_list:
             player.reset()
-            self.textObjectList.append(player.get_text())
+            self.text_object_list.append(player.get_text())
 
         self.initialize_cards()
         self.initialize_buttons()
-        # initialize_cards()
 
         # Add wait frames to each card to create ripple effect
-        for i, card in enumerate(self.cardList):
-            card.set_wait_frames((len(self.cardList) - i) * 3)
+        for i, card in enumerate(self.card_list):
+            card.set_wait_frames((len(self.card_list) - i) * 3)
 
         self.round_initialization()
 
     def round_initialization(self):
         self.lead_position = self.start_lead_position
-        self.start_lead_position = (self.start_lead_position + 1) % len(self.playerList)
+        self.start_lead_position = (self.start_lead_position + 1) % len(self.player_list)
         self.turn = self.lead_position
-        self.current_player = self.playerList[self.lead_position]
+        self.current_player = self.player_list[self.lead_position]
         self.current_player.start_turn()
 
-        self.big_blind = self.lead_position - 1
-        self.small_blind = self.lead_position - 2
-        if self.big_blind < 0:
-            self.big_blind += len(self.playerList)
-        if self.small_blind < 0:
-            self.small_blind += len(self.playerList)
+        big_blind = self.lead_position - 1
+        small_blind = self.lead_position - 2
+        if big_blind < 0:
+            big_blind += len(self.player_list)
+        if small_blind < 0:
+            small_blind += len(self.player_list)
 
-        self.pot.bet_blinds(self.playerList[self.big_blind], self.playerList[self.small_blind])
-
+        self.pot.bet_blinds(self.player_list[big_blind], self.player_list[small_blind])
         self.pot.set_min_bet(self.pot.small_bet)
-
-        f = open("debug.txt", "a")
-        for i, avg in enumerate(self.avg_bet):
-            f.write(f"{avg}, ")
-        f.write("\n")
 
     def initialize_players(self, number_of_players, chips):
         player1 = Player.Player(1, chips, confidence=100, pos_x=80, pos_y=400)
-        self.playerList.append(player1)
+        self.player_list.append(player1)
 
         for i in range(2, number_of_players + 1):
-            x_value = (self.width / number_of_players) * (i - 1)
-            player = Player.Player(i, chips, confidence=100, pos_x=x_value, pos_y=(self.height / 6))
-            self.playerList.append(player)
+            x_value = (self.user_interface.width / number_of_players) * (i - 1)
+            player = Player.Player(i, chips, confidence=100, pos_x=x_value, pos_y=(self.user_interface.height / 6))
+            self.player_list.append(player)
 
-        self.current_player = self.playerList[0]
+        self.current_player = self.player_list[0]
 
     def initialize_buttons(self):
         btn1 = Button.Button(button_id=1, name="Fold", pos_x=500, pos_y=540)
         btn2 = Button.Button(button_id=2, name="Check", pos_x=640, pos_y=540)
         btn3 = Button.Button(button_id=3, name="Bet", pos_x=780, pos_y=540)
 
-        self.buttonList.append(btn1)
-        self.buttonList.append(btn2)
-        self.buttonList.append(btn3)
+        self.button_list.append(btn1)
+        self.button_list.append(btn2)
+        self.button_list.append(btn3)
 
         bet_panel = Button.Button(button_id=4, name="Bet_Display", pos_x=669, pos_y=515)
         raise_panel = Button.Button(button_id=4, name="Bet_Display", pos_x=809, pos_y=515)
-        self.buttonList.append(bet_panel)
-        self.buttonList.append(raise_panel)
+        self.button_list.append(bet_panel)
+        self.button_list.append(raise_panel)
 
-        bet_text = Text.Text("4", 26, (0, 0, 0), None)
+        p1: Player.Player = self.player_list[0]
+        player_bet = str(self.pot.small_bet - p1.get_chips_bet_in_round())
+        player_raise = str(self.pot.big_bet - p1.get_chips_bet_in_round())
+        bet_text = Text.Text(player_bet, 26, (0, 0, 0), None)
         bet_text.move_to(680, 517)
-        raise_text = Text.Text("8", 26, (0, 0, 0), None)
+        raise_text = Text.Text(player_raise, 26, (0, 0, 0), None)
         raise_text.move_to(820, 517)
 
-        self.textObjectList.append(bet_text)
-        self.textObjectList.append(raise_text)
+        self.text_object_list.append(bet_text)
+        self.text_object_list.append(raise_text)
         self.pot.bet_text = bet_text
         self.pot.raise_text = raise_text
 
     def initialize_cards(self):
-        for player in self.playerList:
+        for player in self.player_list:
             player.set_cards([self.deck.draw_card(), self.deck.draw_card()])
-            self.cardList.extend(player.get_cards())
+            self.card_list.extend(player.get_cards())
             if player.get_number() == 1:
                 player.set_cards_face_up(True)
     # ------------------------
@@ -193,20 +183,20 @@ class PokerInPython:
                 card.set_wait_frames(i * 3)
                 card.move(200 + (100 * (i+1)), 400)
                 card.set_face_up(True)
-                self.communityCards.append(card)
-                self.cardList.append(card)
+                self.community_cards.append(card)
+                self.card_list.append(card)
         if phase == 3:
             card = self.deck.draw_card()
             card.move(200 + (100 * (3 + 1)), 400)
             card.set_face_up(True)
-            self.communityCards.append(card)
-            self.cardList.append(card)
+            self.community_cards.append(card)
+            self.card_list.append(card)
         if phase == 4:
             card = self.deck.draw_card()
             card.move(200 + (100 * (4 + 1)), 400)
             card.set_face_up(True)
-            self.communityCards.append(card)
-            self.cardList.append(card)
+            self.community_cards.append(card)
+            self.card_list.append(card)
     # --------------------------
 
     # ---HANDLE GAME LOOP---
@@ -214,60 +204,53 @@ class PokerInPython:
 
         # ---SWITCH TO NEXT PLAYER---
         def next_player():
-            self.turn = (self.turn + 1) % len(self.playerList)
+            self.turn = (self.turn + 1) % len(self.player_list)
             self.current_player.end_turn()
-            self.current_player = self.playerList[self.turn]
+            self.current_player = self.player_list[self.turn]
             self.current_player.start_turn()
 
             if self.current_player.get_number() == 1:
                 self.pot.update_call_raise_display(self.current_player.get_chips_bet_in_round(), self.phase)
 
-            if self.lead_position == self.turn % len(self.playerList):
-                self.update_avg_bet()
+            if self.lead_position == self.turn % len(self.player_list):
                 self.phase += 1
                 self.raises_in_round = 0
-                for player in self.playerList:
-                    player.set_chips_bet_in_round(0)
+                for a_player in self.player_list:
+                    a_player.set_chips_bet_in_round(0)
                 if self.phase == 5:
                     self.showdown()
                     return
-                print(f"Starting phase {self.phase}")
                 self.deal_community_cards(self.phase)
                 self.pot.set_min_bet(0)
 
         # ---REACT TO BUTTON PRESS---
-        def do_action(leadPosition, turn, action):
+        def do_action(turn, action):
 
             if self.current_player.get_number() != 1:
                 action_text = Text.Text(action, 24, (0, 0, 0), None)
                 action_text.set_timer(1)
                 action_text.move_to(self.current_player.get_rect().x + 120, self.current_player.get_rect().y + 30)
-                self.textObjectList.append(action_text)
+                self.text_object_list.append(action_text)
 
             if action == "Fold":
-                print(f"Player {self.current_player.get_number()} folded")
                 self.current_player.fold()
                 return True
             if action == "Check":
-                print(f"Player {self.current_player.get_number()} checked")
                 return self.pot.call(self.current_player)
             if action == "Bet":
-                print(f"Player {self.current_player.get_number()} bet")
                 self.lead_position = turn
                 return self.pot.bet(self.current_player, self.phase)
             if action == "Call":
-                print(f"Player {self.current_player.get_number()} called")
                 return self.pot.call(self.current_player)
             if action == "Raise":
                 if self.raises_in_round == 3:
-                    print(f"Player {self.current_player.get_number()} called")
                     return self.pot.call(self.current_player)
-                print(f"Player {self.current_player.get_number()} raised")
                 self.lead_position = turn
                 self.raises_in_round += 1
                 return self.pot.bet(self.current_player, self.phase)
 
-        for card in self.cardList:
+        # Wait until all cards are dealt before allowing actions
+        for card in self.card_list:
             if card.is_moving():
                 return
 
@@ -275,9 +258,10 @@ class PokerInPython:
             next_player()
             return
 
-        players_left = len(self.playerList)
+        # Determine wins by out-betting
+        players_left = len(self.player_list)
         player_left = None
-        for player in self.playerList:
+        for player in self.player_list:
             if player.has_folded():
                 players_left -= 1
             else:
@@ -292,13 +276,13 @@ class PokerInPython:
         if self.current_player.get_number() != 1:
             # Code taken from http://cowboyprogramming.com/2007/01/04/programming-poker-ai/
             players_folded = 0
-            for player in self.playerList:
+            for player in self.player_list:
                 if player.has_folded():
                     players_folded += 1
 
             i_players_left = 4 - players_folded
 
-            score = self.simulate_games(self.current_player.cards.copy(), self.communityCards.copy(),
+            score = self.simulate_games(self.current_player.cards.copy(), self.community_cards.copy(),
                                         i_players_left)
 
             req = self.pot.required_to_call - self.current_player.get_chips_bet_in_round()
@@ -371,7 +355,7 @@ class PokerInPython:
             if self.raises_in_round == 3 and action == "Raise":
                 action = "Call"
 
-            if do_action(self.lead_position, self.turn, action):
+            if do_action(self.turn, action):
                 next_player()
 
 
@@ -394,27 +378,27 @@ class PokerInPython:
             if isinstance(object_pressed, Button.Button):   # If object is a button
                 if object_pressed.get_name() in ("Fold", "Check", "Bet", "Call", "Raise"):  # Do action and advance to
                     # next player
-                    if do_action(self.lead_position, self.turn, object_pressed.get_name()):
+                    if do_action(self.turn, object_pressed.get_name()):
                         next_player()
             if isinstance(object_pressed, Card.Card):   # If object is a card
                 card_pressed = object_pressed
                 # Return the new card clicked on by the user
                 new_card = self.user_interface.show_card_menu(self.deck)
                 # Check if the card being replaced is held by a player
-                for player in self.playerList:
+                for player in self.player_list:
                     if card_pressed in player.get_cards():
                         player.change_cards(card_pressed, new_card)
-                        self.cardList.remove(card_pressed)
-                        self.cardList.append(new_card)
+                        self.card_list.remove(card_pressed)
+                        self.card_list.append(new_card)
                         self.deck.remove_card(new_card)
                         self.deck.insert_card(card_pressed)
                         return
                 # Check if the card being replaced is a community card
-                if card_pressed in self.communityCards:
-                    self.communityCards.append(new_card)
-                    self.communityCards.remove(card_pressed)
-                    self.cardList.remove(card_pressed)
-                    self.cardList.append(new_card)
+                if card_pressed in self.community_cards:
+                    self.community_cards.append(new_card)
+                    self.community_cards.remove(card_pressed)
+                    self.card_list.remove(card_pressed)
+                    self.card_list.append(new_card)
                     self.deck.remove_card(new_card)
                     self.deck.insert_card(card_pressed)
                     new_card.move_to(card_pressed.get_rect().x, card_pressed.get_rect().y)
@@ -430,14 +414,14 @@ class PokerInPython:
 
 
         # Clear the sequence of images that will be updated
-        self.objectImagesToUpdateSequence.clear()
-        self.objectImagesToUpdateQueue.clear()
+        self.draw_sequence.clear()
+        self.draw_queue.clear()
 
-        for player in self.playerList:
-            self.objectImagesToUpdateQueue.append(player)
+        for player in self.player_list:
+            self.draw_queue.append(player)
         # objectImagesToUpdateQueue.extend(player.getCards())
 
-        for button in self.buttonList:
+        for button in self.button_list:
 
             def _update_buttons():
                 if button.get_name() == "Check":
@@ -454,27 +438,27 @@ class PokerInPython:
                         button.change_button("Bet")
 
             _update_buttons()
-            self.objectImagesToUpdateQueue.append(button)
+            self.draw_queue.append(button)
 
-        for card in self.cardList:
+        for card in self.card_list:
             if card.is_moving():
                 card.update_position()
 
-            self.objectImagesToUpdateQueue.append(card)
+            self.draw_queue.append(card)
 
-        for text in self.textObjectList:
+        for text in self.text_object_list:
             if text.check_timer():
-                self.textObjectList.remove(text)
+                self.text_object_list.remove(text)
                 continue
-            self.objectImagesToUpdateQueue.append(text)
+            self.draw_queue.append(text)
 
-        self.objectImagesToUpdateQueue.append(self.deck)
-        self.objectImagesToUpdateQueue.append(self.pot.pot_text)
+        self.draw_queue.append(self.deck)
+        self.draw_queue.append(self.pot.pot_text)
 
-        for each in self.objectImagesToUpdateQueue:
-            self.objectImagesToUpdateSequence.append((each.get_image(), each.get_rect()))
+        for each in self.draw_queue:
+            self.draw_sequence.append((each.get_image(), each.get_rect()))
 
-        self.user_interface.update_display(self.objectImagesToUpdateSequence)
+        self.user_interface.update_display(self.draw_sequence)
 
 
     # --------------------
@@ -484,14 +468,14 @@ class PokerInPython:
         if early_winner is None:
 
             # A list of the winning players, with their hand score
-            win_list = [[self.playerList[0], [0, 0, 0, 0, 0, 0]]]
+            win_list = [[self.player_list[0], [0, 0, 0, 0, 0, 0]]]
 
             # Determine each players hand
-            for player in self.playerList:
+            for player in self.player_list:
                 if player.has_folded() is False:
                     player.set_cards_face_up(True)
                     card_list = player.get_cards()
-                    card_list.extend(self.communityCards)
+                    card_list.extend(self.community_cards)
                     player_score = self.calculate_hand_score(card_list)
 
                     # Compare players hand to current winning hand
@@ -529,14 +513,14 @@ class PokerInPython:
             win_subtext = Text.Text(f"{win_rank_text}", 48, (0, 0, 0), None)
             win_subtext.move_to(460, 440)
 
-            self.textObjectList.append(win_text)
-            self.textObjectList.append(win_subtext)
+            self.text_object_list.append(win_text)
+            self.text_object_list.append(win_subtext)
 
         else:
             win_text = Text.Text(f"Player {early_winner.get_number()} wins!", 64, (0, 0, 0), None)
             early_winner.set_chips(early_winner.get_chips() + int(self.pot.pot))
             win_text.move_to(320, 320)
-            self.textObjectList.append(win_text)
+            self.text_object_list.append(win_text)
 
         clock = pygame.time.Clock()
         self.update()
@@ -884,17 +868,6 @@ class PokerInPython:
                 return -1
         return 0
 
-    def update_avg_bet(self):
-        for player in self.playerList:
-            if player.has_folded() is False:
-                old_avg = self.avg_bet[self.phase-1][0]
-                n = self.avg_bet[self.phase-1][1]
-                new_avg = ((old_avg*n) + player.get_chips_bet_in_round()) / (n+1)
-                new_avg = round(new_avg, 2)
-                self.avg_bet[self.phase-1] = [new_avg, n+1]
-                return
-
-
     def main(self):
 
         def clock_tick():
@@ -928,6 +901,10 @@ class Pot:
         self.raise_text = Text.Text("none", 32, (0, 0, 0), None)
 
         self.update_text()
+
+    def reset(self):
+        self.pot = 0
+        self.required_to_call = 0
 
 
     def set_min_bet(self, min_bet: int):
