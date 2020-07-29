@@ -56,6 +56,10 @@ class Deck:
         self.rect = self.image.get_rect(topleft=(100, 400))
         self.reset_deck()
 
+    def move_deck(self, pos_x: int, pos_y: int):
+        self.rect.x = pos_x
+        self.rect.y = pos_y
+
     def reset_deck(self):
         """
         Reset and reshuffle the deck.

@@ -11,7 +11,8 @@ class UserInterface:
         self.screen = None
 
         self.black = 0, 0, 0
-        self.background = 49, 117, 61
+        # self.background = 49, 117, 61
+        self.background = pygame.image.load("./Images/UI.png")
 
         self.mouse_pos = 0, 0
 
@@ -19,7 +20,8 @@ class UserInterface:
         self.screen = pygame.display.set_mode(self.size)
 
     def update_display(self, sequence):
-        self.screen.fill(self.background)
+        # self.screen.fill(self.background)
+        self.screen.blit(self.background, (0, 0))
         self.screen.blits(sequence)
         pygame.display.flip()
 

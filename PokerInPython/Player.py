@@ -20,7 +20,7 @@ class Player:
 
     def set_chips(self, amount):
         self.model.set_chips(amount)
-        self.view.update_text(amount)
+        self.view.update_text(amount, number=self.get_number())
 
     def get_confidence(self):
         return self.model.get_confidence()
@@ -163,9 +163,12 @@ class Player:
             text = Text.Text("Chips: -1", 32, self.black, None)
             return text
 
-        def update_text(self, a_chip_count):
+        def update_text(self, a_chip_count, number: int):
             self.text.set_text(f"Chips: {a_chip_count}")
-            self.text.move_to(self.get_rect().x, self.get_rect().y - 20)
+            if number == 1:
+                self.text.move_to(self.get_rect().x, self.get_rect().y + 63)
+            else:
+                self.text.move_to(self.get_rect().x, self.get_rect().y - 30)
 
         def get_image(self):
             return self.image

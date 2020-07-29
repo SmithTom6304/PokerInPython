@@ -88,6 +88,8 @@ class PokerInPython:
             self.player_list.clear()
             self.initialize_players(4, 100)
 
+        self.deck.move_deck(220, 390)
+
         self.button_list.clear()
         self.card_list.clear()
         self.text_object_list.clear()
@@ -128,27 +130,27 @@ class PokerInPython:
         self.pot.set_min_bet(self.pot.small_bet)
 
     def initialize_players(self, number_of_players, chips):
-        player1 = Player.Player(1, chips, confidence=100, pos_x=80, pos_y=400)
+        player1 = Player.Player(1, chips, confidence=100, pos_x=47, pos_y=355)
         self.player_list.append(player1)
 
         for i in range(2, number_of_players + 1):
-            x_value = (self.user_interface.width / number_of_players) * (i - 1)
+            x_value = 100 + (260 * (i - 2))
             player = Player.Player(i, chips, confidence=100, pos_x=x_value, pos_y=(self.user_interface.height / 6))
             self.player_list.append(player)
 
         self.current_player = self.player_list[0]
 
     def initialize_buttons(self):
-        btn1 = Button.Button(button_id=1, name="Fold", pos_x=500, pos_y=540)
-        btn2 = Button.Button(button_id=2, name="Check", pos_x=640, pos_y=540)
-        btn3 = Button.Button(button_id=3, name="Bet", pos_x=780, pos_y=540)
+        btn1 = Button.Button(button_id=1, name="Fold", pos_x=283, pos_y=540)
+        btn2 = Button.Button(button_id=2, name="Check", pos_x=423, pos_y=540)
+        btn3 = Button.Button(button_id=3, name="Bet", pos_x=563, pos_y=540)
 
         self.button_list.append(btn1)
         self.button_list.append(btn2)
         self.button_list.append(btn3)
 
-        bet_panel = Button.Button(button_id=4, name="Bet_Display", pos_x=669, pos_y=515)
-        raise_panel = Button.Button(button_id=4, name="Bet_Display", pos_x=809, pos_y=515)
+        bet_panel = Button.Button(button_id=4, name="Bet_Display", pos_x=452, pos_y=515)
+        raise_panel = Button.Button(button_id=4, name="Bet_Display", pos_x=593, pos_y=515)
         self.button_list.append(bet_panel)
         self.button_list.append(raise_panel)
 
@@ -156,9 +158,9 @@ class PokerInPython:
         player_bet = str(self.pot.small_bet - p1.get_chips_bet_in_round())
         player_raise = str(self.pot.big_bet - p1.get_chips_bet_in_round())
         bet_text = Text.Text(player_bet, 26, (0, 0, 0), None)
-        bet_text.move_to(680, 517)
+        bet_text.move_to(bet_panel.get_rect().x + 11, bet_panel.get_rect().y + 2)
         raise_text = Text.Text(player_raise, 26, (0, 0, 0), None)
-        raise_text.move_to(820, 517)
+        raise_text.move_to(raise_panel.get_rect().x + 11, raise_panel.get_rect().y + 2)
 
         self.text_object_list.append(bet_text)
         self.text_object_list.append(raise_text)
@@ -181,19 +183,19 @@ class PokerInPython:
             for i in range(0, 3):
                 card = self.deck.draw_card()
                 card.set_wait_frames(i * 3)
-                card.move(200 + (100 * (i+1)), 400)
+                card.move(250 + (75 * (i+1)), 390)
                 card.set_face_up(True)
                 self.community_cards.append(card)
                 self.card_list.append(card)
         if phase == 3:
             card = self.deck.draw_card()
-            card.move(200 + (100 * (3 + 1)), 400)
+            card.move(250 + (75 * (3 + 1)), 390)
             card.set_face_up(True)
             self.community_cards.append(card)
             self.card_list.append(card)
         if phase == 4:
             card = self.deck.draw_card()
-            card.move(200 + (100 * (4 + 1)), 400)
+            card.move(250 + (75 * (4 + 1)), 390)
             card.set_face_up(True)
             self.community_cards.append(card)
             self.card_list.append(card)
@@ -895,7 +897,7 @@ class Pot:
         self.big_bet: int = 4
         self.required_to_call = 0
         self.pot_text = Text.Text("Pot: -1", 32, (0, 0, 0), None)
-        self.pot_text.move_to(30, 30)
+        self.pot_text.move_to(756, 417)
 
         self.bet_text = Text.Text("none", 32, (0, 0, 0), None)
         self.raise_text = Text.Text("none", 32, (0, 0, 0), None)
