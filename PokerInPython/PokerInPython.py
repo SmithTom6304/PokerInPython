@@ -754,27 +754,27 @@ class PokerInPython:
             return []
 
         def straight_flush(a_card_list: list):
-            a_card_list.sort(key=lambda x: (x.get_value()["suit"]), reverse=True)
-            last_number = a_card_list[0].get_value()["number"]  # The value of the last card compared
-            count = 1
-            first_card = a_card_list[0]  # The highest card in the straight
-            last_suit = first_card.get_value()["suit"]
-            for card in a_card_list[1:]:
-                if card.get_value()["suit"] == last_suit:
-                    if card.get_value()["number"] == last_number - 1:
-                        count += 1
-                        last_number = card.get_value()["number"]
-                        if count == 5:
-                            return [first_card]
-                    else:
-                        count = 1
-                        last_number = card.get_value()["number"]
-                        first_card = card
-                else:
-                    last_suit = card.get_value()["suit"]
-                    last_number = card.get_value()["number"]
-                    count = 1
-            return []
+            a_card_list.sort(key=lambda x: (x.get_value()["suit"], x.get_value()["number"]), reverse=True)
+            split_list = [[], [], [], []]
+
+            for card in a_card_list:
+                if card.get_value()["suit"] == 'D':
+                    split_list[0].append(card)
+                if card.get_value()["suit"] == 'C':
+                    split_list[1].append(card)
+                if card.get_value()["suit"] == 'H':
+                    split_list[2].append(card)
+                if card.get_value()["suit"] == 'S':
+                    split_list[3].append(card)
+
+            a_kicker_list = []
+            for a_list in split_list:
+                if len(a_list) == 0:
+                    continue
+                a_kicker_list = straight(a_list)
+                if len(a_kicker_list) > 0:
+                    return a_kicker_list
+            return a_kicker_list
 
         def royal_flush(a_card_list: list):
             a_card_list.sort(key=lambda x: (x.get_value()["suit"]), reverse=True)
