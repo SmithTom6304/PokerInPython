@@ -78,7 +78,7 @@ class UserInterface:
             card.set_face_up(True)
             draw_sequence.append((card.get_image(), card.get_rect()))
 
-        self.screen.fill(self.background)
+        self.screen.fill((153, 204, 255))
         self.screen.blits(draw_sequence)
         pygame.display.flip()
 
