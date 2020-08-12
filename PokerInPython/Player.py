@@ -100,6 +100,11 @@ class Player:
             print("Scaling image instead")
             self.view.image = pygame.transform.scale(self.view.image, (144, 200))
 
+    def has_lost(self):
+        return self.model.get_has_lost()
+
+    def set_has_lost(self, value):
+        self.model.set_has_lost(value)
 
     def fold(self):
         self.model.set_folded(True)
@@ -122,6 +127,7 @@ class Player:
             self.confidence = confidence
             self.folded = False
             self.chips_bet_in_round = 0
+            self.has_lost = False
 
         def get_number(self):
             return self.number
@@ -140,6 +146,12 @@ class Player:
 
         def set_folded(self, value):
             self.folded = value
+
+        def set_has_lost(self, value: bool):
+            self.has_lost = value
+
+        def get_has_lost(self):
+            return self.has_lost
 
         def get_chips_bet_in_round(self):
             return self.chips_bet_in_round
