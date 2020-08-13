@@ -1002,6 +1002,16 @@ class Pot:
             self.raise_text.set_text(f"{self.big_bet + self.required_to_call - amount_already_bet}")
 
 
+class GameHandler:
+
+    def __init__(self):
+        self.state = "Menu"
+
+    def enter_menu_state(self):
+        self.state = "Menu"
+
+
+
 if __name__ == '__main__':
     game = PokerInPython()
     game.main()
