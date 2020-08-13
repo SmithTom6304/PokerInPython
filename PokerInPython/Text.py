@@ -132,8 +132,7 @@ class Text:
         if time.time() > self.timer:
             self.timer = 0
             return True
-        else:
-            return False
+        return False
 
 
 
