@@ -296,6 +296,62 @@ def compare_hands(a_player_score, a_win_score):
     return 0
 
 
+def simulate_games(hole_cards, current_community_cards, no_of_players, simulations=1000):
+    # Code modified from http://cowboyprogramming.com/2007/01/04/programming-poker-ai/
+    score = 0.0
+    won_games = 0
+    sim_deck = Deck.Deck()
+    copy_deck = Deck.Deck()
+    sim_deck.remove_cards_by_val(hole_cards)
+    sim_deck.remove_cards_by_val(current_community_cards)
+    sim_deck.shuffle_deck()
+
+    start_time = time.time()
+    for _unused_i in range(0, simulations):
+
+        copy_deck.deck = sim_deck.deck.copy()
+        copy_deck.shuffle_deck()
+        players = [hole_cards]
+        scores = []
+        win_score = [0, 0, 0, 0, 0, 0]
+        winners = 1
+        community_cards = current_community_cards.copy()
+
+        for _unused_j in range(1, no_of_players):
+            players.append([copy_deck.draw_card(), copy_deck.draw_card()])
+        while len(community_cards) < 5:
+            community_cards.append(copy_deck.draw_card())
+
+        for player_hand in players:
+            card_list = player_hand.copy()
+            card_list.extend(community_cards)
+            player_score = calculate_hand_score(card_list)
+            scores.append(player_score)
+            is_better = compare_hands(player_score, win_score)
+            if is_better > 0:
+                win_score = player_score
+                winners = 1
+            if is_better == 0:
+                winners += 1
+
+        if scores[0] == win_score:
+            score += 1/winners
+            won_games += 1
+
+
+
+
+
+    end_time = time.time()
+    delta_t = end_time - start_time
+
+    print(f"Simulation took {round(delta_t, 3)}s")
+    print(f"Simulation scored {round(score/simulations, 3)}, with {won_games} games won")
+
+    # score = random.random()
+    return score/simulations
+
+
 class PokerInPython:
 
     # Queue of objects to be added to the sequence to update
@@ -601,7 +657,7 @@ class PokerInPython:
 
             i_players_left = 4 - players_folded
 
-            score = self.simulate_games(self.current_player.cards.copy(), self.community_cards.copy(),
+            score = simulate_games(self.current_player.cards.copy(), self.community_cards.copy(),
                                         i_players_left)
 
             req = self.pot.required_to_call - self.current_player.get_chips_bet_in_round()
@@ -853,62 +909,6 @@ class PokerInPython:
             pygame.event.get()
 
         self.initialize_game_objects(False)
-
-    # ---SIMULATE GAMES FOR AI CALCULATION---
-    def simulate_games(self, hole_cards, current_community_cards, no_of_players, simulations=1000):
-        # Code modified from http://cowboyprogramming.com/2007/01/04/programming-poker-ai/
-        score = 0.0
-        won_games = 0
-        sim_deck = Deck.Deck()
-        copy_deck = Deck.Deck()
-        sim_deck.remove_cards_by_val(hole_cards)
-        sim_deck.remove_cards_by_val(current_community_cards)
-        sim_deck.shuffle_deck()
-
-        start_time = time.time()
-        for _unused_i in range(0, simulations):
-
-            copy_deck.deck = sim_deck.deck.copy()
-            copy_deck.shuffle_deck()
-            players = [hole_cards]
-            scores = []
-            win_score = [0, 0, 0, 0, 0, 0]
-            winners = 1
-            community_cards = current_community_cards.copy()
-
-            for _unused_j in range(1, no_of_players):
-                players.append([copy_deck.draw_card(), copy_deck.draw_card()])
-            while len(community_cards) < 5:
-                community_cards.append(copy_deck.draw_card())
-
-            for player_hand in players:
-                card_list = player_hand.copy()
-                card_list.extend(community_cards)
-                player_score = calculate_hand_score(card_list)
-                scores.append(player_score)
-                is_better = compare_hands(player_score, win_score)
-                if is_better > 0:
-                    win_score = player_score
-                    winners = 1
-                if is_better == 0:
-                    winners += 1
-
-            if scores[0] == win_score:
-                score += 1/winners
-                won_games += 1
-
-
-
-
-
-        end_time = time.time()
-        delta_t = end_time - start_time
-
-        print(f"Simulation took {round(delta_t, 3)}s")
-        print(f"Simulation scored {round(score/simulations, 3)}, with {won_games} games won")
-
-        # score = random.random()
-        return score/simulations
 
     def main(self):
 
