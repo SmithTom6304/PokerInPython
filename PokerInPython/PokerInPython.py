@@ -86,7 +86,7 @@ class PokerInPython:
     def initialize_game_objects(self, initialize_players=True):
         if initialize_players is True:
             self.player_list.clear()
-            self.initialize_players(4, 100)
+            self.initialize_players(4, 10)
 
         self.deck.move_deck(220, 390)
 
@@ -103,6 +103,7 @@ class PokerInPython:
             player.reset()
             self.text_object_list.append(player.get_text())
 
+        self.round_initialization()
         self.initialize_cards()
         self.initialize_buttons()
 
@@ -110,24 +111,62 @@ class PokerInPython:
         for i, card in enumerate(self.card_list):
             card.set_wait_frames((len(self.card_list) - i) * 3)
 
-        self.round_initialization()
+
 
     def round_initialization(self):
+
+        def determine_players_left_in_round():
+            a_players_left_in_game = len(self.player_list)
+            for player in self.player_list:
+                if player.get_chips() <= 0:
+                    player.set_has_lost(True)
+                    a_players_left_in_game -= 1
+            return a_players_left_in_game
+
+        def determine_blind_indexes() -> [int, int]:
+            big_blind = self.lead_position - 1
+            small_blind = self.lead_position - 2
+            blinds_selected = False
+            while not blinds_selected:
+                if big_blind < 0:
+                    big_blind += len(self.player_list)
+                if small_blind < 0:
+                    small_blind += len(self.player_list)
+
+                if self.player_list[big_blind].has_lost():
+                    big_blind -= 1
+                    small_blind -= 1
+                    continue
+                elif self.player_list[big_blind].get_chips() < self.pot.small_bet:
+                    self.player_list[big_blind].set_has_lost(True)
+                    big_blind -= 1
+                    small_blind -= 1
+                    continue
+                elif self.player_list[small_blind].has_lost():
+                    small_blind -= 1
+                    continue
+                elif self.player_list[small_blind].get_chips() < int(self.pot.small_bet / 2):
+                    self.player_list[small_blind].set_has_lost(True)
+                    small_blind -= 1
+                    continue
+
+                blinds_selected = True
+
+            return [big_blind, small_blind]
+
         self.lead_position = self.start_lead_position
         self.start_lead_position = (self.start_lead_position + 1) % len(self.player_list)
         self.turn = self.lead_position
         self.current_player = self.player_list[self.lead_position]
         self.current_player.start_turn()
 
-        big_blind = self.lead_position - 1
-        small_blind = self.lead_position - 2
-        if big_blind < 0:
-            big_blind += len(self.player_list)
-        if small_blind < 0:
-            small_blind += len(self.player_list)
+        players_left_in_game = determine_players_left_in_round()
 
-        self.pot.bet_blinds(self.player_list[big_blind], self.player_list[small_blind])
+        blind_indexes = determine_blind_indexes()
+
+        self.pot.bet_blinds(self.player_list[blind_indexes[0]], self.player_list[blind_indexes[1]])
         self.pot.set_min_bet(self.pot.small_bet)
+
 
     def initialize_players(self, number_of_players, chips):
         player1 = Player.Player(1, chips, confidence=100, pos_x=47, pos_y=355)
@@ -169,6 +208,9 @@ class PokerInPython:
 
     def initialize_cards(self):
         for player in self.player_list:
+            if player.has_lost():
+                player.fold(has_cards=False)
+                continue
             player.set_cards([self.deck.draw_card(), self.deck.draw_card()])
             self.card_list.extend(player.get_cards())
             if player.get_number() == 1:
@@ -356,6 +398,10 @@ class PokerInPython:
                 action = "Bet"
             if self.raises_in_round == 3 and action == "Raise":
                 action = "Call"
+            if req == 0 and self.current_player.get_chips() == 0:
+                action = "Check"
+            if self.current_player.get_chips() < req:
+                action = "Fold"
 
             if do_action(self.turn, action):
                 next_player()

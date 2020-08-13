@@ -106,10 +106,11 @@ class Player:
     def set_has_lost(self, value):
         self.model.set_has_lost(value)
 
-    def fold(self):
+    def fold(self, has_cards=True):
         self.model.set_folded(True)
-        self.cards[0].move_by(0, 20)
-        self.cards[1].move_by(0, 20)
+        if has_cards:
+            self.cards[0].move_by(0, 20)
+            self.cards[1].move_by(0, 20)
 
     def has_folded(self):
         return self.model.get_folded()
