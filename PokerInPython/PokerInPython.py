@@ -377,6 +377,7 @@ class PokerInPython:
         self.pot = Pot()
         self.deck = Deck.Deck()
         self.user_interface = UserInterface.UserInterface()
+        self.user_interface.change_background("UI")
 
         self.start_lead_position = 0    # Index of first player in round. Effectively the dealer.
         self.lead_position = 0  # Index of the current leading player, or player who raised last
@@ -1006,12 +1007,100 @@ class GameHandler:
 
     def __init__(self):
         self.state = "Menu"
+        self.ui = UserInterface.UserInterface()
+        self.ui.change_background("Menu")
+
+
+        self.btn_list = []
 
     def enter_menu_state(self):
         self.state = "Menu"
 
+        self.btn_list.clear()
+        btn1 = Button.Button(0, "Play", 150, 260)
+        btn2 = Button.Button(1, "Exit", 395, 253)
+        self.btn_list.extend([btn2, btn1])
+
+    def menu(self):
+
+        def check_button_presses():
+            button_pressed: Button.Button = self.ui.check_button_presses(self.btn_list)
+            if button_pressed is not None:
+                action = button_pressed.get_name()
+                return action
+            return "None"
+
+        def update():
+            draw_queue = []
+            draw_sequence = []
+
+            for button in self.btn_list:
+                draw_queue.append(button)
+
+            for item in draw_queue:
+                draw_sequence.append((item.get_image(), item.get_rect()))
+
+            self.ui.update_display(draw_sequence)
+
+        action: str = "None"
+
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                sys.exit()
+            if event.type == pygame.MOUSEBUTTONDOWN:
+                action: str = check_button_presses()
+
+        if action == "Play":
+            self.exit_menu_state()
+            self.enter_game_state()
+        if action == "Exit":
+            self.state = "Exit"
+            self.exit_menu_state()
+        if action == "None":
+            update()
+        return
+
+
+    def exit_menu_state(self):
+        self.btn_list.clear()
+
+    def enter_game_state(self):
+        self.state = "Game"
+
+    def game(self):
+        a_game = PokerInPython()
+        a_game.main()
+        self.exit_game_state()
+
+    def exit_game_state(self):
+        self.state = "Menu"
+
+    def handler(self):
+
+        def clock_tick():
+            clock.tick(60)
+
+        pygame.init()
+        clock = pygame.time.Clock()
+        self.ui.init_display()
+
+        self.enter_menu_state()
+        while True:
+
+
+            if self.state == "Menu":
+                self.menu()
+            if self.state == "Game":
+                self.game()
+            if self.state == "Exit":
+                sys.exit()
+            clock_tick()
+
+
 
 
 if __name__ == '__main__':
-    game = PokerInPython()
-    game.main()
+    # game = PokerInPython()
+    # game.main()
+    game = GameHandler()
+    game.handler()

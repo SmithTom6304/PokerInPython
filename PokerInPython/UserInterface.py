@@ -12,7 +12,7 @@ class UserInterface:
 
         self.black = 0, 0, 0
         # self.background = 49, 117, 61
-        self.background = pygame.image.load("./Images/UI.png")
+        self.background = pygame.image.load("./Images/Menu.png")
 
         self.mouse_pos = 0, 0
 
@@ -91,3 +91,12 @@ class UserInterface:
                     card.move_to(deck_object.rect.x, deck_object.rect.y)
                 return card_pressed
             clock.tick(60)
+
+    def change_background(self, a_background: str):
+        bg_ui = "./Images/UI.png"
+        bg_menu = "./Images/Menu.png"
+
+        if a_background == "UI":
+            self.background = pygame.image.load(bg_ui)
+        elif a_background == "Menu":
+            self.background = pygame.image.load(bg_menu)
