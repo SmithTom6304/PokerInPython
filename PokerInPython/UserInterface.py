@@ -90,5 +90,4 @@ class UserInterface:
                 for card in deck:
                     card.move_to(deck_object.rect.x, deck_object.rect.y)
                 return card_pressed
-            elif True:
-                clock.tick(60)
+            clock.tick(60)
