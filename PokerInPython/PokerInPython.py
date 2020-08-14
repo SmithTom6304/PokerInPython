@@ -378,6 +378,7 @@ class PokerInPython:
         self.deck = Deck.Deck()
         self.user_interface = UserInterface.UserInterface()
         self.user_interface.change_background("UI")
+        self.exit = False
 
         self.start_lead_position = 0    # Index of first player in round. Effectively the dealer.
         self.lead_position = 0  # Index of the current leading player, or player who raised last
@@ -529,6 +530,10 @@ class PokerInPython:
         self.button_list.append(bet_panel)
         self.button_list.append(raise_panel)
 
+        home_btn = Button.Button(button_id=6, name="Home", pos_x=8, pos_y=8)
+
+        self.button_list.append(home_btn)
+
         p1: Player.Player = self.player_list[0]
         player_bet = str(self.pot.small_bet - p1.get_chips_bet_in_round())
         player_raise = str(self.pot.big_bet - p1.get_chips_bet_in_round())
@@ -626,6 +631,8 @@ class PokerInPython:
                 self.lead_position = turn
                 self.raises_in_round += 1
                 return self.pot.bet(self.current_player, self.phase)
+            if action == "Home":
+                self.exit = True
 
         # Wait until all cards are dealt before allowing actions
         for card in self.card_list:
@@ -762,6 +769,8 @@ class PokerInPython:
                     # next player
                     if do_action(self.turn, object_pressed.get_name()):
                         next_player()
+                if object_pressed.get_name() == "Home":
+                    do_action(self.turn, object_pressed.get_name())
             if isinstance(object_pressed, Card.Card):   # If object is a card
                 card_pressed = object_pressed
                 # Return the new card clicked on by the user
@@ -925,6 +934,9 @@ class PokerInPython:
         while True:
             self.game_loop()
             self.update()
+            if self.exit is True:
+                self.exit = False
+                break
             clock_tick()
 
 
@@ -1060,7 +1072,6 @@ class GameHandler:
             update()
         return
 
-
     def exit_menu_state(self):
         self.btn_list.clear()
 
@@ -1073,7 +1084,8 @@ class GameHandler:
         self.exit_game_state()
 
     def exit_game_state(self):
-        self.state = "Menu"
+        self.enter_menu_state()
+
 
     def handler(self):
 
