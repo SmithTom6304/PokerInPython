@@ -531,8 +531,10 @@ class PokerInPython:
         self.button_list.append(raise_panel)
 
         home_btn = Button.Button(button_id=6, name="Home", pos_x=8, pos_y=8)
+        music_btn = Button.Button(button_id=7, name="Music", pos_x=800, pos_y=8)
 
         self.button_list.append(home_btn)
+        self.button_list.append(music_btn)
 
         p1: Player.Player = self.player_list[0]
         player_bet = str(self.pot.small_bet - p1.get_chips_bet_in_round())
@@ -633,6 +635,11 @@ class PokerInPython:
                 return self.pot.bet(self.current_player, self.phase)
             if action == "Home":
                 self.exit = True
+            if action == "Music":
+                if pygame.mixer.music.get_busy():
+                    pygame.mixer.music.stop()
+                else:
+                    pygame.mixer.music.play()
 
         # Wait until all cards are dealt before allowing actions
         for card in self.card_list:
@@ -769,7 +776,7 @@ class PokerInPython:
                     # next player
                     if do_action(self.turn, object_pressed.get_name()):
                         next_player()
-                if object_pressed.get_name() == "Home":
+                if object_pressed.get_name() in ("Home", "Music"):
                     do_action(self.turn, object_pressed.get_name())
             if isinstance(object_pressed, Card.Card):   # If object is a card
                 card_pressed = object_pressed
@@ -1022,7 +1029,6 @@ class GameHandler:
         self.ui = UserInterface.UserInterface()
         self.ui.change_background("Menu")
 
-
         self.btn_list = []
 
     def enter_menu_state(self):
@@ -1095,6 +1101,11 @@ class GameHandler:
         pygame.init()
         clock = pygame.time.Clock()
         self.ui.init_display()
+
+        pygame.mixer.init()
+        pygame.mixer.music.load("./Sounds/bensound-jazzyfrenchy.mp3")
+        pygame.mixer.music.set_volume(0.05)
+        pygame.mixer.music.play(-1)
 
         self.enter_menu_state()
         while True:
