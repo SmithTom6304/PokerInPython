@@ -1,26 +1,51 @@
-# UserInterface layer
+"""
+A module to handle drawing the game screen
+
+Classes
+-------
+UserInterface
+    Draws and updates the user interface, and handles player input
+
+Methods
+-------
+None
+"""
+
 import pygame
 
 
 class UserInterface:
 
-    # myfont = pygame.font.SysFont('Elephant', 16)
-
     def __init__(self):
+        """
+        Attributes
+        ----------
+            self.size: The width and height of the screen
+            self.screen: The screen object to draw to
+            self.background: The background image
+            self.mouse_pos: The x,y coordinates of the mouse
+
+        """
         self.size = self.width, self.height = 920, 640
         self.screen = None
-
-        self.black = 0, 0, 0
-        # self.background = 49, 117, 61
         self.background = pygame.image.load("./Images/Menu.png")
-
         self.mouse_pos = 0, 0
 
     def init_display(self):
+        """Initialize the screen object
+
+        """
         self.screen = pygame.display.set_mode(self.size)
 
     def update_display(self, sequence):
-        # self.screen.fill(self.background)
+        """
+        Draw a sequence of objects to the display
+
+        Parameters
+        ----------
+        sequence
+            A sequence of tuples of type (image, rect) to be drawn to the screen
+        """
         self.screen.blit(self.background, (0, 0))
         self.screen.blits(sequence)
         pygame.display.flip()
@@ -44,6 +69,20 @@ class UserInterface:
         return None
 
     def check_card_presses(self, card_list):
+        """
+        Checks if a card is being clicked on, and returns it
+
+        Parameters
+        ----------
+        card_list
+            List of cards to be checked
+
+        Returns
+        -------
+        Card
+            The card being clicked on
+
+        """
         pygame.event.get()
 
         if pygame.mouse.get_pressed()[0] == 0:
@@ -57,6 +96,19 @@ class UserInterface:
         return None
 
     def show_card_menu(self, deck_object):
+        """
+        Display a menu to swap cards, to help with debugging
+
+        Parameters
+        ----------
+        deck_object
+            Deck object containing all the cards that can be swapped with
+
+        Returns
+        -------
+            Card being swapped with
+
+        """
         deck = deck_object.deck
         draw_sequence = []
         # a_card_list.sort(key=lambda x: x.get_value()["number"], reverse=True)
@@ -93,6 +145,17 @@ class UserInterface:
             clock.tick(60)
 
     def change_background(self, a_background: str):
+        """
+        Change the background image
+
+        Parameters
+        ----------
+        a_background
+            What background should be swapped to
+            "UI": The user interface background
+            "Menu": The main menu background
+
+        """
         bg_ui = "./Images/UI.png"
         bg_menu = "./Images/Menu.png"
 
