@@ -395,6 +395,8 @@ class PokerInPython:
 
         self.current_player: Player.Player = None
 
+        self.btn_click_sound = pygame.mixer.Sound("./Sounds/btn_click.wav")
+
     # ---INPUT HANDLING---
     def handle_events(self):
         """Handle input events
@@ -616,6 +618,9 @@ class PokerInPython:
                 action_text.set_timer(1)
                 action_text.move_to(self.current_player.get_rect().x + 120, self.current_player.get_rect().y + 30)
                 self.text_object_list.append(action_text)
+            else:
+                self.btn_click_sound.play()
+
 
             if action == "Fold":
                 self.current_player.fold()
@@ -772,8 +777,8 @@ class PokerInPython:
 
         if object_pressed is not None:
             if isinstance(object_pressed, Button.Button):   # If object is a button
-                if object_pressed.get_name() in ("Fold", "Check", "Bet", "Call", "Raise"):  # Do action and advance to
-                    # next player
+                if object_pressed.get_name() in ("Fold", "Check", "Bet", "Call", "Raise"):
+                    # Do action and advance to next player
                     if do_action(self.turn, object_pressed.get_name()):
                         next_player()
                 if object_pressed.get_name() in ("Home", "Music"):
@@ -1104,7 +1109,7 @@ class GameHandler:
 
         pygame.mixer.init()
         pygame.mixer.music.load("./Sounds/bensound-jazzyfrenchy.mp3")
-        pygame.mixer.music.set_volume(0.05)
+        pygame.mixer.music.set_volume(0.1)
         pygame.mixer.music.play(-1)
 
         self.enter_menu_state()
