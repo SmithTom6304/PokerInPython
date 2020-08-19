@@ -112,6 +112,10 @@ class Button:
         a_rect = self.get_rect()
         return a_rect.collidepoint(mouse_x, mouse_y)
 
+    def change_button(self, name):
+        self.model.name = name
+        self.view.set_image(name)
+
     class Model:
         """
         Inner class to keep track of buttons values
@@ -189,10 +193,14 @@ class Button:
             :param pos_y: y value of the button
             """
 
-            button_image_path = f"{base_path}Images/Buttons/"
-
-            self.image = pygame.image.load(f"{button_image_path}Btn_{name}.png")
+            self.image = None
+            self.set_image(name)
             self.rect = self.image.get_rect(topleft=(pos_x, pos_y))
+
+        def set_image(self, name):
+            button_image_path = f"{base_path}Images/Buttons/"
+            image = pygame.image.load(f"{button_image_path}Btn_{name}.png")
+            self.image = image
 
         def get_image(self):
             """Returns the buttons image

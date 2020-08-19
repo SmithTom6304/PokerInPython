@@ -77,7 +77,8 @@ class Card:
 
     def update_position(self):
         """Updates the cards position, if it's moving to a new position."""
-        self.view.move_step()
+        if self.view.move_step():
+            self.model.moving = False
 
     def get_value(self):
         """Returns the cards value, as a dict {"number", "suit"}
@@ -123,6 +124,16 @@ class Card:
         :return: rect
         """
         return self.view.get_rect()
+
+    def is_mouse_over(self, mouse_x, mouse_y):
+        """Returns true if the mouse is over the button
+
+        :param mouse_x: x position of the mouse
+        :param mouse_y: y position of the mouse
+        :return: True if mouse is over the button
+        """
+        a_rect = self.get_rect()
+        return a_rect.collidepoint(mouse_x, mouse_y)
 
     def is_moving(self):
         """Returns whether the card is currently moving
@@ -204,7 +215,7 @@ class Card:
             self.moving = False
 
             # Ensure given card values are valid. Set to None and return if not.
-            if number < 1 or number > 13:
+            if number < 2 or number > 14:
                 self.number = None
                 return
             if suit not in ('H', 'D', 'C', 'S'):
@@ -415,6 +426,10 @@ class Card:
             if abs(delta_y) < step_size:
                 self.move_absolute(a_rect.x, a_move_to[1])
 
+            if abs(delta_x) < step_size and abs(delta_y) < step_size:
+                self.moving = False
+                return True
+
             # Re-calculate difference between current pos and final pos
             a_rect = self.get_rect()
             a_move_to = self.movingTo
@@ -431,5 +446,4 @@ class Card:
             if delta_y < 0:
                 self.move_relative(0, -step_size)
 
-            if delta_x == 0 and delta_y == 0:
-                self.moving = False
+

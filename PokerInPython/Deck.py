@@ -56,19 +56,23 @@ class Deck:
         self.rect = self.image.get_rect(topleft=(100, 400))
         self.reset_deck()
 
+    def move_deck(self, pos_x: int, pos_y: int):
+        self.rect.x = pos_x
+        self.rect.y = pos_y
+
     def reset_deck(self):
         """
         Reset and reshuffle the deck.
         """
         self.deck.clear()
 
-        for i in range(1, 14):
-            self.deck.append(Card.Card(i, 'C', self.rect.x, self.rect.y))
-        for i in range(1, 14):
+        for i in range(2, 15):
             self.deck.append(Card.Card(i, 'D', self.rect.x, self.rect.y))
-        for i in range(1, 14):
+        for i in range(2, 15):
+            self.deck.append(Card.Card(i, 'C', self.rect.x, self.rect.y))
+        for i in range(2, 15):
             self.deck.append(Card.Card(i, 'H', self.rect.x, self.rect.y))
-        for i in range(1, 14):
+        for i in range(2, 15):
             self.deck.append(Card.Card(i, 'S', self.rect.x, self.rect.y))
 
         self.shuffle_deck()
@@ -94,6 +98,37 @@ class Deck:
         :return: Card
         """
         return self.deck.pop()
+
+    def remove_card(self, a_card):
+        self.deck.remove(a_card)
+
+    def remove_cards(self, card_list):
+        for card in card_list:
+            self.remove_card(card)
+
+    def remove_card_by_val(self, a_card):
+        for card in self.deck:
+            if card.get_value() == a_card.get_value():
+                self.deck.remove(card)
+                return True
+        raise ValueError
+
+    def remove_cards_by_val(self, card_list):
+        for card in card_list:
+            self.remove_card_by_val(card)
+
+
+    def insert_card(self, a_card, shuffle=True):
+        self.deck.insert(0, a_card)
+        if shuffle:
+            self.shuffle_deck()
+
+    def insert_cards(self, card_list, shuffle=True):
+        for card in card_list:
+            if card == card_list[-1]:   # If card is last in list, do shuffle
+                self.insert_card(card, shuffle)
+            else:   # Dont shuffle until last card in list
+                self.insert_card(card, shuffle=False)
 
     def get_image(self):
         """
