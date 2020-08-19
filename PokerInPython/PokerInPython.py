@@ -381,8 +381,8 @@ def simulate_games(hole_cards: list, current_community_cards: list, no_of_player
     end_time = time.time()
     delta_t = end_time - start_time
 
-    print(f"Simulation took {round(delta_t, 3)}s")
-    print(f"Simulation scored {round(score/simulations, 3)}, with {won_games} games won")
+    # print(f"Simulation took {round(delta_t, 3)}s")
+    # print(f"Simulation scored {round(score/simulations, 3)}, with {won_games} games won")
 
     # score = random.random()
     return score/simulations
@@ -731,13 +731,15 @@ class PokerInPython:
 
                 pot_odds = min_bet / (self.pot.pot + min_bet*2)
                 rate_of_return = score/pot_odds
-                print(f"TWO LEFT: Player{self.current_player.get_number()}ROR = "
-                      f"{score}/{pot_odds} = {rate_of_return}")
+                if self.DEV_MODE is True:
+                    print(f"TWO LEFT: Player{self.current_player.get_number()}ROR = "
+                          f"{score}/{pot_odds} = {rate_of_return}")
 
                 # Players should only call when score is bad but RoR
                 if score < 0.45 and rate_of_return > 1:
-                    print(f"TWO LEFT: Player{self.current_player.get_number()} is hanging on")
-                    rate_of_return = 1.05
+                    if self.DEV_MODE is True:
+                        print(f"TWO LEFT: Player{self.current_player.get_number()} is hanging on")
+                        rate_of_return = 1.05
 
 
             delay = random.uniform(0.5, 3)
@@ -923,7 +925,8 @@ class PokerInPython:
             for winner in win_list:
                 player = winner[0]
 
-                print(f"Player {player.get_number()} wins with {winner[1][0]}!")
+                if self.DEV_MODE is True:
+                    print(f"Player {player.get_number()} wins with {winner[1][0]}!")
                 player.set_chips(player.get_chips() + int(self.pot.pot/len(win_list)))
 
             win_rank = win_list[0][1][0]    # This looks worse than it is.

@@ -1,0 +1,3 @@
+To create a new build, run
+	python setup.py build
+from the command line
