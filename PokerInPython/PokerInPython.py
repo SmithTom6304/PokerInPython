@@ -16,7 +16,23 @@ os.environ['SDL_VIDEO_WINDOW_POS'] = "%d,%d" % (5, 35)
 
 
 def calculate_hand_score(card_list: list):
+    """
+    Determine the value of a hand.
+    e.g. Pair with a 7 kicker, straight flush
 
+    :param card_list: List of cards to be ranked. Players hole cards and the community cards
+
+    :return: List of ints [0, 0, 0, 0, 0, 0]. First value is the rank (0 = high card, 1 = pair etc.)
+    Remaining values are for the value of the card rank and the value of the kickers.
+
+
+    For example:
+
+    Three-of-a-kind sixes with a king and a 10 as kicker would return [4, 6, 13, 10, 0, 0].
+
+    Ace high-card with 10, 8, 6, 4 kickers would return [1, 14, 10, 8, 6, 4]
+
+    """
     def high_card(a_card_list: list):
         return a_card_list[:5]
 
@@ -287,7 +303,16 @@ def calculate_hand_score(card_list: list):
     return hand_score
 
 
-def compare_hands(a_player_score, a_win_score):
+def compare_hands(a_player_score: list, a_win_score: list) -> int:
+    """
+    Compare two hand scores, and determine which one is better.
+
+    :param a_player_score: First hand score to be compared
+    :param a_win_score: Hand score to be compared with.
+
+    :return: 1 if a_player_score is better, -1 if a_win_score is better, 0 if they are equal
+
+    """
     for i in range(0, len(a_player_score)):
         if a_player_score[i] > a_win_score[i]:
             return 1
@@ -296,7 +321,18 @@ def compare_hands(a_player_score, a_win_score):
     return 0
 
 
-def simulate_games(hole_cards, current_community_cards, no_of_players, simulations=1000):
+def simulate_games(hole_cards: list, current_community_cards: list, no_of_players: int, simulations=1000) -> float:
+    """
+    Simulate a number of games, to determine how likely a hand is to win the round.
+
+    :param hole_cards: Players two hole cards
+    :param current_community_cards: The community cards that have been dealt so far
+    :param no_of_players: The players remaining in the round
+    :param simulations: Number of games to be simulated. A higher number will increase accuracy, but take longer
+
+    :return: Estimated chance to win the round. A float between 0.0 and 1.0
+
+    """
     # Code modified from http://cowboyprogramming.com/2007/01/04/programming-poker-ai/
     score = 0.0
     won_games = 0
@@ -619,7 +655,8 @@ class PokerInPython:
                 action_text.move_to(self.current_player.get_rect().x + 120, self.current_player.get_rect().y + 30)
                 self.text_object_list.append(action_text)
             else:
-                self.btn_click_sound.play()
+                if pygame.mixer.music.get_busy():
+                    self.btn_click_sound.play()
 
 
             if action == "Fold":
