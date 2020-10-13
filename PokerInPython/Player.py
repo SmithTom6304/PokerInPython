@@ -6,7 +6,7 @@ base_path = "./"
 
 class Player:
 
-    def __init__(self, number, chips, confidence, pos_x, pos_y):
+    def __init__(self, number, chips, pos_x, pos_y):
         self.model = self.Model(number, chips)
         self.view = self.View(number, pos_x, pos_y)
         self.cards = [None, None]

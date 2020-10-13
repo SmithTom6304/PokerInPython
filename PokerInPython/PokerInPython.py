@@ -342,7 +342,7 @@ def simulate_games(hole_cards: list, current_community_cards: list, no_of_player
     sim_deck.remove_cards_by_val(current_community_cards)
     sim_deck.shuffle_deck()
 
-    start_time = time.time()
+    # start_time = time.time()
     for _unused_i in range(0, simulations):
 
         copy_deck.deck = sim_deck.deck.copy()
@@ -374,12 +374,8 @@ def simulate_games(hole_cards: list, current_community_cards: list, no_of_player
             score += 1/winners
             won_games += 1
 
-
-
-
-
-    end_time = time.time()
-    delta_t = end_time - start_time
+    # end_time = time.time()
+    # delta_t = end_time - start_time
 
     # print(f"Simulation took {round(delta_t, 3)}s")
     # print(f"Simulation scored {round(score/simulations, 3)}, with {won_games} games won")
@@ -406,7 +402,7 @@ class PokerInPython:
     # or we can add it to the relevant list
     # The update function handles providing the objects to the UserInterface module
 
-    DEV_MODE = True
+    DEV_MODE = False
 
 
     def __init__(self):
@@ -544,12 +540,12 @@ class PokerInPython:
         self.pot.set_min_bet(self.pot.small_bet)
 
     def initialize_players(self, number_of_players, chips):
-        player1 = Player.Player(1, chips, confidence=100, pos_x=47, pos_y=355)
+        player1 = Player.Player(1, chips, pos_x=47, pos_y=355)
         self.player_list.append(player1)
 
         for i in range(2, number_of_players + 1):
             x_value = 100 + (260 * (i - 2))
-            player = Player.Player(i, chips, confidence=100, pos_x=x_value, pos_y=(self.user_interface.height / 6))
+            player = Player.Player(i, chips, pos_x=x_value, pos_y=(self.user_interface.height / 6))
             self.player_list.append(player)
 
         self.current_player = self.player_list[0]
@@ -823,6 +819,8 @@ class PokerInPython:
                 if object_pressed.get_name() in ("Home", "Music"):
                     do_action(self.turn, object_pressed.get_name())
             if isinstance(object_pressed, Card.Card):   # If object is a card
+                if self.DEV_MODE is False:
+                    return
                 card_pressed = object_pressed
                 # Return the new card clicked on by the user
                 new_card = self.user_interface.show_card_menu(self.deck)
@@ -1121,7 +1119,6 @@ class GameHandler:
             self.exit_menu_state()
         if action == "None":
             update()
-        return
 
     def exit_menu_state(self):
         self.btn_list.clear()

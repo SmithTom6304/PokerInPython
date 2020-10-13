@@ -1,14 +1,16 @@
 # Poker In Python
 
-A simple Poker game, programmed in Python using PyGame.
-
-***Currently work in progress.***
+A poker game, programmed in Python using PyGame.
 
 ## Getting Started
 
 1. Install prerequisites
 2. [Add the repository to your PYTHONPATH](https://www.devdungeon.com/content/python-import-syspath-and-pythonpath-tutorial#toc-13), so that the modules can be imported by the test classes
 3. Execute [PokerInPython/PokerInPython.py](./PokerInPython/PokerInPython.py) to run the program
+
+or, to just run the game
+
+1. Run PokerInPython.exe in the PokerInPython/build/exe.win32/ folder
 
 ### Prerequisites
 
@@ -32,4 +34,6 @@ Tests can be run individually by executing them like a normal python file.
 
 ## Acknowledgments
 
-* Thank you to [PurpleBooth](https://gist.github.com/PurpleBooth/109311bb0361f32d87a2) for creating a readme template.
+* [Readme template](https://gist.github.com/PurpleBooth/109311bb0361f32d87a2) by PurpleBooth
+* [Poker AI article](http://cowboyprogramming.com/2007/01/04/programming-poker-ai/) by Mick West
+* [Background music](https://www.bensound.com/royalty-free-music/track/jazzy-frenchy) - Jazzy Frenchy by Bensound

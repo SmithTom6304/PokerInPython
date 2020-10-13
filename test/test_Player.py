@@ -10,17 +10,15 @@ class TestPlayerMethods(unittest.TestCase):
     Text.font_path = "../PokerInPython/Font/Minecraft.ttf"
 
     def test_smoke(self):
-        player = Player.Player(2, 30, 60, 30, 15)
+        player = Player.Player(2, 30, 30, 15)
 
         self.assertEqual(player.get_number(), 2)
         self.assertEqual(player.get_chips(), 30)
-        self.assertEqual(player.get_confidence(), 60)
         self.assertNotEqual(player.get_number(), 5)
         self.assertNotEqual(player.get_chips(), 40)
-        self.assertNotEqual(player.get_confidence(), 40)
 
     def test_canMovePlayerRelative(self):
-        player = Player.Player(3, 100, 50, 10, 20)
+        player = Player.Player(3, 100, 10, 20)
 
         self.assertEqual(10, player.get_rect().x, "Player was not initialized with the correct parameters")
         self.assertEqual(20, player.get_rect().y, "Player was not initialized with the correct parameters")
@@ -41,7 +39,7 @@ class TestPlayerMethods(unittest.TestCase):
         self.assertEqual(15, player.get_rect().y, "Player did not move negatively in the y direction")
 
     def test_canMovePlayerAbsolute(self):
-        player = Player.Player(3, 100, 50, 10, 20)
+        player = Player.Player(3, 100, 10, 20)
 
         self.assertEqual(10, player.get_rect().x, "Player was not initialized with the correct parameters")
         self.assertEqual(20, player.get_rect().y, "Player was not initialized with the correct parameters")
@@ -62,7 +60,7 @@ class TestPlayerMethods(unittest.TestCase):
         self.assertEqual(0, player.get_rect().y, "Player did not move negatively in the y direction")
 
     def test_canAssignCardsToPlayer(self):
-        player = Player.Player(3, 100, 50, 10, 20)
+        player = Player.Player(3, 100, 10, 20)
         card1 = Card.Card(3, 'H')
         card2 = Card.Card(5, 'D')
 
@@ -77,7 +75,7 @@ class TestPlayerMethods(unittest.TestCase):
         self.assertEqual(playerCard2.get_value()["suit"], 'D')
 
     def test_canSetFacedown(self):
-        player = Player.Player(3, 100, 50, 10, 20)
+        player = Player.Player(3, 100, 10, 20)
         card1 = Card.Card(3, 'H')
         card2 = Card.Card(5, 'D')
 
@@ -85,7 +83,6 @@ class TestPlayerMethods(unittest.TestCase):
 
         playerCard1 = player.get_cards()[0]
         # playerCard2 = player.get_cards()[1]
-
 
         self.assertEqual(playerCard1.is_face_up(), False)
 
